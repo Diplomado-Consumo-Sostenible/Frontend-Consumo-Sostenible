@@ -9,7 +9,6 @@ export const registerUser = async (userData) => {
   }
 };
 
-// Login
 export const login = async (credentials) => {
   try {
     const response = await API.post("/auth/login", credentials);
