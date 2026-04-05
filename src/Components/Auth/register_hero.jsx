@@ -5,7 +5,6 @@ export default function RegisterHero() {
     return (
         <div className="hidden md:flex flex-col justify-between w-1/2 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-700 p-10 relative overflow-hidden">
 
-        {/* Fondo de puntos */}
         <div
             className="absolute inset-0 opacity-10"
             style={{
@@ -14,12 +13,10 @@ export default function RegisterHero() {
             }}
         />
 
-        {/* Círculos decorativos flotantes */}
         <div className="absolute top-[-40px] right-[-40px] w-48 h-48 rounded-full bg-white/10" />
         <div className="absolute bottom-[-30px] left-[-30px] w-64 h-64 rounded-full bg-teal-400/20" />
         <div className="absolute top-1/2 right-[-20px] w-32 h-32 rounded-full bg-emerald-300/20" />
 
-        {/* Logo / Brand */}
         <div className="relative flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
             <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white" stroke="currentColor" strokeWidth="1.5">
@@ -29,7 +26,6 @@ export default function RegisterHero() {
             <span className="text-white/90 text-sm font-semibold tracking-widest uppercase">EcoVida</span>
         </div>
 
-        {/* Ilustración SVG + Slogan */}
         <div className="relative flex flex-col items-center justify-center flex-1 py-8 gap-8">
             <svg viewBox="0 0 260 260" className="w-64 h-64 drop-shadow-xl" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="130" cy="220" rx="90" ry="16" fill="rgba(255,255,255,0.12)" />
@@ -72,7 +68,6 @@ export default function RegisterHero() {
             </div>
         </div>
 
-        {/* Stats */}
         <div className="relative flex justify-between text-center">
         {[
             { value: "12K+", label: "Usuarios", icon: Users },

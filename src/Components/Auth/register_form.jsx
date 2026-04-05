@@ -1,6 +1,7 @@
 import { AlertCircle, Leaf } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { registerModel } from "../../models/auth.model";
 import { registerUser } from "../../services/auth/auth.service";
 import Button from "../button";
@@ -45,7 +46,6 @@ export default function RegisterForm() {
     return (
         <div className="flex-1 bg-white/80 backdrop-blur-xl flex flex-col justify-center px-10 py-10">
 
-        {/* Brand visible solo en mobile */}
         <div className="flex md:hidden items-center gap-2 mb-4">
             <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-emerald-500" stroke="currentColor" strokeWidth="1.5">
             <path d="M12 22C6.5 22 2 17.5 2 12C2 7 5.5 3.5 10 2C10 2 8 8 12 12C16 16 22 14 22 14C22 18.5 17.5 22 12 22Z" strokeLinecap="round" strokeLinejoin="round" />
@@ -53,7 +53,6 @@ export default function RegisterForm() {
             <span className="text-emerald-600 font-semibold text-sm tracking-widest uppercase">EcoVida</span>
         </div>
 
-        {/* Encabezado */}
         <div className="mb-6">
             <h1 className="text-stone-800 text-2xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
             Crea tu cuenta
@@ -61,7 +60,6 @@ export default function RegisterForm() {
             <p className="text-stone-400 text-sm mt-1">Completa los datos para registrarte</p>
         </div>
 
-        {/* Banner éxito */}
         {success && (
             <div className="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-3 rounded-xl">
                 <Leaf className="w-5 h-5 text-emerald-600" />
@@ -69,7 +67,6 @@ export default function RegisterForm() {
             </div>
         )}
 
-        {/* Banner error API */}
         {apiError && (
             <div className="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
             <AlertCircle className="w-5 h-5" />
@@ -79,7 +76,6 @@ export default function RegisterForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
-            {/* Nombre */}
             <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-stone-600">Nombre completo</label>
             <div className="relative group">
@@ -106,7 +102,6 @@ export default function RegisterForm() {
             )}
             </div>
 
-            {/* Género */}
             <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-stone-600">Género</label>
             <div className="relative group">
@@ -139,7 +134,6 @@ export default function RegisterForm() {
             )}
             </div>
 
-            {/* Email */}
             <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-stone-600">Correo electrónico</label>
             <div className="relative group">
@@ -170,7 +164,6 @@ export default function RegisterForm() {
             )}
             </div>
 
-            {/* Password */}
             <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-stone-600">Contraseña</label>
             <div className="relative group">
@@ -202,7 +195,6 @@ export default function RegisterForm() {
             )}
             </div>
 
-            {/* Submit */}
             <Button
                 type="submit"
                 loading={loading}
@@ -213,9 +205,9 @@ export default function RegisterForm() {
 
             <p className="text-center text-sm text-stone-400 pt-1">
             ¿Ya tienes cuenta?{" "}
-            <a href="#" className="text-emerald-600 font-medium hover:text-emerald-700 underline underline-offset-2">
+            <Link to="/login" className="text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2">
                 Inicia sesión
-            </a>
+            </Link>
             </p>
         </form>
         </div>
