@@ -9,6 +9,15 @@ export const registerUser = async (userData) => {
   }
 };
 
+export const getGeneros = async () => {
+  try {
+    const response = await API.get("/genero");
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error al obtener los géneros" };
+  }
+};
+
 export const login = async (credentials) => {
   try {
     const response = await API.post("/auth/login", credentials);

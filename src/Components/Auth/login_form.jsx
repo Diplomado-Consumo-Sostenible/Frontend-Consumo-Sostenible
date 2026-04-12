@@ -11,7 +11,7 @@ import InputField from "../ui/InputField";
 const redirectByRole = (rol) => {
   switch (rol?.toLowerCase()) {
     case "admin":
-      window.location.href = "/admin/dashboard";
+      window.location.href = "/adminDashboard";
       break;
     case "usuario":
     default:

@@ -1,9 +1,9 @@
 import { AlertCircle, Leaf } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { registerModel } from "../../models/auth.model";
-import { registerUser } from "../../services/auth/auth.service";
+import { getGeneros, registerUser } from "../../services/auth/auth.service";
 import Button from "../button";
 
 const inputClass = (error) =>
@@ -26,6 +26,22 @@ export default function RegisterForm() {
     const [apiError, setApiError] = useState(null);
     const [success, setSuccess]   = useState(false);
 
+    const [generos, setGeneros] = useState([]);
+
+    useEffect(() => {
+        const fetchGeneros = async () => {
+            try {
+                const data = await getGeneros();
+                setGeneros(data);
+            } catch (error){
+                console.error("Error al cargar géneros:", error);
+            }
+        };
+        
+        fetchGeneros();
+    }, []);
+    
+    const navigate = useNavigate();
     const onSubmit = async (data) => {
         setLoading(true);
         setApiError(null);
@@ -35,6 +51,10 @@ export default function RegisterForm() {
         const response = await registerUser(formattedData);
         console.log("Usuario registrado ✅", response);
         setSuccess(true);
+
+        setTimeout (()=>{
+            navigate("/login");
+        }, 1500); 
         } catch (error) {
         console.error("Error al registrar:", error);
         setApiError(error?.message || "Ocurrió un error al registrar. Intenta de nuevo.");
@@ -116,10 +136,12 @@ export default function RegisterForm() {
                 {...register("id_genero", { required: "Selecciona un género" })}
                 >
                 <option value="">Selecciona tu género</option>
-                <option value="1">Masculino</option>
-                <option value="2">Femenino</option>
-                <option value="3">No binario</option>
-                <option value="4">Prefiero no decirlo</option>
+                
+                {generos.map((genero) => (
+                    <option key={genero.id_genero} value={genero.id_genero}>
+                        {genero.nombre}
+                    </option>
+                ))}
                 </select>
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none">
                 <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
