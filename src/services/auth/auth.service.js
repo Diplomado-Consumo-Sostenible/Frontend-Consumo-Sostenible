@@ -53,3 +53,21 @@ export const resetPassword = async (otp, newPassword) => {
     throw error.response?.data || { message: "Error al restablecer la contraseña" };
   }
 };
+
+export const getUsers = async () => {
+  try {
+    const response = await API.get("/auth/users");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error al obtener la lista de usuarios" };
+  }
+};
+
+export const toggleUserStatus = async (userId) => {
+  try {
+    const response = await API.patch(`/auth/users/${userId}/toggle-status`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Error al cambiar el estado del usuario" };
+  }
+};

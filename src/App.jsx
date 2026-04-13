@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 function App() {
   return (
@@ -12,8 +13,16 @@ function App() {
       <Routes>
         <Route path="/"                 element={<Login />} />
         <Route path="/login"            element={<Login />} />
-        <Route path="/adminDashboard"   element={<AdminDashboard />} />
-        <Route path="/dashboard"        element={<Dashboard />} />
+        <Route path="/adminDashboard"   element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard"        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/register"         element={<Register />} />
         <Route path="/forgot-password"  element={<ForgotPassword />} />
       </Routes>
