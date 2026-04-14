@@ -1,8 +1,11 @@
 import axios from "axios";
 import { getToken } from "../models/auth.model";
 
+const rawApiUrl = import.meta.env.VITE_API_URL || "";
+const apiUrl = rawApiUrl.replace(/\/+$/, "");
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: apiUrl,
 });
 
 // Request interceptor to add auth token

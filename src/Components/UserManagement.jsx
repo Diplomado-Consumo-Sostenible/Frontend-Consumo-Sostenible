@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { getUsers, toggleUserStatus } from "../../services/auth/auth.service";
-import { decodeToken, getToken } from "../../models/auth.model";
-import Button from "../../Components/button";
+import { getUsers, toggleUserStatus } from "../services/auth/auth.service";
+import Button from "./button";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -18,8 +17,9 @@ export default function UserManagement() {
       setLoading(true);
       setError(null);
       const response = await getUsers();
-      setUsers(response.data || response);
+      setUsers(Array.isArray(response) ? response : []);
     } catch (err) {
+      console.error("fetchUsers error:", err);
       setError(err.message || "Error al cargar usuarios");
     } finally {
       setLoading(false);
@@ -30,17 +30,70 @@ export default function UserManagement() {
     try {
       setActionLoading(userId);
       await toggleUserStatus(userId);
-      // Update local state
-      setUsers(users.map(user =>
-        user.id === userId
-          ? { ...user, activo: !user.activo }
-          : user
-      ));
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => {
+          const currentId = user.id ?? user._id;
+          if (currentId !== userId) return user;
+          return { ...user, activo: !user.activo };
+        })
+      );
     } catch (err) {
+      console.error("handleToggleStatus error:", err);
       setError(err.message || "Error al cambiar el estado del usuario");
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const renderUserRow = (user) => {
+    const currentId = user.id ?? user._id;
+    const roleClasses =
+      user.rol === "admin"
+        ? "bg-purple-100 text-purple-800"
+        : "bg-blue-100 text-blue-800";
+    const statusClasses =
+      user.activo
+        ? "bg-green-100 text-green-800"
+        : "bg-red-100 text-red-800";
+    const buttonClasses =
+      user.activo
+        ? "bg-red-600 hover:bg-red-700"
+        : "bg-green-600 hover:bg-green-700";
+    const statusLabel = user.activo ? "Desactivar" : "Activar";
+
+    return (
+      <tr key={currentId} className="hover:bg-gray-50">
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          {user.nombre}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {user.email}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${roleClasses}`}>
+            {user.rol}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusClasses}`}>
+            {user.activo ? "Activo" : "Inactivo"}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <Button
+            onClick={() => handleToggleStatus(currentId)}
+            disabled={actionLoading === currentId}
+            className={`${buttonClasses} text-white px-3 py-1 text-xs`}
+          >
+            {actionLoading === currentId ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            ) : (
+              statusLabel
+            )}
+          </Button>
+        </td>
+      </tr>
+    );
   };
 
   if (loading) {
@@ -98,51 +151,7 @@ export default function UserManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {user.nombre}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    user.rol === 'admin'
-                      ? 'bg-purple-100 text-purple-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {user.rol}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    user.activo
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {user.activo ? 'Activo' : 'Inactivo'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <Button
-                    onClick={() => handleToggleStatus(user.id)}
-                    disabled={actionLoading === user.id}
-                    className={`${
-                      user.activo
-                        ? 'bg-red-600 hover:bg-red-700'
-                        : 'bg-green-600 hover:bg-green-700'
-                    } text-white px-3 py-1 text-xs`}
-                  >
-                    {actionLoading === user.id ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      user.activo ? 'Desactivar' : 'Activar'
-                    )}
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {users.map(renderUserRow)}
           </tbody>
         </table>
       </div>

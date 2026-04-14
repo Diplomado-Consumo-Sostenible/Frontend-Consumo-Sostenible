@@ -35,6 +35,11 @@ export default function RegisterForm() {
                 setGeneros(data);
             } catch (error){
                 console.error("Error al cargar géneros:", error);
+                // Opciones predeterminadas si falla la API
+                setGeneros([
+                    { id_genero: 1, nombre: "Femenino" },
+                    { id_genero: 2, nombre: "Masculino" }
+                ]);
             }
         };
         

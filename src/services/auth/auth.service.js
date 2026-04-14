@@ -57,8 +57,9 @@ export const resetPassword = async (otp, newPassword) => {
 export const getUsers = async () => {
   try {
     const response = await API.get("/auth/users");
-    return response.data;
+    return response.data?.data || response.data?.users || response.data || [];
   } catch (error) {
+    console.error("getUsers error:", error.response || error);
     throw error.response?.data || { message: "Error al obtener la lista de usuarios" };
   }
 };
@@ -68,6 +69,7 @@ export const toggleUserStatus = async (userId) => {
     const response = await API.patch(`/auth/users/${userId}/toggle-status`);
     return response.data;
   } catch (error) {
+    console.error("toggleUserStatus error:", error.response || error);
     throw error.response?.data || { message: "Error al cambiar el estado del usuario" };
   }
 };
