@@ -9,14 +9,10 @@ import AuthAlert from "../ui/AuthAlert";
 import InputField from "../ui/InputField";
 
 const redirectByRole = (rol) => {
-  switch (rol?.toLowerCase()) {
-    case "admin":
-      window.location.href = "/adminDashboard";
-      break;
-    case "usuario":
-    default:
-      window.location.href = "/dashboard";
-      break;
+  if (rol === 1 || rol === "admin") {
+    window.location.href = "/adminDashboard";
+  } else {
+    window.location.href = "/dashboard";
   }
 };
 
