@@ -2,11 +2,13 @@ import { Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { decodeToken, loginModel, saveToken } from "../../models/auth.model";
-import { login } from "../../services/auth/auth.service";
-import Button from "../button";
-import AuthAlert from "../ui/AuthAlert";
-import InputField from "../ui/InputField";
+import { loginModel } from "../../../models/auth/login.model";
+import { login } from "../../../services/auth/auth.service";
+import { decodeToken } from "../../../utils/jwt.utils";
+import { saveToken } from "../../../utils/storage";
+import Button from "../../button";
+import AuthAlert from "../../ui/AuthAlert";
+import InputField from "../../ui/InputField";
 
 const redirectByRole = (rol) => {
   switch (rol?.toLowerCase()) {

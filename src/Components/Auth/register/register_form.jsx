@@ -2,9 +2,10 @@ import { AlertCircle, Leaf } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import { registerModel } from "../../models/auth.model";
-import { getGeneros, registerUser } from "../../services/auth/auth.service";
-import Button from "../button";
+import { registerModel } from "../../../models//auth/register.model";
+import { registerUser } from "../../../services/auth/auth.service";
+import { getGeneros } from "../../../services/generos.service";
+import Button from "../../button";
 
 const inputClass = (error) =>
     `w-full pl-10 pr-4 py-3 rounded-xl border text-stone-700 placeholder-stone-300 text-sm
@@ -97,7 +98,7 @@ export default function RegisterForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
             <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-stone-600">Nombre completo</label>
+            <label className="text-sm font-medium text-stone-600">Nombre de usuario</label>
             <div className="relative group">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-emerald-500 transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
@@ -107,7 +108,7 @@ export default function RegisterForm() {
                 </span>
                 <input
                 type="text"
-                placeholder="Ej. Ana García"
+                placeholder="Ej. Usuario123"
                 className={inputClass(errors.nombre)}
                 {...register("nombre", {
                     required: "El nombre es obligatorio",
