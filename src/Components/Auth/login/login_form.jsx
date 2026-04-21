@@ -108,10 +108,12 @@ export default function LoginForm() {
           />
         </div>
 
-        <Button type="submit" loading={loading} icon={LogIn}
-          className="mt-2 shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-200">
-          Iniciar sesión
-        </Button>
+        <div className="flex items-center gap-2 px-6 py-2">
+          <Button type="submit" loading={loading} icon={LogIn}
+            className="  mt-2 shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-200">
+            Iniciar sesión
+          </Button>
+        </div>
 
         <p className="text-center text-sm text-stone-400 pt-1">
           ¿No tienes cuenta?{" "}
