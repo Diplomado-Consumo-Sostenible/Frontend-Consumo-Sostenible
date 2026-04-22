@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BusinessFormHero from "../Components/Auth/register/businessFormHero";
+import BusinessFormStep from "../Components/Auth/register/businessFormStep";
 import RegisterForm from "../Components/Auth/register/register_form";
 import RegisterHero from "../Components/Auth/register/register_hero";
 import RoleStep from "../Components/Auth/register/rolStep";
 import AuthLayout from "../layouts/AuthLayout";
 import { registerModel } from "../models/auth/register.model";
+import { registerBusinessModel } from "../models/business.model";
 import { login, registerUser } from "../services/auth/auth.service";
+import { postBusiness } from "../services/busienss.service";
 import { saveToken } from "../utils/storage";
 
 export default function Register() {
@@ -26,7 +30,8 @@ export default function Register() {
     case 2:
       return <RegisterHero />;
 
-
+	    case 3:
+      return <BusinessFormHero />;
 
     default:
       return <RegisterHero />;
@@ -76,6 +81,31 @@ export default function Register() {
           />
         );
 
+              case 3:
+        return (
+          <BusinessFormStep
+            onBack={prevStep}
+            onNext={async (businessData) => {
+              const mergedData = { ...formData, ...businessData, roleId };
+              setFormData(mergedData);
+
+              const userFormatted = registerModel(mergedData);
+              await registerUser(userFormatted);
+
+              const { access_token } = await login({
+                email: mergedData.email,
+                password: mergedData.password,
+              });
+
+              saveToken(access_token);
+
+              const businessFormatted = registerBusinessModel(mergedData);
+              await postBusiness(businessFormatted);
+
+              navigate("/dashboardBusiness");
+            }}
+          />
+        );
 
       default:
         return null;
