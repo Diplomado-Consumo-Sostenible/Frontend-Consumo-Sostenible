@@ -2,11 +2,13 @@ import { Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { decodeToken, loginModel, saveToken } from "../../models/auth.model";
-import { login } from "../../services/auth/auth.service";
-import Button from "../button";
-import AuthAlert from "../ui/AuthAlert";
-import InputField from "../ui/InputField";
+import { loginModel } from "../../../models/auth/login.model";
+import { login } from "../../../services/auth/auth.service";
+import { decodeToken } from "../../../utils/jwt.utils";
+import { saveToken } from "../../../utils/storage";
+import Button from "../../button";
+import AuthAlert from "../../ui/AuthAlert";
+import InputField from "../../ui/InputField";
 
 const redirectByRole = (rol) => {
   switch (rol?.toLowerCase()) {
@@ -106,10 +108,12 @@ export default function LoginForm() {
           />
         </div>
 
-        <Button type="submit" loading={loading} icon={LogIn}
-          className="mt-2 shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-200">
-          Iniciar sesión
-        </Button>
+        <div className="flex items-center gap-2 px-6 py-2">
+          <Button type="submit" loading={loading} icon={LogIn}
+            className="  mt-2 shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-200">
+            Iniciar sesión
+          </Button>
+        </div>
 
         <p className="text-center text-sm text-stone-400 pt-1">
           ¿No tienes cuenta?{" "}

@@ -12,7 +12,7 @@ export default function Button({
         <button
         type={type}
         disabled={loading}
-        className={`w-full py-3.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 
+        className={`w-sm py-3.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 
         bg-gradient-to-r from-emerald-500 to-teal-500 text-white 
         hover:from-emerald-600 hover:to-teal-600 
         transition-all duration-200 active:scale-[0.98]

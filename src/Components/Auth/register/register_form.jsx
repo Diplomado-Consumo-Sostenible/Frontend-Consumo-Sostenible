@@ -1,10 +1,10 @@
-import { AlertCircle, Leaf } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { registerModel } from "../../models/auth.model";
-import { getGeneros, registerUser } from "../../services/auth/auth.service";
-import Button from "../button";
+import { Link } from "react-router-dom";
+import { getGeneros } from "../../../services/generos.service";
+import BackButton from "../../backButton";
+import Button from "../../button";
 
 const inputClass = (error) =>
     `w-full pl-10 pr-4 py-3 rounded-xl border text-stone-700 placeholder-stone-300 text-sm
@@ -15,57 +15,44 @@ const inputClass = (error) =>
         : "border-stone-200 focus:ring-emerald-300 focus:border-emerald-400 hover:border-stone-300"
     }`;
 
-export default function RegisterForm() {
+export default function RegisterForm({ onNext, onBack, defaultValues }) {
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm();
-
-    const [loading, setLoading]   = useState(false);
-    const [apiError, setApiError] = useState(null);
-    const [success, setSuccess]   = useState(false);
+        reset,
+    } = useForm({
+        defaultValues, 
+    });
 
     const [generos, setGeneros] = useState([]);
 
     useEffect(() => {
-        const fetchGeneros = async () => {
+        if (defaultValues) {
+        reset(defaultValues);
+        }
+    }, [defaultValues, reset]);
+
+    useEffect(() => {
+            const fetchGeneros = async () => {
             try {
                 const data = await getGeneros();
                 setGeneros(data);
-            } catch (error){
+            } catch (error) {
                 console.error("Error al cargar géneros:", error);
             }
-        };
-        
-        fetchGeneros();
-    }, []);
-    
-    const navigate = useNavigate();
+            };
+
+            fetchGeneros();
+        }, []);
     const onSubmit = async (data) => {
-        setLoading(true);
-        setApiError(null);
-
-        try {
-        const formattedData = registerModel(data);
-        const response = await registerUser(formattedData);
-        console.log("Usuario registrado ✅", response);
-        setSuccess(true);
-
-        setTimeout (()=>{
-            navigate("/login");
-        }, 1500); 
-        } catch (error) {
-        console.error("Error al registrar:", error);
-        setApiError(error?.message || "Ocurrió un error al registrar. Intenta de nuevo.");
-        } finally {
-        setLoading(false);
-        }
+            onNext(data);
     };
 
     return (
         <div className="flex-1 bg-white/80 backdrop-blur-xl flex flex-col justify-center px-10 py-10">
-
+        
+        <BackButton onBack={onBack} />
         <div className="flex md:hidden items-center gap-2 mb-4">
             <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-emerald-500" stroke="currentColor" strokeWidth="1.5">
             <path d="M12 22C6.5 22 2 17.5 2 12C2 7 5.5 3.5 10 2C10 2 8 8 12 12C16 16 22 14 22 14C22 18.5 17.5 22 12 22Z" strokeLinecap="round" strokeLinejoin="round" />
@@ -80,24 +67,10 @@ export default function RegisterForm() {
             <p className="text-stone-400 text-sm mt-1">Completa los datos para registrarte</p>
         </div>
 
-        {success && (
-            <div className="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-3 rounded-xl">
-                <Leaf className="w-5 h-5 text-emerald-600" />
-                <span>¡Cuenta creada exitosamente! Ya puedes iniciar sesión.</span>
-            </div>
-        )}
-
-        {apiError && (
-            <div className="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
-            <AlertCircle className="w-5 h-5" />
-            <span>{apiError}</span>
-            </div>
-        )}
-
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
             <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-stone-600">Nombre completo</label>
+            <label className="text-sm font-medium text-stone-600">Nombre de usuario</label>
             <div className="relative group">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-emerald-500 transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
@@ -107,7 +80,7 @@ export default function RegisterForm() {
                 </span>
                 <input
                 type="text"
-                placeholder="Ej. Ana García"
+                placeholder="Ej. Usuario123"
                 className={inputClass(errors.nombre)}
                 {...register("nombre", {
                     required: "El nombre es obligatorio",
@@ -216,14 +189,14 @@ export default function RegisterForm() {
                 </p>
             )}
             </div>
-
-            <Button
-                type="submit"
-                loading={loading}
-                icon={Leaf}
-                >
-                Crear mi cuenta
-            </Button>
+            <div className="flex items-center gap-2 px-6 py-2">
+                <Button
+                    type="submit"
+                    icon={Leaf}
+                    >
+                    Crear mi cuenta
+                </Button>
+            </div>
 
             <p className="text-center text-sm text-stone-400 pt-1">
             ¿Ya tienes cuenta?{" "}

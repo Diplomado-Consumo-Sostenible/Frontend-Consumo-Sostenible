@@ -7,7 +7,7 @@ export default function AuthLayout({ hero, form }) {
       <div className="absolute bottom-[-60px] left-[-40px] w-80 h-80 rounded-full bg-teal-100/50 blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 left-1/3 w-48 h-48 rounded-full bg-lime-100/40 blur-2xl pointer-events-none" />
 
-      <div className="relative w-full max-w-5xl flex rounded-3xl overflow-hidden shadow-2xl shadow-emerald-200/50 border border-white/80 min-h-[620px]">
+      <div className="relative w-full max-w-5xl flex rounded-3xl overflow-hidden shadow-2xl shadow-emerald-200/50 border border-white/80 h-[90vh] max-h-[720px]">
         {hero}
         {form}
       </div>

@@ -14,10 +14,10 @@ import {
   requestPasswordReset,
   resendPasswordReset,
   resetPassword,
-} from "../../services/auth/auth.service";
-import Button from "../button";
-import AuthAlert from "../ui/AuthAlert";
-import InputField from "../ui/InputField";
+} from "../../../services/auth/auth.service";
+import Button from "../../button";
+import AuthAlert from "../../ui/AuthAlert";
+import InputField from "../../ui/InputField";
 
 function StepEmail({ onSuccess }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
