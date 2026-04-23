@@ -1,21 +1,21 @@
-import { AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 
 const variants = {
   error: {
-    wrapper: "bg-red-50 border-red-200 text-red-600",
+    wrapper: 'bg-red-50 border-red-200 text-red-600',
     icon: <AlertCircle className="w-4 h-4 shrink-0" />,
   },
   success: {
-    wrapper: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    wrapper: 'bg-emerald-50 border-emerald-200 text-emerald-700',
     icon: <CheckCircle2 className="w-4 h-4 shrink-0" />,
   },
   info: {
-    wrapper: "bg-teal-50 border-teal-200 text-teal-700",
+    wrapper: 'bg-teal-50 border-teal-200 text-teal-700',
     icon: <Info className="w-4 h-4 shrink-0" />,
   },
 };
 
-export default function AuthAlert({ message, variant = "error" }) {
+export default function AuthAlert({ message, variant = 'error' }) {
   if (!message) return null;
   const { wrapper, icon } = variants[variant] ?? variants.error;
 

@@ -1,44 +1,38 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import './App.css';
-import AdminDashboard from "./pages/admin/admin_dashboard";
+import AdminDashboard from './pages/admin/admin_dashboard';
+import AdminUsuarios from './pages/admin/usuarios';
 import Dashboard from './pages/dashboard';
-import DashboardBusiness from './pages/dashboardBusiness';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Unauthorized from './pages/Unauthorized';
-import ProtectedRoute from "./Routes/protectedRoute";
+import ProtectedRoute from './routes/ProtectedRoute';
+import PublicRoute from './routes/PublicRoute';
 
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-right" richColors closeButton />
       <Routes>
-
-        <Route path="/login"           element={<Login />} />
-        <Route path="/register"        element={<Register />} />
+        {/* Rutas públicas — redirigen al dash si ya hay sesión */}
+        <Route path="/*"               element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/login"           element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register"        element={<PublicRoute><Register /></PublicRoute>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/unauthorized"    element={<Unauthorized />} />
 
+        {/* Rutas autenticadas — cualquier rol */}
         <Route path="/dashboard" element={
-          <ProtectedRoute roles={["user"]}>
-            <Dashboard />
-          </ProtectedRoute>
+          <ProtectedRoute><Dashboard /></ProtectedRoute>
         } />
 
-        <Route path="/dashboardBusiness" element={
-          <ProtectedRoute roles={["owner"]}>
-            <DashboardBusiness />
-          </ProtectedRoute>
-        } />
-
+        {/* Rutas solo ADMIN */}
         <Route path="/adminDashboard" element={
-          <ProtectedRoute roles={["admin"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
+          <ProtectedRoute roles="ADMIN"><AdminDashboard /></ProtectedRoute>
         } />
-
-        <Route path="*" element={<Navigate to="/login" replace />} />
-
+        <Route path="/adminDashboard/usuarios" element={
+          <ProtectedRoute roles="ADMIN"><AdminUsuarios /></ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   );

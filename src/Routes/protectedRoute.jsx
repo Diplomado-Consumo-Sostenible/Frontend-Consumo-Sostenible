@@ -1,34 +1,21 @@
-import { Navigate } from "react-router-dom";
-import { decodeToken } from "../utils/jwt.utils";
-import { getToken } from "../utils/storage";
+import { Navigate } from 'react-router-dom';
+import { getSession } from '../utils/storage';
 
+/**
+ * @param {string|string[]} [roles] - roles permitidos. Si se omite, solo exige sesión activa.
+ */
+export default function ProtectedRoute({ children, roles }) {
+  const session = getSession();
 
-const ProtectedRoute = ({ children, roles = null }) => {
-    const token = getToken();
+  if (!session) return <Navigate to="/login" replace />;
 
-    if (!token) return <Navigate to="/login" replace />;
-
-    const decoded = decodeToken(token);
-
-    if (!decoded) {
-        return <Navigate to="/login" replace />;
+  if (roles) {
+    const allowed = Array.isArray(roles) ? roles : [roles];
+    if (!allowed.includes(session.rol?.toUpperCase())) {
+      const fallback = session.rol?.toUpperCase() === 'ADMIN' ? '/adminDashboard' : '/dashboard';
+      return <Navigate to={fallback} replace />;
     }
+  }
 
-    const isExpired = decoded?.exp ? (Number(decoded.exp) * 1000 < Date.now()) : true;
-    if (isExpired) {
-    return <Navigate to="/login" replace />;
+  return children;
 }
-
-    const userRole = decoded?.rol;
-
-    if (roles) {
-        const allowed = Array.isArray(roles) ? roles : [roles];
-        if (!allowed.includes(userRole)) {
-            return <Navigate to="/unauthorized" replace />;
-        }
-    }
-
-    return children;
-};
-
-export default ProtectedRoute;

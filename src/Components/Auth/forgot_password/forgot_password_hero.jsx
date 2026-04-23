@@ -1,14 +1,13 @@
-import { Globe, Recycle, Users } from "lucide-react";
+import { Globe, Recycle, Users } from 'lucide-react';
 
 export default function ForgotPasswordHero() {
   return (
     <div className="hidden md:flex flex-col justify-between w-1/2 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-700 p-10 relative overflow-hidden">
-
       <div
         className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: "radial-gradient(circle, white 1.5px, transparent 1.5px)",
-          backgroundSize: "28px 28px",
+          backgroundImage: 'radial-gradient(circle, white 1.5px, transparent 1.5px)',
+          backgroundSize: '28px 28px',
         }}
       />
 
@@ -32,20 +31,18 @@ export default function ForgotPasswordHero() {
           <rect x="70" y="130" width="120" height="95" rx="18" fill="rgba(255,255,255,0.22)" />
           <rect x="78" y="138" width="104" height="79" rx="14" fill="rgba(255,255,255,0.12)" />
 
-          <path d="M90 130 V100 C90 72 170 72 170 100 V130"
-            stroke="rgba(255,255,255,0.55)" strokeWidth="14" fill="none"
-            strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M90 130 V100 C90 72 170 72 170 100 V130" stroke="rgba(255,255,255,0.55)" strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" />
 
           <circle cx="130" cy="175" r="16" fill="rgba(255,255,255,0.35)" />
           <rect x="125" y="175" width="10" height="18" rx="5" fill="rgba(255,255,255,0.5)" />
 
-          <circle cx="68"  cy="80"  r="3"  fill="rgba(255,255,255,0.6)" />
-          <circle cx="192" cy="68"  r="2.5" fill="rgba(255,255,255,0.5)" />
-          <circle cx="55"  cy="160" r="2"  fill="rgba(255,255,255,0.4)" />
-          <circle cx="205" cy="155" r="3"  fill="rgba(255,255,255,0.5)" />
-          <circle cx="130" cy="48"  r="2.5" fill="rgba(255,255,255,0.55)" />
-          <circle cx="46"  cy="118" r="2"  fill="rgba(255,255,255,0.4)" />
-          <circle cx="215" cy="112" r="2"  fill="rgba(255,255,255,0.4)" />
+          <circle cx="68" cy="80" r="3" fill="rgba(255,255,255,0.6)" />
+          <circle cx="192" cy="68" r="2.5" fill="rgba(255,255,255,0.5)" />
+          <circle cx="55" cy="160" r="2" fill="rgba(255,255,255,0.4)" />
+          <circle cx="205" cy="155" r="3" fill="rgba(255,255,255,0.5)" />
+          <circle cx="130" cy="48" r="2.5" fill="rgba(255,255,255,0.55)" />
+          <circle cx="46" cy="118" r="2" fill="rgba(255,255,255,0.4)" />
+          <circle cx="215" cy="112" r="2" fill="rgba(255,255,255,0.4)" />
 
           <path d="M40 140 Q30 130 40 120" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
           <path d="M32 148 Q18 130 32 112" stroke="rgba(255,255,255,0.18)" strokeWidth="2" fill="none" strokeLinecap="round" />
@@ -55,19 +52,19 @@ export default function ForgotPasswordHero() {
 
         <div className="text-center space-y-3">
           <h2 className="text-white text-2xl font-bold leading-tight" style={{ fontFamily: "'Georgia', serif" }}>
-            Recupera tu acceso,<br />retoma tu camino.
+            Recupera tu acceso,
+            <br />
+            retoma tu camino.
           </h2>
-          <p className="text-emerald-100 text-sm leading-relaxed max-w-xs">
-            Te enviaremos un código seguro para que puedas restablecer tu contraseña en minutos.
-          </p>
+          <p className="text-emerald-100 text-sm leading-relaxed max-w-xs">Te enviaremos un código seguro para que puedas restablecer tu contraseña en minutos.</p>
         </div>
       </div>
 
       <div className="relative flex justify-between text-center">
         {[
-          { value: "12K+", label: "Usuarios",       icon: Users   },
-          { value: "40%",  label: "Menos residuos", icon: Recycle },
-          { value: <br />,   label: "Impacto real",   icon: Globe   },
+          { value: '12K+', label: 'Usuarios', icon: Users },
+          { value: '40%', label: 'Menos residuos', icon: Recycle },
+          { value: <br />, label: 'Impacto real', icon: Globe },
         ].map((s) => {
           const Icon = s.icon;
           return (

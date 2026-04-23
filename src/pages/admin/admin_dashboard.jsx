@@ -1,12 +1,17 @@
+import DashboardLayout from '../../layouts/DashboardLayout';
+import { getSession } from '../../utils/storage';
 
+export default function AdminDashboard() {
+  const session = getSession();
 
-export default function Dashboard() {
-    return (
-        <div className="flex-1 bg-white/80 backdrop-blur-xl flex flex-col justify-center items-center px-10 py-10">
-            <h1 className="text-stone-800 text-3xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
-                Bienvenido a tu Dashboard de Administrador
-            </h1>
-            <p className="text-stone-400 text-sm mt-2">Aquí podrás gestionar las configuraciones del sistema y supervisar la actividad de los usuarios.</p>
-        </div>
-    );
+  return (
+    <DashboardLayout>
+      <div className="flex flex-col justify-center items-center h-full gap-2">
+        <h1 className="text-stone-800 text-3xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
+          Panel de Administrador{session?.nombre ? ` — ${session.nombre}` : ''}
+        </h1>
+        <p className="text-stone-400 text-sm">Gestiona la configuración del sistema y supervisa la actividad.</p>
+      </div>
+    </DashboardLayout>
+  );
 }

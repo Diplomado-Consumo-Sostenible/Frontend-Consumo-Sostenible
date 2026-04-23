@@ -1,121 +1,32 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import BusinessFormHero from "../Components/Auth/register/businessFormHero";
-import BusinessFormStep from "../Components/Auth/register/businessFormStep";
-import RegisterForm from "../Components/Auth/register/register_form";
-import RegisterHero from "../Components/Auth/register/register_hero";
-import RoleStep from "../Components/Auth/register/rolStep";
-import AuthLayout from "../layouts/AuthLayout";
-import { registerModel } from "../models/auth/register.model";
-import { registerBusinessModel } from "../models/business.model";
-import { login, registerUser } from "../services/auth/auth.service";
-import { postBusiness } from "../services/busienss.service";
-import { saveToken } from "../utils/storage";
+import { useNavigate } from 'react-router-dom';
+import RegisterForm from '../Components/Auth/register/register_form';
+import RegisterHero from '../Components/Auth/register/register_hero';
+import AuthLayout from '../layouts/AuthLayout';
+import { registerModel } from '../models/auth/register.model';
+import { login, registerUser } from '../services/auth/auth.service';
+import { saveSession, saveToken } from '../utils/storage';
 
 export default function Register() {
-  const [step, setStep] = useState(1);
-  const [roleId, setRole] = useState(null); 
-  const [formData, setFormData] = useState({});
+  const navigate = useNavigate();
 
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
+  const handleRegister = async (data) => {
+    const formatted = registerModel(data);
+    await registerUser(formatted);
 
-  const navigate = useNavigate(); 
+    const response = await login({
+      email: data.email,
+      password: data.password,
+    });
 
-  const renderHero = () => {
-  switch (step) {
-    case 1:
-      return <RegisterHero />;
-
-    case 2:
-      return <RegisterHero />;
-
-	    case 3:
-      return <BusinessFormHero />;
-
-    default:
-      return <RegisterHero />;
-  }
-};
-
-
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <RoleStep
-            onSelectRole={(selectedRole) => {
-              setRole(selectedRole);
-              setStep(2);
-            }}
-          />
-        );
-
-      case 2:
-        return (
-          <RegisterForm
-            role={roleId} 
-            onBack={prevStep}
-            defaultValues={formData}
-            onNext={async (data) => {
-
-              const mergedData = { ...formData, ...data, roleId };
-              setFormData(mergedData);
-
-              if (roleId === 2) {
-                const formatted = registerModel(mergedData);
-                await registerUser(formatted);
-
-                const { access_token } = await login({
-                  email: mergedData.email,
-                  password: mergedData.password,
-                });
-
-                saveToken(access_token);
-
-                navigate("/dashboard");
-              } else {
-                nextStep();
-              }
-            }}
-          />
-        );
-
-              case 3:
-        return (
-          <BusinessFormStep
-            onBack={prevStep}
-            onNext={async (businessData) => {
-              const mergedData = { ...formData, ...businessData, roleId };
-              setFormData(mergedData);
-
-              const userFormatted = registerModel(mergedData);
-              await registerUser(userFormatted);
-
-              const { access_token } = await login({
-                email: mergedData.email,
-                password: mergedData.password,
-              });
-
-              saveToken(access_token);
-
-              const businessFormatted = registerBusinessModel(mergedData);
-              await postBusiness(businessFormatted);
-
-              navigate("/dashboardBusiness");
-            }}
-          />
-        );
-
-      default:
-        return null;
-    }
+    saveToken(response.access_token);
+    saveSession(response.user);
+    navigate('/dashboard');
   };
 
   return (
     <AuthLayout
-      hero={renderHero()}
-      form={renderStep()}
+      hero={<RegisterHero />}
+      form={<RegisterForm onNext={handleRegister} />}
     />
   );
 }
