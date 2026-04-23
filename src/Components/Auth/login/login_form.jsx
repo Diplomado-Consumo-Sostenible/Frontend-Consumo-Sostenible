@@ -2,27 +2,11 @@ import { Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { loginModel } from "../../../models/auth/login.model";
-import { login } from "../../../services/auth/auth.service";
-import { decodeToken } from "../../../utils/jwt.utils";
-import { saveToken } from "../../../utils/storage";
 import Button from "../../button";
 import AuthAlert from "../../ui/AuthAlert";
 import InputField from "../../ui/InputField";
 
-const redirectByRole = (rol) => {
-  switch (rol?.toLowerCase()) {
-    case "admin":
-      window.location.href = "/adminDashboard";
-      break;
-    case "usuario":
-    default:
-      window.location.href = "/dashboard";
-      break;
-  }
-};
-
-export default function LoginForm() {
+export default function LoginForm({ onLogin }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading,  setLoading]  = useState(false);
   const [apiError, setApiError] = useState(null);
@@ -32,13 +16,7 @@ export default function LoginForm() {
     setLoading(true);
     setApiError(null);
     try {
-      const credentials = loginModel(data);
-      const response    = await login(credentials);
-      const token       = response.access_token;
-      saveToken(token);
-      const payload = decodeToken(token);
-      console.log("Login exitoso ✅ — rol:", payload?.rol);
-      redirectByRole(payload?.rol);
+      await onLogin(data);
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       setApiError(error?.message || "Credenciales incorrectas. Verifica tu correo y contraseña.");
@@ -110,7 +88,7 @@ export default function LoginForm() {
 
         <div className="flex items-center gap-2 px-6 py-2">
           <Button type="submit" loading={loading} icon={LogIn}
-            className="  mt-2 shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-200">
+            className="mt-2 shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-200">
             Iniciar sesión
           </Button>
         </div>
