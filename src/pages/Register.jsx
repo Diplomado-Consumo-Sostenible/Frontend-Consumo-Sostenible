@@ -11,33 +11,26 @@ import { registerBusinessModel } from "../models/business.model";
 import { login, registerUser } from "../services/auth/auth.service";
 import { postBusiness } from "../services/busienss.service";
 import { saveToken } from "../utils/storage";
+import { useToastContext } from "../context/ToastContext";
 
 export default function Register() {
   const [step, setStep] = useState(1);
-  const [roleId, setRole] = useState(null); 
+  const [roleId, setRole] = useState(null);
   const [formData, setFormData] = useState({});
+  const navigate = useNavigate();
+  const toast = useToastContext();
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const navigate = useNavigate(); 
-
   const renderHero = () => {
-  switch (step) {
-    case 1:
-      return <RegisterHero />;
-
-    case 2:
-      return <RegisterHero />;
-
-	    case 3:
-      return <BusinessFormHero />;
-
-    default:
-      return <RegisterHero />;
-  }
-};
-
+    switch (step) {
+      case 3:
+        return <BusinessFormHero />;
+      default:
+        return <RegisterHero />;
+    }
+  };
 
   const renderStep = () => {
     switch (step) {
@@ -54,26 +47,26 @@ export default function Register() {
       case 2:
         return (
           <RegisterForm
-            role={roleId} 
+            role={roleId}
             onBack={prevStep}
             defaultValues={formData}
             onNext={async (data) => {
-
               const mergedData = { ...formData, ...data, roleId };
               setFormData(mergedData);
 
               if (roleId === 2) {
-                const formatted = registerModel(mergedData);
-                await registerUser(formatted);
-
-                const { access_token } = await login({
-                  email: mergedData.email,
-                  password: mergedData.password,
-                });
-
-                saveToken(access_token);
-
-                navigate("/dashboard");
+                try {
+                  const res = await registerUser(registerModel(mergedData));
+                  const { access_token } = await login({
+                    email: mergedData.email,
+                    password: mergedData.password,
+                  });
+                  saveToken(access_token);
+                  toast.success(res?.message || "¡Cuenta creada exitosamente!");
+                  navigate("/dashboard");
+                } catch (err) {
+                  toast.error(err?.message || "Error al crear la cuenta");
+                }
               } else {
                 nextStep();
               }
@@ -81,28 +74,26 @@ export default function Register() {
           />
         );
 
-              case 3:
+      case 3:
         return (
           <BusinessFormStep
             onBack={prevStep}
             onNext={async (businessData) => {
               const mergedData = { ...formData, ...businessData, roleId };
               setFormData(mergedData);
-
-              const userFormatted = registerModel(mergedData);
-              await registerUser(userFormatted);
-
-              const { access_token } = await login({
-                email: mergedData.email,
-                password: mergedData.password,
-              });
-
-              saveToken(access_token);
-
-              const businessFormatted = registerBusinessModel(mergedData);
-              await postBusiness(businessFormatted);
-
-              navigate("/dashboardBusiness");
+              try {
+                const res = await registerUser(registerModel(mergedData));
+                const { access_token } = await login({
+                  email: mergedData.email,
+                  password: mergedData.password,
+                });
+                saveToken(access_token);
+                await postBusiness(registerBusinessModel(mergedData));
+                toast.success(res?.message || "¡Negocio registrado exitosamente!");
+                navigate("/dashboardBusiness");
+              } catch (err) {
+                toast.error(err?.message || "Error al registrar el negocio");
+              }
             }}
           />
         );

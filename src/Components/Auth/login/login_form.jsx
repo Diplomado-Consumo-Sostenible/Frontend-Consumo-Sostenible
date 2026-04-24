@@ -2,24 +2,22 @@ import { Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useToastContext } from "../../../context/ToastContext";
 import Button from "../../button";
-import AuthAlert from "../../ui/AuthAlert";
 import InputField from "../../ui/InputField";
 
 export default function LoginForm({ onLogin }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const [loading,  setLoading]  = useState(false);
-  const [apiError, setApiError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const toast = useToastContext();
 
   const onSubmit = async (data) => {
     setLoading(true);
-    setApiError(null);
     try {
       await onLogin(data);
     } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      setApiError(error?.message || "Credenciales incorrectas. Verifica tu correo y contraseña.");
+      toast.error(error?.message || "Credenciales incorrectas. Verifica tu correo y contraseña.");
     } finally {
       setLoading(false);
     }
@@ -42,9 +40,7 @@ export default function LoginForm({ onLogin }) {
         <p className="text-stone-400 text-sm mt-1">Ingresa tu cuenta para continuar</p>
       </div>
 
-      <AuthAlert message={apiError} variant="error" />
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
         <InputField
           label="Correo electrónico"
