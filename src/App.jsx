@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import AdminDashboard from './pages/admin/admin_dashboard';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminBusinesses from './pages/admin/AdminBusinesses';
 import Dashboard from './pages/dashboard';
 import DashboardBusiness from './pages/dashboardBusiness';
 import ForgotPassword from './pages/ForgotPassword';
@@ -61,6 +62,17 @@ function App() {
             <ProtectedRoute roles={['ADMIN']}>
               <DashboardLayout>
                 <AdminUsers />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/adminDashboard/negocios"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <DashboardLayout>
+                <AdminBusinesses />
               </DashboardLayout>
             </ProtectedRoute>
           }
