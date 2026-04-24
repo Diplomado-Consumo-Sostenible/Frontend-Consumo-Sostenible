@@ -15,23 +15,23 @@ import {
   resendPasswordReset,
   resetPassword,
 } from "../../../services/auth/auth.service";
+import { useToastContext } from "../../../context/ToastContext";
 import Button from "../../button";
-import AuthAlert from "../../ui/AuthAlert";
 import InputField from "../../ui/InputField";
 
 function StepEmail({ onSuccess }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const [loading,  setLoading]  = useState(false);
-  const [apiError, setApiError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const toast = useToastContext();
 
   const onSubmit = async ({ email }) => {
     setLoading(true);
-    setApiError(null);
     try {
-      await requestPasswordReset(email);
+      const res = await requestPasswordReset(email);
+      toast.success(res?.message || "Código enviado. Revisa tu correo.");
       onSuccess(email);
     } catch (err) {
-      setApiError(err?.message || "No encontramos una cuenta con ese correo.");
+      toast.error(err?.message || "No encontramos una cuenta con ese correo.");
     } finally {
       setLoading(false);
     }
@@ -51,9 +51,7 @@ function StepEmail({ onSuccess }) {
         </p>
       </div>
 
-      <AuthAlert message={apiError} variant="error" />
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <InputField
           label="Correo electrónico"
           id="email"
@@ -88,11 +86,10 @@ function StepEmail({ onSuccess }) {
 
 function StepOtp({ email, onSuccess }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const [loading,    setLoading]    = useState(false);
-  const [resending,  setResending]  = useState(false);
-  const [apiError,   setApiError]   = useState(null);
-  const [resendMsg,  setResendMsg]  = useState(null);
-  const [countdown,  setCountdown]  = useState(60);    
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const toast = useToastContext();
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -102,11 +99,10 @@ function StepOtp({ email, onSuccess }) {
 
   const onSubmit = async ({ otp }) => {
     setLoading(true);
-    setApiError(null);
     try {
       onSuccess(otp);
     } catch (err) {
-      setApiError(err?.message || "Código incorrecto o expirado.");
+      toast.error(err?.message || "Código incorrecto o expirado.");
     } finally {
       setLoading(false);
     }
@@ -114,14 +110,12 @@ function StepOtp({ email, onSuccess }) {
 
   const handleResend = async () => {
     setResending(true);
-    setResendMsg(null);
-    setApiError(null);
     try {
-      await resendPasswordReset(email);
-      setResendMsg("Código reenviado. Revisa tu bandeja de entrada.");
+      const res = await resendPasswordReset(email);
+      toast.success(res?.message || "Código reenviado. Revisa tu bandeja de entrada.");
       setCountdown(60);
     } catch (err) {
-      setApiError(err?.message || "No se pudo reenviar el código.");
+      toast.error(err?.message || "No se pudo reenviar el código.");
     } finally {
       setResending(false);
     }
@@ -143,12 +137,7 @@ function StepOtp({ email, onSuccess }) {
         </p>
       </div>
 
-      <div className="space-y-3">
-        <AuthAlert message={apiError}  variant="error"   />
-        <AuthAlert message={resendMsg} variant="success" />
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <InputField
           label="Código de verificación"
           id="otp"
@@ -158,7 +147,7 @@ function StepOtp({ email, onSuccess }) {
           error={errors.otp}
           registration={register("otp", {
             required: "El código es obligatorio",
-            pattern:  { value: /^\d{6}$/, message: "Debe ser un código de 6 dígitos" },
+            pattern: { value: /^\d{6}$/, message: "Debe ser un código de 6 dígitos" },
           })}
         />
 
@@ -192,34 +181,34 @@ function StepOtp({ email, onSuccess }) {
 
 function StepNewPassword({ otp, onSuccess }) {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const [loading,   setLoading]   = useState(false);
-  const [apiError,  setApiError]  = useState(null);
-  const [showPass,  setShowPass]  = useState(false);
-  const [showConf,  setShowConf]  = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [showConf, setShowConf] = useState(false);
+  const toast = useToastContext();
 
   const passwordValue = watch("newPassword", "");
 
   const getStrength = (p) => {
     let s = 0;
-    if (p.length >= 8)         s++;
-    if (/[A-Z]/.test(p))       s++;
-    if (/[0-9]/.test(p))       s++;
+    if (p.length >= 8) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
     if (/[^A-Za-z0-9]/.test(p)) s++;
     return s;
   };
-  const strength      = getStrength(passwordValue);
+  const strength = getStrength(passwordValue);
   const strengthLabel = ["", "Débil", "Regular", "Buena", "Fuerte"][strength];
   const strengthColor = ["", "bg-red-400", "bg-amber-400", "bg-lime-500", "bg-emerald-500"][strength];
-  const strengthText  = ["", "text-red-500", "text-amber-500", "text-lime-600", "text-emerald-600"][strength];
+  const strengthText = ["", "text-red-500", "text-amber-500", "text-lime-600", "text-emerald-600"][strength];
 
   const onSubmit = async ({ newPassword }) => {
     setLoading(true);
-    setApiError(null);
     try {
-      await resetPassword(otp, newPassword);
+      const res = await resetPassword(otp, newPassword);
+      toast.success(res?.message || "Contraseña restablecida correctamente.");
       onSuccess();
     } catch (err) {
-      setApiError(err?.message || "El código OTP es inválido o ya expiró.");
+      toast.error(err?.message || "El código OTP es inválido o ya expiró.");
     } finally {
       setLoading(false);
     }
@@ -239,10 +228,7 @@ function StepNewPassword({ otp, onSuccess }) {
         </p>
       </div>
 
-      <AuthAlert message={apiError} variant="error" />
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-5">
-
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="flex flex-col gap-1.5">
           <InputField
             label="Nueva contraseña"
@@ -350,14 +336,13 @@ function StepIndicator({ current, total }) {
 }
 
 export default function ForgotPasswordForm() {
-  const [step,  setStep]  = useState(0); 
+  const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
-  const [otp,   setOtp]   = useState("");
+  const [otp, setOtp] = useState("");
 
   return (
     <div className="flex-1 bg-white/80 backdrop-blur-xl flex flex-col justify-center px-10 py-10">
 
-      {/* Brand móvil */}
       <div className="flex md:hidden items-center gap-2 mb-4">
         <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-emerald-500" stroke="currentColor" strokeWidth="1.5">
           <path d="M12 22C6.5 22 2 17.5 2 12C2 7 5.5 3.5 10 2C10 2 8 8 12 12C16 16 22 14 22 14C22 18.5 17.5 22 12 22Z" strokeLinecap="round" strokeLinejoin="round" />
@@ -367,18 +352,10 @@ export default function ForgotPasswordForm() {
 
       {step < 3 && <StepIndicator current={step} total={3} />}
 
-      {step === 0 && (
-        <StepEmail onSuccess={(e) => { setEmail(e); setStep(1); }} />
-      )}
-      {step === 1 && (
-        <StepOtp email={email} onSuccess={(o) => { setOtp(o); setStep(2); }} />
-      )}
-      {step === 2 && (
-        <StepNewPassword otp={otp} onSuccess={() => setStep(3)} />
-      )}
-      {step === 3 && (
-        <StepSuccess />
-      )}
+      {step === 0 && <StepEmail onSuccess={(e) => { setEmail(e); setStep(1); }} />}
+      {step === 1 && <StepOtp email={email} onSuccess={(o) => { setOtp(o); setStep(2); }} />}
+      {step === 2 && <StepNewPassword otp={otp} onSuccess={() => setStep(3)} />}
+      {step === 3 && <StepSuccess />}
     </div>
   );
 }
