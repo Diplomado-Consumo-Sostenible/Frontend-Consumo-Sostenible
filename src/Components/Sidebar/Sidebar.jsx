@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, LogOut, Leaf } from 'lucide-react';
+import { LayoutDashboard, Users, LogOut, Leaf, Building2 } from 'lucide-react';
 import { decodeToken } from '../../utils/jwt.utils';
 import { getToken, removeToken } from '../../utils/storage';
 import { useToastContext } from '../../context/ToastContext';
@@ -8,6 +8,7 @@ const NAV_ITEMS = {
   admin: [
     { label: 'Dashboard', icon: LayoutDashboard, to: '/adminDashboard' },
     { label: 'Gestionar Usuarios', icon: Users, to: '/adminDashboard/usuarios' },
+    { label: 'Moderación de Negocios', icon: Building2, to: '/adminDashboard/negocios' },
   ],
   user: [{ label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' }],
   owner: [{ label: 'Dashboard', icon: LayoutDashboard, to: '/dashboardBusiness' }],
