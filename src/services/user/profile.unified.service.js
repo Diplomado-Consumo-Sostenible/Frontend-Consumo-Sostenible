@@ -1,15 +1,12 @@
-import { decodeToken } from '../utils/jwt.utils';
-import { getToken } from '../utils/storage';
+import { decodeToken } from '../../utils/jwt.utils';
+import { getToken } from '../../utils/storage';
 import { getMyProfile } from './profile.service';
 import { getAllUsers } from './user.service';
 
 export const getFullUserProfile = async () => {
   const decoded = decodeToken(getToken());
 
-  const [usersResult, profileResult] = await Promise.allSettled([
-    getAllUsers(),
-    getMyProfile(),
-  ]);
+  const [usersResult, profileResult] = await Promise.allSettled([getAllUsers(), getMyProfile()]);
 
   if (profileResult.status === 'rejected') {
     throw profileResult.reason;
@@ -27,12 +24,9 @@ export const getFullUserProfile = async () => {
     // getAllUsers falló (sin permisos) — construir con JWT + datos anidados del perfil
     const profileData = profileResult.value;
     userData = {
-      email:     decoded?.email,
-      rol:       decoded?.rol,
-      createdAt: profileData?.usuario?.createdAt
-              ?? profileData?.user?.createdAt
-              ?? profileData?.createdAt
-              ?? null,
+      email: decoded?.email,
+      rol: decoded?.rol,
+      createdAt: profileData?.usuario?.createdAt ?? profileData?.user?.createdAt ?? profileData?.createdAt ?? null,
     };
   }
 

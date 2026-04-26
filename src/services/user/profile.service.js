@@ -1,4 +1,4 @@
-import API from "../api/api";
+import API from '../../api/api';
 
 const extractError = (error) => {
   const data = error?.response?.data;
@@ -10,7 +10,7 @@ const extractError = (error) => {
 // Obtener mi propio perfil (ADMIN, owner, USER)
 export const getMyProfile = async () => {
   try {
-    const response = await API.get("/perfil/me");
+    const response = await API.get('/perfil/me');
     return response.data;
   } catch (error) {
     throw extractError(error);
@@ -21,7 +21,7 @@ export const getMyProfile = async () => {
 // data: { nombre?, foto_perfil?, id_genero? }
 export const updateMyProfile = async (data) => {
   try {
-    const response = await API.patch("/perfil/me", data);
+    const response = await API.patch('/perfil/me', data);
     return response.data;
   } catch (error) {
     throw extractError(error);
@@ -32,7 +32,7 @@ export const updateMyProfile = async (data) => {
 // filters: { page?, limit?, isActive?, id_genero? }
 export const getAllProfiles = async (filters = {}) => {
   try {
-    const response = await API.get("/perfil", { params: filters });
+    const response = await API.get('/perfil', { params: filters });
     return response.data;
   } catch (error) {
     throw extractError(error);
@@ -43,6 +43,16 @@ export const getAllProfiles = async (filters = {}) => {
 export const getProfileById = async (id) => {
   try {
     const response = await API.get(`/perfil/${id}`);
+    return response.data;
+  } catch (error) {
+    throw extractError(error);
+  }
+};
+
+// Actualizar solo la foto de mi propio perfil (ADMIN, owner, USER)
+export const updateMyProfilePhoto = async (fotoUrl) => {
+  try {
+    const response = await API.patch('/perfil/me/foto', { foto_perfil: fotoUrl });
     return response.data;
   } catch (error) {
     throw extractError(error);

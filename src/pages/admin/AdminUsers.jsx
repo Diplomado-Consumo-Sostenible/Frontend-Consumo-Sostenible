@@ -1,17 +1,50 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Users, Plus, Search, Edit2, Trash2, X, AlertTriangle, ChevronUp, ChevronDown, Eye, EyeOff, Loader2, LayoutDashboard, ChevronRight } from 'lucide-react';
-import { getAllUsers, createUser, updateUser, deleteUser, toggleUserStatus } from '../../services/user.service';
+import { getAllUsers, createUser, updateUser, deleteUser, toggleUserStatus } from '../../services/user/user.service';
 import { useToastContext } from '../../context/ToastContext';
 import API from '../../api/api';
 
 const INITIAL_FORM = { nombre: '', email: '', password: '', rolId: '', id_genero: '' };
 
-function Avatar({ perfil, email }) {
+function PhotoPreviewModal({ src, alt, onClose }) {
+  return (
+    <>
+      <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 pointer-events-none">
+        <div className="relative max-w-xs w-full pointer-events-auto">
+          <button
+            onClick={onClose}
+            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-stone-100 transition-colors"
+          >
+            <X className="w-4 h-4 text-stone-600" />
+          </button>
+          <img src={src} alt={alt} className="w-full rounded-2xl shadow-2xl object-cover aspect-square" />
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Avatar({ perfil, email, onPreview }) {
   const initial = perfil?.nombre ? perfil.nombre.charAt(0).toUpperCase() : email?.charAt(0).toUpperCase() || '?';
   if (perfil?.foto_perfil) {
-    return <img src={perfil.foto_perfil} alt={perfil.nombre || email} className="w-8 h-8 rounded-full object-cover" />;
+    return (
+      <div className="relative group shrink-0 w-8 h-8">
+        <img src={perfil.foto_perfil} alt={perfil.nombre || email} className="w-8 h-8 rounded-full object-cover" />
+        <button
+          onClick={() => onPreview(perfil.foto_perfil, perfil.nombre || email)}
+          className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+        >
+          <Eye className="w-3.5 h-3.5 text-white" />
+        </button>
+      </div>
+    );
   }
-  return <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-semibold text-emerald-700 shrink-0">{initial}</div>;
+  return (
+    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-semibold text-emerald-700 shrink-0">
+      {initial}
+    </div>
+  );
 }
 
 function StatusBadge({ isActive }) {
@@ -103,6 +136,7 @@ export default function AdminUsers() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [deleteUser_, setDeleteUser] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const [form, setForm] = useState(INITIAL_FORM);
   const [formErrors, setFormErrors] = useState({});
@@ -349,9 +383,9 @@ export default function AdminUsers() {
                 {filtered.map((user, idx) => (
                   <tr key={user.id_usuario} className="hover:bg-stone-50/50 transition-colors">
                     <td className="px-4 py-3.5 text-xs text-stone-400 font-mono">{idx + 1}</td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 overflow-visible">
                       <div className="flex items-center gap-3">
-                        <Avatar perfil={user.perfil} email={user.email} />
+                        <Avatar perfil={user.perfil} email={user.email} onPreview={(src, alt) => setPreview({ src, alt })} />
                         <span className="text-sm font-medium text-stone-700">{user.perfil?.nombre || '—'}</span>
                       </div>
                     </td>
@@ -514,6 +548,8 @@ export default function AdminUsers() {
 
       {/* Delete Confirm */}
       {deleteUser_ && <ConfirmDialog user={deleteUser_} onConfirm={handleDelete} onCancel={() => setDeleteUser(null)} loading={actionLoading === 'delete'} />}
+
+      {preview && <PhotoPreviewModal src={preview.src} alt={preview.alt} onClose={() => setPreview(null)} />}
     </div>
   );
 }

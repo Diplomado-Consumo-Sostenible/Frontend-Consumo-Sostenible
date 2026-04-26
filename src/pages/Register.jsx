@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import BusinessFormHero from "../Components/Auth/register/businessFormHero";
-import BusinessFormStep from "../Components/Auth/register/businessFormStep";
-import RegisterForm from "../Components/Auth/register/register_form";
-import RegisterHero from "../Components/Auth/register/register_hero";
-import RoleStep from "../Components/Auth/register/rolStep";
-import AuthLayout from "../layouts/AuthLayout";
-import { registerModel } from "../models/auth/register.model";
-import { registerBusinessModel } from "../models/business.model";
-import { login, registerUser } from "../services/auth/auth.service";
-import { postBusiness } from "../services/busienss.service";
-import { saveToken } from "../utils/storage";
-import { useToastContext } from "../context/ToastContext";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import BusinessFormHero from '../Components/Auth/register/businessFormHero';
+import BusinessFormStep from '../Components/Auth/register/businessFormStep';
+import RegisterForm from '../Components/Auth/register/register_form';
+import RegisterHero from '../Components/Auth/register/register_hero';
+import RoleStep from '../Components/Auth/register/rolStep';
+import AuthLayout from '../layouts/AuthLayout';
+import { registerModel } from '../models/auth/register.model';
+import { registerBusinessModel } from '../models/business/business.model';
+import { login, registerUser } from '../services/auth/auth.service';
+import { postBusiness } from '../services/business/business.service';
+import { saveToken } from '../utils/storage';
+import { useToastContext } from '../context/ToastContext';
 
 export default function Register() {
   const [step, setStep] = useState(1);
@@ -62,10 +62,10 @@ export default function Register() {
                     password: mergedData.password,
                   });
                   saveToken(access_token);
-                  toast.success(res?.message || "¡Cuenta creada exitosamente!");
-                  navigate("/dashboard");
+                  toast.success(res?.message || '¡Cuenta creada exitosamente!');
+                  navigate('/dashboard');
                 } catch (err) {
-                  toast.error(err?.message || "Error al crear la cuenta");
+                  toast.error(err?.message || 'Error al crear la cuenta');
                 }
               } else {
                 nextStep();
@@ -89,10 +89,10 @@ export default function Register() {
                 });
                 saveToken(access_token);
                 await postBusiness(registerBusinessModel(mergedData));
-                toast.success(res?.message || "¡Negocio registrado exitosamente!");
-                navigate("/dashboardBusiness");
+                toast.success(res?.message || '¡Negocio registrado exitosamente!');
+                navigate('/dashboardBusiness');
               } catch (err) {
-                toast.error(err?.message || "Error al registrar el negocio");
+                toast.error(err?.message || 'Error al registrar el negocio');
               }
             }}
           />
@@ -103,10 +103,5 @@ export default function Register() {
     }
   };
 
-  return (
-    <AuthLayout
-      hero={renderHero()}
-      form={renderStep()}
-    />
-  );
+  return <AuthLayout hero={renderHero()} form={renderStep()} />;
 }
