@@ -1,7 +1,7 @@
-import { LayoutDashboard, Users, Building2, ShieldCheck } from 'lucide-react';
+import { Building2, LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getToken } from '../../utils/storage';
-import { decodeToken } from '../../utils/jwt.utils';
+import { getMyProfile } from '../../services/profile.service';
 
 const now = new Date();
 const hour = now.getHours();
@@ -13,8 +13,15 @@ const QUICK_LINKS = [
 ];
 
 export default function AdminDashboard() {
-  const decoded = decodeToken(getToken());
-  const email = decoded?.email || 'Administrador';
+  const [nombre, setNombre] = useState('Administrador');
+
+  useEffect(() => {
+    getMyProfile()
+      .then((perfil) => {
+        if (perfil?.nombre) setNombre(perfil.nombre);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="p-6 space-y-8">
@@ -29,7 +36,7 @@ export default function AdminDashboard() {
             <ShieldCheck className="w-5 h-5 text-stone-600" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-stone-800">{greeting}, {email.split('@')[0]}</h1>
+            <h1 className="text-xl font-semibold text-stone-800">{greeting}, {nombre}</h1>
             <p className="text-sm text-stone-400 mt-0.5">Panel de administración · Consumo Sostenible</p>
           </div>
         </div>
@@ -38,15 +45,15 @@ export default function AdminDashboard() {
       {/* Quick links */}
       <div>
         <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Accesos rápidos</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-wrap gap-3">
           {QUICK_LINKS.map(item => (
-            <Link key={item.to} to={item.to} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-stone-100 hover:border-stone-200 hover:shadow-sm transition-all group">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>
-                <item.icon className="w-5 h-5" />
+            <Link key={item.to} to={item.to} className="flex items-center gap-3 px-4 py-8 bg-white rounded-2xl border border-stone-100 hover:border-stone-200 hover:shadow-sm transition-all group w-fit">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
+                <item.icon className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-stone-700 group-hover:text-stone-900 transition-colors">{item.label}</p>
-                <p className="text-xs text-stone-400 mt-0.5 truncate">{item.desc}</p>
+                <p className="text-sm font-medium text-stone-700 group-hover:text-stone-900 transition-colors whitespace-nowrap">{item.label}</p>
+                <p className="text-xs text-stone-400 mt-0.5 whitespace-nowrap">{item.desc}</p>
               </div>
             </Link>
           ))}

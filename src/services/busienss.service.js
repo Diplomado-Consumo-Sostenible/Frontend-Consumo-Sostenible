@@ -9,6 +9,15 @@ export const getBusiness = async () => {
     }
 };
 
+export const getMyBusinesses = async () => {
+    try {
+        const response = await API.get("/business/management/my-businesses");
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Error al obtener tus negocios" };
+    }
+};
+
 export const postBusiness = async (businessData, token) => {
     try {
         const response = await API.post("/business", businessData, {

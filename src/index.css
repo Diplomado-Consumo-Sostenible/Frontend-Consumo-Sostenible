@@ -1,4 +1,37 @@
 @import "tailwindcss";
 
+@theme {
+  /* ── Primarios (verde bosque) ─────────────────────────── */
+  --color-primary-darkest:  #1A3D2B;
+  --color-primary-dark:     #2E6B47;
+  --color-primary-mid:      #4A9C6D;
+  --color-primary-light:    #A8D5B5;
+  --color-primary-softest:  #E8F5EC;
+
+  /* ── Tierra (cálidos complementarios) ────────────────── */
+  --color-earth-dark:   #3D2B1A;
+  --color-earth-mid:    #1A3D2B;
+  --color-earth-light:  #C8A882;
+  --color-earth-cream:  #F2E4CC;
+
+  /* ── Superficies ─────────────────────────────────────── */
+  --color-app-bg:    #F4F7F5;
+  --color-card-bg:   #FFFFFF;
+  --color-edge:      #C8DED1;
+
+  /* ── Estados ─────────────────────────────────────────── */
+  --color-ok-bg:       #D5EDDF;
+  --color-ok-text:     #1A5C35;
+  --color-warn-bg:     #FDF0D0;
+  --color-warn-text:   #8C5A0A;
+
+  /* ── Tipografía ──────────────────────────────────────── */
+  --color-heading:      #1A3D2B;
+  --color-body:         #2E4A38;
+  --color-muted:        #5B8A6F;
+  --color-on-dark:      #A8D5B5;
+  --color-on-dark-active: #E8F5EC;
+}
+
 
 

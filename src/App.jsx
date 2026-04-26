@@ -1,17 +1,19 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
+import { ToastProvider } from './context/ToastContext';
+import DashboardLayout from './layouts/DashboardLayout';
 import AdminDashboard from './pages/admin/admin_dashboard';
-import AdminUsers from './pages/admin/AdminUsers';
 import AdminBusinesses from './pages/admin/AdminBusinesses';
+import AdminUsers from './pages/admin/AdminUsers';
+import BusinessCertifications from './pages/business/BusinessCertifications';
+import BusinessStats from './pages/business/BusinessStats';
+import DashboardBusiness from './pages/business/dashboardBusiness';
 import Dashboard from './pages/dashboard';
-import DashboardBusiness from './pages/dashboardBusiness';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './Routes/protectedRoute';
-import DashboardLayout from './layouts/DashboardLayout';
-import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (
@@ -37,9 +39,31 @@ function App() {
         <Route
           path="/dashboardBusiness"
           element={
-            <ProtectedRoute roles={['OWNER']}>
+            <ProtectedRoute roles={['owner']}>
               <DashboardLayout>
                 <DashboardBusiness />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboardBusiness/estadisticas"
+          element={
+            <ProtectedRoute roles={['owner']}>
+              <DashboardLayout>
+                <BusinessStats />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboardBusiness/certificaciones"
+          element={
+            <ProtectedRoute roles={['owner']}>
+              <DashboardLayout>
+                <BusinessCertifications />
               </DashboardLayout>
             </ProtectedRoute>
           }
