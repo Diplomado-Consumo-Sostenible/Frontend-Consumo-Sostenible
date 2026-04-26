@@ -5,12 +5,13 @@ import DashboardLayout from './layouts/DashboardLayout';
 import AdminDashboard from './pages/admin/admin_dashboard';
 import AdminBusinesses from './pages/admin/AdminBusinesses';
 import AdminUsers from './pages/admin/AdminUsers';
+import DashboardBusiness from './pages/business/dashboardBusiness';
 import BusinessCertifications from './pages/business/BusinessCertifications';
 import BusinessStats from './pages/business/BusinessStats';
-import DashboardBusiness from './pages/business/dashboardBusiness';
 import Dashboard from './pages/dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
+import Profile from './pages/profile/Profile';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './Routes/protectedRoute';
@@ -97,6 +98,17 @@ function App() {
             <ProtectedRoute roles={['ADMIN']}>
               <DashboardLayout>
                 <AdminBusinesses />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/profile"
+          element={
+            <ProtectedRoute roles={['USER', 'owner', 'ADMIN']}>
+              <DashboardLayout>
+                <Profile />
               </DashboardLayout>
             </ProtectedRoute>
           }
