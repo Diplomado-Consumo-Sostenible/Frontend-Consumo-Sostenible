@@ -1,4 +1,4 @@
-import { Award, BarChart2, Building2, LayoutDashboard, LogOut, Users } from 'lucide-react';
+import { Award, BarChart2, Building2, LayoutDashboard, LogOut, User, Users } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useToastContext } from '../../context/ToastContext';
 import { decodeToken } from '../../utils/jwt.utils';
@@ -9,14 +9,17 @@ const NAV_ITEMS = {
     { label: 'Dashboard',             icon: LayoutDashboard, to: '/adminDashboard'          },
     { label: 'Gestionar Usuarios',     icon: Users,           to: '/adminDashboard/usuarios' },
     { label: 'Moderación de Negocios', icon: Building2,       to: '/adminDashboard/negocios' },
+    { label: 'Mi perfil',              icon: User,            to: '/dashboard/profile'       },
   ],
   user: [
-    { label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard' },
+    { label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard'        },
+    { label: 'Mi perfil', icon: User,            to: '/dashboard/profile' },
   ],
   owner: [
     { label: 'Dashboard',       icon: LayoutDashboard, to: '/dashboardBusiness'                  },
     { label: 'Estadísticas',    icon: BarChart2,        to: '/dashboardBusiness/estadisticas'    },
     { label: 'Certificaciones', icon: Award,            to: '/dashboardBusiness/certificaciones' },
+    { label: 'Mi perfil',       icon: User,             to: '/dashboard/profile'                },
   ],
 };
 
