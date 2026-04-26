@@ -1,7 +1,7 @@
 import { Building2, LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getMyProfile } from '../../services/profile.service';
+import { getMyProfile } from '../../services/user/profile.service';
 
 const now = new Date();
 const hour = now.getHours();
@@ -36,7 +36,9 @@ export default function AdminDashboard() {
             <ShieldCheck className="w-5 h-5 text-stone-600" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-stone-800">{greeting}, {nombre}</h1>
+            <h1 className="text-xl font-semibold text-stone-800">
+              {greeting}, {nombre}
+            </h1>
             <p className="text-sm text-stone-400 mt-0.5">Panel de administración · Consumo Sostenible</p>
           </div>
         </div>
@@ -46,7 +48,7 @@ export default function AdminDashboard() {
       <div>
         <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Accesos rápidos</p>
         <div className="flex flex-wrap gap-3">
-          {QUICK_LINKS.map(item => (
+          {QUICK_LINKS.map((item) => (
             <Link key={item.to} to={item.to} className="flex items-center gap-3 px-4 py-8 bg-white rounded-2xl border border-stone-100 hover:border-stone-200 hover:shadow-sm transition-all group w-fit">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.color}`}>
                 <item.icon className="w-4 h-4" />

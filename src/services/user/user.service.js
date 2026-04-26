@@ -1,4 +1,4 @@
-import API from "../api/api";
+import API from '../../api/api';
 
 const extractError = (error) => {
   const data = error?.response?.data;
@@ -9,7 +9,7 @@ const extractError = (error) => {
 
 export const getAllUsers = async () => {
   try {
-    const response = await API.get("/user");
+    const response = await API.get('/user');
     return response.data;
   } catch (error) {
     throw extractError(error);
@@ -18,7 +18,7 @@ export const getAllUsers = async () => {
 
 export const createUser = async (data) => {
   try {
-    const response = await API.post("/user", data);
+    const response = await API.post('/user', data);
     return response.data;
   } catch (error) {
     throw extractError(error);
@@ -37,6 +37,15 @@ export const updateUser = async (id, data) => {
 export const toggleUserStatus = async (id, isActive) => {
   try {
     const response = await API.patch(`/user/${id}/status`, { isActive });
+    return response.data;
+  } catch (error) {
+    throw extractError(error);
+  }
+};
+
+export const changeEmail = async ({ newEmail, password }) => {
+  try {
+    const response = await API.patch('/user/me/email', { newEmail, password });
     return response.data;
   } catch (error) {
     throw extractError(error);

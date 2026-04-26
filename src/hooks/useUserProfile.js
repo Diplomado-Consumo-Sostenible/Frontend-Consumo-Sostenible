@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getFullUserProfile } from '../services/profile.unified.service';
+import { getFullUserProfile } from '../services/user/profile.unified.service';
 
 export default function useUserProfile() {
   const [profile, setProfile] = useState(null);

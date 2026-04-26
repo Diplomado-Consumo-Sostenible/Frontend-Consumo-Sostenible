@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Building2, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight, Loader2, AlertTriangle, X, Power, PowerOff, Plus, Edit2, Trash2, Tag as TagIcon, LayoutDashboard } from 'lucide-react';
-import { getBusinessesForAdmin, changeBusinessStatus, toggleBusinessActive, createBusiness, updateBusiness, deleteBusiness } from '../../services/business.admin.service';
+import { Building2, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight, Loader2, AlertTriangle, X, Power, PowerOff, Plus, Edit2, Trash2, Tag as TagIcon, LayoutDashboard, Eye } from 'lucide-react';
+import { getBusinessesForAdmin, changeBusinessStatus, toggleBusinessActive, createBusiness, updateBusiness, deleteBusiness } from '../../services/business/business.admin.service';
 import { useToastContext } from '../../context/ToastContext';
 import API from '../../api/api';
 
@@ -33,8 +33,39 @@ const INIT_FORM = {
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 /* ─── small reusable pieces ─────────────────────────────────────────────── */
-function BusinessAvatar({ logo, name }) {
-  if (logo) return <img src={logo} alt={name} className="w-8 h-8 rounded-lg object-cover shrink-0" />;
+function PhotoPreviewModal({ src, alt, onClose }) {
+  return (
+    <>
+      <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 pointer-events-none">
+        <div className="relative max-w-xs w-full pointer-events-auto">
+          <button
+            onClick={onClose}
+            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-stone-100 transition-colors"
+          >
+            <X className="w-4 h-4 text-stone-600" />
+          </button>
+          <img src={src} alt={alt} className="w-full rounded-2xl shadow-2xl object-cover aspect-square" />
+        </div>
+      </div>
+    </>
+  );
+}
+
+function BusinessAvatar({ logo, name, onPreview }) {
+  if (logo) {
+    return (
+      <div className="relative group shrink-0 w-8 h-8">
+        <img src={logo} alt={name} className="w-8 h-8 rounded-lg object-cover" />
+        <button
+          onClick={() => onPreview(logo, name)}
+          className="absolute inset-0 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+        >
+          <Eye className="w-3.5 h-3.5 text-white" />
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
       <span className="text-xs font-bold text-emerald-600">{name?.charAt(0)?.toUpperCase() || '?'}</span>
@@ -352,6 +383,7 @@ export default function AdminBusinesses() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const LIMIT = 10;
 
@@ -535,9 +567,9 @@ export default function AdminBusinesses() {
                   return (
                     <tr key={business.id_business} className="hover:bg-stone-50/50 transition-colors">
                       <td className="px-4 py-3.5 text-xs text-stone-400 font-mono">{(page - 1) * LIMIT + idx + 1}</td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5 overflow-visible">
                         <div className="flex items-center gap-3">
-                          <BusinessAvatar logo={business.logo} name={business.businessName} />
+                          <BusinessAvatar logo={business.logo} name={business.businessName} onPreview={(src, alt) => setPreview({ src, alt })} />
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-stone-700 truncate max-w-[140px]">{business.businessName}</p>
                             {status === 'Rejected' && business.rejectionReason && (
@@ -629,6 +661,8 @@ export default function AdminBusinesses() {
       {rejectTarget && <RejectModal business={rejectTarget} onConfirm={handleRejectConfirm} onCancel={() => setRejectTarget(null)} loading={actionLoading === rejectTarget.id_business} />}
       {deleteTarget && <DeleteConfirm business={deleteTarget} onConfirm={handleDeleteConfirm} onCancel={() => setDeleteTarget(null)} loading={actionLoading === deleteTarget.id_business} />}
       <BusinessFormDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onSaved={() => fetchBusinesses(activeTab, page)} editTarget={editTarget} categories={categories} tags={tags} />
+
+      {preview && <PhotoPreviewModal src={preview.src} alt={preview.alt} onClose={() => setPreview(null)} />}
     </div>
   );
 }
