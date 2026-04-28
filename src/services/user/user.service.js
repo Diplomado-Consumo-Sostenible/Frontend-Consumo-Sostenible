@@ -52,6 +52,15 @@ export const changeEmail = async ({ newEmail, password }) => {
   }
 };
 
+export const changePassword = async ({ currentPassword, newPassword }) => {
+  try {
+    const response = await API.patch('/user/me/password', { currentPassword, newPassword });
+    return response.data;
+  } catch (error) {
+    throw extractError(error);
+  }
+};
+
 export const deleteUser = async (id) => {
   try {
     const response = await API.delete(`/user/${id}`);
