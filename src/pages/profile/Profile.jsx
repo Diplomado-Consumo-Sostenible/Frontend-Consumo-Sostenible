@@ -22,7 +22,7 @@ import useUserProfile from '../../hooks/useUserProfile';
 import { getGeneros } from '../../services/types/generos.service';
 import { uploadProfileImage } from '../../services/upload/upload.service';
 import { updateMyProfile, updateMyProfilePhoto } from '../../services/user/profile.service';
-import { changeEmail } from '../../services/user/user.service';
+import { changeEmail, changePassword } from '../../services/user/user.service';
 import { removeToken } from '../../utils/storage';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
@@ -306,6 +306,163 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
   );
 }
 
+function ChangePasswordModal({ onSave, onClose, loading }) {
+  const [currentPassword,  setCurrentPassword]  = useState('');
+  const [newPassword,      setNewPassword]      = useState('');
+  const [confirmPassword,  setConfirmPassword]  = useState('');
+  const [showCurrent,      setShowCurrent]      = useState(false);
+  const [showNew,          setShowNew]          = useState(false);
+  const [showConfirm,      setShowConfirm]      = useState(false);
+  const [errors,           setErrors]           = useState({});
+
+  const validate = () => {
+    const errs = {};
+    if (!currentPassword) errs.currentPassword = 'La contraseña actual es requerida';
+    if (!newPassword) errs.newPassword = 'La nueva contraseña es requerida';
+    else if (newPassword.length < 6) errs.newPassword = 'Mínimo 6 caracteres';
+    else if (newPassword === currentPassword) errs.newPassword = 'La nueva contraseña debe ser diferente a la actual';
+    if (!confirmPassword) errs.confirmPassword = 'Confirma tu nueva contraseña';
+    else if (confirmPassword !== newPassword) errs.confirmPassword = 'Las contraseñas no coinciden';
+    return errs;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    onSave({ currentPassword, newPassword });
+  };
+
+  const inputCls = (err) =>
+    `w-full px-4 py-2.5 rounded-xl border text-sm text-stone-700 focus:outline-none focus:ring-2 transition-all bg-white ${
+      err
+        ? 'border-red-300 focus:ring-red-200'
+        : 'border-stone-200 focus:ring-emerald-300 focus:border-emerald-400'
+    }`;
+
+  const EyeToggle = ({ show, onToggle }) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+      tabIndex={-1}
+    >
+      {show ? (
+        <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
+          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" strokeLinecap="round" strokeLinejoin="round"/>
+          <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round"/>
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      )}
+    </button>
+  );
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        onClick={!loading ? onClose : undefined}
+      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-bold text-stone-800">Cambiar contraseña</h3>
+            <button
+              onClick={!loading ? onClose : undefined}
+              disabled={loading}
+              className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors disabled:opacity-50"
+            >
+              <X className="w-4 h-4 text-stone-500" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-stone-600 block mb-1.5">Contraseña actual</label>
+              <div className="relative">
+                <input
+                  type={showCurrent ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => { setCurrentPassword(e.target.value); setErrors((p) => ({ ...p, currentPassword: null })); }}
+                  placeholder="Tu contraseña actual"
+                  className={`${inputCls(errors.currentPassword)} pr-10`}
+                  disabled={loading}
+                  autoComplete="current-password"
+                />
+                <EyeToggle show={showCurrent} onToggle={() => setShowCurrent((v) => !v)} />
+              </div>
+              {errors.currentPassword && (
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.currentPassword}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-stone-600 block mb-1.5">Nueva contraseña</label>
+              <div className="relative">
+                <input
+                  type={showNew ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); setErrors((p) => ({ ...p, newPassword: null, confirmPassword: null })); }}
+                  placeholder="Mínimo 6 caracteres"
+                  className={`${inputCls(errors.newPassword)} pr-10`}
+                  disabled={loading}
+                  autoComplete="new-password"
+                />
+                <EyeToggle show={showNew} onToggle={() => setShowNew((v) => !v)} />
+              </div>
+              {errors.newPassword && (
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.newPassword}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-stone-600 block mb-1.5">Confirmar nueva contraseña</label>
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setErrors((p) => ({ ...p, confirmPassword: null })); }}
+                  placeholder="Repite la nueva contraseña"
+                  className={`${inputCls(errors.confirmPassword)} pr-10`}
+                  disabled={loading}
+                  autoComplete="new-password"
+                />
+                <EyeToggle show={showConfirm} onToggle={() => setShowConfirm((v) => !v)} />
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.confirmPassword}</p>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={!loading ? onClose : undefined}
+                disabled={loading}
+                className="flex-1 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-800 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {loading ? 'Guardando…' : 'Cambiar contraseña'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function PhotoPreviewModal({ src, onClose }) {
   return (
     <>
@@ -480,16 +637,18 @@ export default function Profile() {
   const toast   = useToastContext();
   const navigate = useNavigate();
 
-  const [menuOpen,       setMenuOpen]       = useState(false);
-  const [previewOpen,    setPreviewOpen]    = useState(false);
-  const [editOpen,       setEditOpen]       = useState(false);
-  const [editLoading,    setEditLoading]    = useState(false);
-  const [emailOpen,      setEmailOpen]      = useState(false);
-  const [emailLoading,   setEmailLoading]   = useState(false);
-  const [photoLoading,   setPhotoLoading]   = useState(false);
-  const [localPhoto,     setLocalPhoto]     = useState(null);
-  const [photoRemoved,   setPhotoRemoved]   = useState(false);
-  const [generos,        setGeneros]        = useState([]);
+  const [menuOpen,         setMenuOpen]         = useState(false);
+  const [previewOpen,      setPreviewOpen]      = useState(false);
+  const [editOpen,         setEditOpen]         = useState(false);
+  const [editLoading,      setEditLoading]      = useState(false);
+  const [emailOpen,        setEmailOpen]        = useState(false);
+  const [emailLoading,     setEmailLoading]     = useState(false);
+  const [passwordOpen,     setPasswordOpen]     = useState(false);
+  const [passwordLoading,  setPasswordLoading]  = useState(false);
+  const [photoLoading,     setPhotoLoading]     = useState(false);
+  const [localPhoto,       setLocalPhoto]       = useState(null);
+  const [photoRemoved,     setPhotoRemoved]     = useState(false);
+  const [generos,          setGeneros]          = useState([]);
 
   const email        = profile?._user?.email      ?? profile?.email        ?? '';
   const nombre       = profile?._profile?.nombre  ?? profile?.nombre       ?? '';
@@ -572,6 +731,19 @@ export default function Profile() {
     setLocalPhoto(null);
     setPhotoRemoved(true);
     setMenuOpen(false);
+  };
+
+  const handleChangePassword = async ({ currentPassword, newPassword }) => {
+    setPasswordLoading(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setPasswordOpen(false);
+      toast.success('Contraseña actualizada correctamente.');
+    } catch (err) {
+      toast.error(err?.message || 'Error al cambiar la contraseña');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   const handleSaveEdit = async ({ nombre: nuevoNombre, id_genero }) => {
@@ -721,7 +893,7 @@ export default function Profile() {
               label="Contraseña"
               value="••••••••••••"
               actionLabel="Cambiar contraseña"
-              onClick={() => {}}
+              onClick={() => setPasswordOpen(true)}
             />
           </div>
 
@@ -752,6 +924,14 @@ export default function Profile() {
           onSave={handleChangeEmail}
           onClose={() => !emailLoading && setEmailOpen(false)}
           loading={emailLoading}
+        />
+      )}
+
+      {passwordOpen && (
+        <ChangePasswordModal
+          onSave={handleChangePassword}
+          onClose={() => !passwordLoading && setPasswordOpen(false)}
+          loading={passwordLoading}
         />
       )}
     </div>
