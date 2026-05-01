@@ -15,6 +15,7 @@ import Profile from './pages/profile/Profile';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './Routes/protectedRoute';
+import GoogleCallback from './pages/GoogleCallback';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/auth/callback" element={<GoogleCallback />} />
 
         <Route
           path="/dashboard"
