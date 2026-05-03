@@ -9,6 +9,9 @@ import DashboardBusiness from './pages/business/dashboardBusiness';
 import BusinessCertifications from './pages/business/BusinessCertifications';
 import BusinessStats from './pages/business/BusinessStats';
 import Dashboard from './pages/dashboard';
+import Explorar from './pages/user/Explorar';
+import Favoritos from './pages/user/Favoritos';
+import Mapa from './pages/user/Mapa';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import Profile from './pages/profile/Profile';
@@ -100,6 +103,39 @@ function App() {
             <ProtectedRoute roles={['ADMIN']}>
               <DashboardLayout>
                 <AdminBusinesses />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/explorar"
+          element={
+            <ProtectedRoute roles={['USER']}>
+              <DashboardLayout>
+                <Explorar />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/favoritos"
+          element={
+            <ProtectedRoute roles={['USER']}>
+              <DashboardLayout>
+                <Favoritos />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/mapa"
+          element={
+            <ProtectedRoute roles={['USER']}>
+              <DashboardLayout>
+                <Mapa />
               </DashboardLayout>
             </ProtectedRoute>
           }
