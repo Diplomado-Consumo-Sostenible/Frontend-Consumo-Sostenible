@@ -7,7 +7,9 @@ import AdminBusinesses from './pages/admin/AdminBusinesses';
 import AdminUsers from './pages/admin/AdminUsers';
 import DashboardBusiness from './pages/business/dashboardBusiness';
 import BusinessCertifications from './pages/business/BusinessCertifications';
+import BusinessProducts from './pages/business/BusinessProducts';
 import BusinessStats from './pages/business/BusinessStats';
+import CreateBusiness from './pages/business/CreateBusiness';
 import Dashboard from './pages/dashboard';
 import Explorar from './pages/user/Explorar';
 import Favoritos from './pages/user/Favoritos';
@@ -70,6 +72,28 @@ function App() {
             <ProtectedRoute roles={['owner']}>
               <DashboardLayout>
                 <BusinessCertifications />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboardBusiness/crear-negocio"
+          element={
+            <ProtectedRoute roles={['owner']}>
+              <DashboardLayout>
+                <CreateBusiness />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboardBusiness/productos"
+          element={
+            <ProtectedRoute roles={['owner']}>
+              <DashboardLayout>
+                <BusinessProducts />
               </DashboardLayout>
             </ProtectedRoute>
           }

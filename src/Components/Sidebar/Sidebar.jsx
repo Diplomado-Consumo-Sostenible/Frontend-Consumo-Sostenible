@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Leaf,
   Map as MapIcon,
+  Package,
   User,
   Users,
 } from 'lucide-react';
@@ -42,6 +43,7 @@ const NAV_CONFIG = {
   owner: {
     menu: [
       { label: 'Dashboard',       icon: LayoutDashboard, to: '/dashboardBusiness'                  },
+      { label: 'Productos',       icon: Package,          to: '/dashboardBusiness/productos'       },
       { label: 'Estadísticas',    icon: BarChart2,        to: '/dashboardBusiness/estadisticas'    },
       { label: 'Certificaciones', icon: Award,            to: '/dashboardBusiness/certificaciones' },
     ],
