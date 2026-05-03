@@ -1,14 +1,9 @@
-import { AlertTriangle, Clock, ImagePlus, Loader2, PackageOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Clock, ImagePlus, LayoutDashboard, Loader2, PackageOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useToastContext } from '../../context/ToastContext';
 import { getMyBusinesses } from '../../services/business/busienss.service';
-import {
-  createProduct,
-  deleteProduct,
-  getProductsByBusiness,
-  updateProduct,
-} from '../../services/product/product.service';
+import { createProduct, deleteProduct, getProductsByBusiness, updateProduct } from '../../services/product/product.service';
 import { uploadGeneralImage } from '../../services/upload/upload.service';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
@@ -61,7 +56,10 @@ function ProductFormModal({ initial, onClose, onSave, businessId, loading }) {
   async function handleSubmit(e) {
     e.preventDefault();
     const e2 = validate();
-    if (Object.keys(e2).length) { setErrors(e2); return; }
+    if (Object.keys(e2).length) {
+      setErrors(e2);
+      return;
+    }
 
     let imageUrl = form.image;
 
@@ -92,9 +90,7 @@ function ProductFormModal({ initial, onClose, onSave, businessId, loading }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-800">
-            {isEdit ? 'Editar producto' : 'Nuevo producto'}
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-800">{isEdit ? 'Editar producto' : 'Nuevo producto'}</h2>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -107,32 +103,18 @@ function ProductFormModal({ initial, onClose, onSave, businessId, loading }) {
             {imagePreview ? (
               <div className="relative w-full h-48 rounded-xl overflow-hidden bg-gray-100">
                 <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-sm transition-colors"
-                >
+                <button type="button" onClick={removeImage} className="absolute top-2 right-2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-sm transition-colors">
                   <X className="w-4 h-4 text-gray-600" />
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="w-full h-32 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary-mid hover:bg-green-50/30 transition-colors"
-              >
+              <button type="button" onClick={() => fileRef.current?.click()} className="w-full h-32 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary-mid hover:bg-green-50/30 transition-colors">
                 <ImagePlus className="w-6 h-6 text-gray-400" />
                 <span className="text-sm text-gray-500">Subir imagen</span>
                 <span className="text-xs text-gray-400">JPG, PNG, WEBP, GIF · máx. 5 MB</span>
               </button>
             )}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-              className="hidden"
-              onChange={handleImageChange}
-            />
+            <input ref={fileRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" className="hidden" onChange={handleImageChange} />
           </div>
 
           {/* Name */}
@@ -143,11 +125,12 @@ function ProductFormModal({ initial, onClose, onSave, businessId, loading }) {
             <input
               type="text"
               value={form.name}
-              onChange={(e) => { setForm((f) => ({ ...f, name: e.target.value })); setErrors((er) => ({ ...er, name: '' })); }}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, name: e.target.value }));
+                setErrors((er) => ({ ...er, name: '' }));
+              }}
               placeholder="Ej: Canasta de frutas orgánicas"
-              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none transition-colors focus:ring-2 focus:ring-green-400/30 ${
-                errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-green-400'
-              }`}
+              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none transition-colors focus:ring-2 focus:ring-green-400/30 ${errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-green-400'}`}
             />
             {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
           </div>
@@ -160,28 +143,21 @@ function ProductFormModal({ initial, onClose, onSave, businessId, loading }) {
             <textarea
               rows={3}
               value={form.description}
-              onChange={(e) => { setForm((f) => ({ ...f, description: e.target.value })); setErrors((er) => ({ ...er, description: '' })); }}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, description: e.target.value }));
+                setErrors((er) => ({ ...er, description: '' }));
+              }}
               placeholder="Describe brevemente tu producto…"
-              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none resize-none transition-colors focus:ring-2 focus:ring-green-400/30 ${
-                errors.description ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-green-400'
-              }`}
+              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none resize-none transition-colors focus:ring-2 focus:ring-green-400/30 ${errors.description ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-green-400'}`}
             />
             {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description}</p>}
           </div>
 
           <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-            >
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
               Cancelar
             </button>
-            <button
-              type="submit"
-              disabled={loading || uploading}
-              className="flex-1 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-            >
+            <button type="submit" disabled={loading || uploading} className="flex-1 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors">
               {(loading || uploading) && <Loader2 className="w-4 h-4 animate-spin" />}
               {uploading ? 'Subiendo imagen…' : loading ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear producto'}
             </button>
@@ -209,17 +185,10 @@ function DeleteConfirmModal({ product, onClose, onConfirm, loading }) {
           ¿Seguro que deseas eliminar <strong>"{product.name}"</strong>?
         </p>
         <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-          >
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
             Cancelar
           </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-          >
+          <button onClick={onConfirm} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors">
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Eliminando…' : 'Eliminar'}
           </button>
@@ -238,13 +207,13 @@ function ProductCard({ product, onEdit, onDelete }) {
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover"
-            onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextSibling.style.display = 'flex';
+            }}
           />
         ) : null}
-        <div
-          className="w-full h-full flex items-center justify-center bg-gray-50"
-          style={{ display: product.image ? 'none' : 'flex' }}
-        >
+        <div className="w-full h-full flex items-center justify-center bg-gray-50" style={{ display: product.image ? 'none' : 'flex' }}>
           <PackageOpen className="w-10 h-10 text-gray-300" />
         </div>
       </div>
@@ -254,17 +223,11 @@ function ProductCard({ product, onEdit, onDelete }) {
         <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">{product.description}</p>
 
         <div className="flex gap-2 mt-auto pt-2">
-          <button
-            onClick={() => onEdit(product)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
-          >
+          <button onClick={() => onEdit(product)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors">
             <Pencil className="w-3.5 h-3.5" />
             Editar
           </button>
-          <button
-            onClick={() => onDelete(product)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-red-100 text-xs font-medium text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors"
-          >
+          <button onClick={() => onDelete(product)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-red-100 text-xs font-medium text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors">
             <Trash2 className="w-3.5 h-3.5" />
             Eliminar
           </button>
@@ -281,13 +244,8 @@ function EmptyProducts({ onAdd }) {
         <PackageOpen className="w-8 h-8 text-green-400" />
       </div>
       <h3 className="text-lg font-semibold text-gray-700 mb-1">Sin productos aún</h3>
-      <p className="text-sm text-gray-400 max-w-xs mb-6">
-        Agrega tu primer producto para que los usuarios puedan explorar lo que ofreces.
-      </p>
-      <button
-        onClick={onAdd}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
-      >
+      <p className="text-sm text-gray-400 max-w-xs mb-6">Agrega tu primer producto para que los usuarios puedan explorar lo que ofreces.</p>
+      <button onClick={onAdd} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors">
         <Plus className="w-4 h-4" />
         Agregar producto
       </button>
@@ -317,7 +275,10 @@ export default function BusinessProducts() {
     async function init() {
       try {
         const businesses = await getMyBusinesses();
-        if (!businesses?.length) { setPageLoading(false); return; }
+        if (!businesses?.length) {
+          setPageLoading(false);
+          return;
+        }
         const biz = businesses[0];
         setBusiness(biz);
         await loadProducts(biz);
@@ -365,9 +326,18 @@ export default function BusinessProducts() {
     }
   }
 
-  function openCreate() { setEditingProduct(null); setShowForm(true); }
-  function openEdit(product) { setEditingProduct(product); setShowForm(true); }
-  function closeForm() { setShowForm(false); setEditingProduct(null); }
+  function openCreate() {
+    setEditingProduct(null);
+    setShowForm(true);
+  }
+  function openEdit(product) {
+    setEditingProduct(product);
+    setShowForm(true);
+  }
+  function closeForm() {
+    setShowForm(false);
+    setEditingProduct(null);
+  }
 
   if (pageLoading) {
     return (
@@ -381,19 +351,9 @@ export default function BusinessProducts() {
     const isPending = business.status === 'Pending';
     return (
       <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${isPending ? 'bg-yellow-50 border border-yellow-100' : 'bg-red-50 border border-red-100'}`}>
-          {isPending
-            ? <Clock className="w-7 h-7 text-yellow-400" />
-            : <AlertTriangle className="w-7 h-7 text-red-400" />}
-        </div>
-        <h3 className="text-base font-semibold text-gray-700 mb-1">
-          {isPending ? 'Negocio pendiente de aprobación' : 'Negocio rechazado'}
-        </h3>
-        <p className="text-sm text-gray-400 max-w-xs">
-          {isPending
-            ? 'Podrás gestionar tus productos una vez que el administrador apruebe tu negocio.'
-            : 'Tu negocio fue rechazado. Contacta al administrador para más información.'}
-        </p>
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${isPending ? 'bg-yellow-50 border border-yellow-100' : 'bg-red-50 border border-red-100'}`}>{isPending ? <Clock className="w-7 h-7 text-yellow-400" /> : <AlertTriangle className="w-7 h-7 text-red-400" />}</div>
+        <h3 className="text-base font-semibold text-gray-700 mb-1">{isPending ? 'Negocio pendiente de aprobación' : 'Negocio rechazado'}</h3>
+        <p className="text-sm text-gray-400 max-w-xs">{isPending ? 'Podrás gestionar tus productos una vez que el administrador apruebe tu negocio.' : 'Tu negocio fue rechazado. Contacta al administrador para más información.'}</p>
       </div>
     );
   }
@@ -406,10 +366,7 @@ export default function BusinessProducts() {
         </div>
         <h3 className="text-base font-semibold text-gray-700 mb-1">Sin negocio registrado</h3>
         <p className="text-sm text-gray-400 max-w-xs mb-5">Registra tu negocio primero para poder agregar productos.</p>
-        <button
-          onClick={() => navigate('/dashboardBusiness/crear-negocio')}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
-        >
+        <button onClick={() => navigate('/dashboardBusiness/crear-negocio')} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors">
           <Plus className="w-4 h-4" />
           Crear negocio
         </button>
@@ -418,21 +375,35 @@ export default function BusinessProducts() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Mis productos</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{business.name ?? business.nombre} · {products.length} producto{products.length !== 1 ? 's' : ''}</p>
+    <div className="pl-14 pr-6 py-6 space-y-8 w-full">
+      <div className="space-y-3">
+        <div className="flex items-center gap-1.5 text-xs text-muted">
+          <LayoutDashboard className="w-3.5 h-3.5" />
+          <Link to="/dashboardBusiness" className="hover:text-body transition-colors">
+            Mi Negocio
+          </Link>
+          <span>/</span>
+          <span className="text-body font-medium">Productos</span>
         </div>
-        {products.length > 0 && (
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Agregar
-          </button>
-        )}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
+              <PackageOpen className="w-5 h-5 text-primary-dark" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-heading">Productos</h1>
+              <p className="text-sm text-muted mt-0.5">
+                {business.name ?? business.businessName} · {products.length} producto{products.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+          {products.length > 0 && (
+            <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors">
+              <Plus className="w-4 h-4" />
+              Agregar
+            </button>
+          )}
+        </div>
       </div>
 
       {products.length === 0 ? (
@@ -440,34 +411,14 @@ export default function BusinessProducts() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {products.map((p) => (
-            <ProductCard
-              key={p.id_product}
-              product={p}
-              onEdit={openEdit}
-              onDelete={setDeletingProduct}
-            />
+            <ProductCard key={p.id_product} product={p} onEdit={openEdit} onDelete={setDeletingProduct} />
           ))}
         </div>
       )}
 
-      {showForm && (
-        <ProductFormModal
-          initial={editingProduct}
-          onClose={closeForm}
-          onSave={handleSave}
-          businessId={business.id_business}
-          loading={actionLoading}
-        />
-      )}
+      {showForm && <ProductFormModal initial={editingProduct} onClose={closeForm} onSave={handleSave} businessId={business.id_business} loading={actionLoading} />}
 
-      {deletingProduct && (
-        <DeleteConfirmModal
-          product={deletingProduct}
-          onClose={() => setDeletingProduct(null)}
-          onConfirm={handleDelete}
-          loading={actionLoading}
-        />
-      )}
+      {deletingProduct && <DeleteConfirmModal product={deletingProduct} onClose={() => setDeletingProduct(null)} onConfirm={handleDelete} loading={actionLoading} />}
     </div>
   );
 }
