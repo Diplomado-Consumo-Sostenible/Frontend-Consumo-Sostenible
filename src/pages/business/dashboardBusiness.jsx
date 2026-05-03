@@ -1,8 +1,8 @@
-import { AlertCircle, AlertTriangle, Award, BarChart2, Building2, CalendarDays, Camera, CheckCircle2, Clock, Edit, Globe, ImagePlus, LayoutDashboard, Leaf, Lightbulb, Lock, Mail, MapPin, Phone, Tag } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Award, BarChart2, Building2, CalendarDays, Camera, CheckCircle2, Clock, Edit, Globe, ImagePlus, LayoutDashboard, Leaf, Lightbulb, Lock, Mail, MapPin, Phone, Plus, Tag } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getMyBusinesses } from '../../services/business/busienss.service';
 
 const POLL_INTERVAL = 15_000;
@@ -75,6 +75,7 @@ function LoadingState() {
 }
 
 function EmptyState() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col items-center justify-center min-h-[220px] bg-card-bg rounded-2xl shadow p-6 text-center">
       <div className="w-14 h-14 bg-primary-softest rounded-2xl flex items-center justify-center mb-4">
@@ -82,6 +83,13 @@ function EmptyState() {
       </div>
       <h2 className="text-base font-semibold text-body">Aún no tienes un negocio</h2>
       <p className="text-sm text-muted mt-1 max-w-xs">Registra tu negocio para comenzar a gestionarlo desde este panel.</p>
+      <button
+        onClick={() => navigate('/dashboardBusiness/crear-negocio')}
+        className="mt-5 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+        Crear negocio
+      </button>
     </div>
   );
 }

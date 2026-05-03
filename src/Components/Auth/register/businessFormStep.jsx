@@ -52,7 +52,7 @@ export default function BusinessForm({ onNext, onBack }) {
 
   return (
     <div className="flex-1 bg-white/80 backdrop-blur-xl flex flex-col justify-center px-10 py-10 ">
-      <div className="overflow-y-auto pr-2">
+      <div className="overflow-y-auto ">
         <BackButton onBack={onBack} />
         <div className="mb-6 pt-2">
           <h1 className="text-stone-800 text-2xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
