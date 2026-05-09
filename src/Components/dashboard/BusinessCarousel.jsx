@@ -198,6 +198,7 @@ export function HorizontalCarousel({
   autoplay      = false,
   autoplayDelay = 4000,
   onSelect,
+  renderItem,
 }) {
   const trackRef         = useRef(null);
   const isDragging       = useRef(false);
@@ -386,7 +387,7 @@ export function HorizontalCarousel({
             className="shrink-0 w-[80vw] sm:w-[calc(50%-6px)] lg:w-[calc(33.333%-8px)]"
             style={{ scrollSnapAlign: 'start' }}
           >
-            <BusinessCard business={b} delay={i * 55} onSelect={onSelect} />
+            {renderItem ? renderItem(b, i) : <BusinessCard business={b} delay={i * 55} onSelect={onSelect} />}
           </div>
         ))}
       </div>

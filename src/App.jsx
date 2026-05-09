@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/admin_dashboard';
 import AdminBusinesses from './pages/admin/AdminBusinesses';
 import AdminUsers from './pages/admin/AdminUsers';
 import DashboardBusiness from './pages/business/dashboardBusiness';
+import BusinessProfile from './pages/business/BusinessProfile';
 import BusinessCertifications from './pages/business/BusinessCertifications';
 import BusinessProducts from './pages/business/BusinessProducts';
 import BusinessStats from './pages/business/BusinessStats';
@@ -94,6 +95,17 @@ function App() {
             <ProtectedRoute roles={['owner']}>
               <DashboardLayout>
                 <BusinessProducts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboardBusiness/perfil"
+          element={
+            <ProtectedRoute roles={['owner']}>
+              <DashboardLayout>
+                <BusinessProfile />
               </DashboardLayout>
             </ProtectedRoute>
           }
