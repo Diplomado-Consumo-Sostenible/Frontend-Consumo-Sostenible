@@ -8,23 +8,22 @@ import {
   LayoutDashboard,
   MapPin,
   Star,
-  X,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getPublicBusinesses } from '../../services/business/explore.service';
+import { useFollows } from '../../hooks/useFollows';
+import { useToastContext } from '../../context/ToastContext';
 
-function FavoriteCard({ business, onRemove }) {
+function FavoriteCard({ business, onUnfollow }) {
   const hasCerts = business.certifications?.length > 0;
 
   return (
     <div className="relative flex gap-4 p-4 sm:p-5 bg-card-bg rounded-2xl shadow border border-edge hover:border-primary-light hover:shadow-md transition-all">
       <button
-        onClick={() => onRemove(business.id_business)}
-        title="Quitar de favoritos"
+        onClick={() => onUnfollow(business.id_business)}
+        title="Dejar de seguir"
         className="absolute top-3 right-3 p-1 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 transition-colors"
       >
-        <X className="w-4 h-4" />
+        <Heart className="w-4 h-4 fill-red-400 text-red-400 hover:fill-none hover:text-red-500 transition-all" />
       </button>
 
       <div className="w-14 h-14 rounded-xl shrink-0 overflow-hidden bg-primary-softest flex items-center justify-center">
@@ -79,9 +78,9 @@ function EmptyFavorites() {
       <div className="w-16 h-16 bg-primary-softest rounded-2xl flex items-center justify-center mb-4">
         <HeartOff className="w-8 h-8 text-muted" />
       </div>
-      <h2 className="text-base font-semibold text-body">Aún no tienes favoritos</h2>
+      <h2 className="text-base font-semibold text-body">Aún no sigues ningún negocio</h2>
       <p className="text-sm text-muted mt-1.5 max-w-xs leading-relaxed">
-        Explora negocios y toca el corazón para guardarlos aquí.
+        Explora negocios y toca el corazón para seguirlos.
       </p>
       <Link
         to="/dashboard/explorar"
@@ -94,39 +93,21 @@ function EmptyFavorites() {
   );
 }
 
-export default function Favoritos() {
-  const [allBusinesses, setAllBusinesses] = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [favoriteIds, setFavoriteIds]     = useState(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem('cs_favorites') || '[]'));
-    } catch {
-      return new Set();
-    }
-  });
-
-  const fetchBusinesses = useCallback(() => {
-    getPublicBusinesses()
-      .then((data) => setAllBusinesses(Array.isArray(data) ? data : []))
-      .catch(() => setAllBusinesses([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => { fetchBusinesses(); }, [fetchBusinesses]);
-
-  const removeFromFavorites = (id) => {
-    setFavoriteIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      localStorage.setItem('cs_favorites', JSON.stringify([...next]));
-      return next;
-    });
-  };
-
-  const favorites = useMemo(
-    () => allBusinesses.filter((b) => favoriteIds.has(b.id_business)),
-    [allBusinesses, favoriteIds],
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-edge rounded-2xl" />)}
+    </div>
   );
+}
+
+export default function Favoritos() {
+  const { followedBusinesses, loading, toggleFollow } = useFollows();
+  const { error: showError } = useToastContext();
+
+  const handleUnfollow = (id) => {
+    toggleFollow(id, { onError: showError });
+  };
 
   return (
     <div className="px-4 py-5 sm:px-6 sm:py-6 lg:pl-10 lg:pr-8 space-y-6">
@@ -135,37 +116,35 @@ export default function Favoritos() {
           <LayoutDashboard className="w-3.5 h-3.5" />
           <span className="text-body font-medium">Inicio</span>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-body font-medium">Favoritos</span>
+          <span className="text-body font-medium">Siguiendo</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
             <Heart className="w-5 h-5 text-primary-dark" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-semibold text-heading">Mis favoritos</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-heading">Negocios que sigo</h1>
             <p className="text-xs sm:text-sm text-muted mt-0.5">
               {loading
                 ? 'Cargando…'
-                : `${favorites.length} negocio${favorites.length !== 1 ? 's' : ''} guardado${favorites.length !== 1 ? 's' : ''}`}
+                : `${followedBusinesses.length} negocio${followedBusinesses.length !== 1 ? 's' : ''} seguido${followedBusinesses.length !== 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="space-y-4 animate-pulse">
-          {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-edge rounded-2xl" />)}
-        </div>
-      ) : favorites.length === 0 ? (
+        <LoadingSkeleton />
+      ) : followedBusinesses.length === 0 ? (
         <EmptyFavorites />
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {favorites.map((biz) => (
+            {followedBusinesses.map((biz) => (
               <FavoriteCard
                 key={biz.id_business}
                 business={biz}
-                onRemove={removeFromFavorites}
+                onUnfollow={handleUnfollow}
               />
             ))}
           </div>

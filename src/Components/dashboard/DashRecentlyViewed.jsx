@@ -3,10 +3,10 @@ import { forwardRef, useCallback, useState } from 'react';
 import useVisitedBusinesses from '../../hooks/useVisitedBusinesses';
 import { saveVisitedBusiness } from '../../utils/visitedBusinesses';
 import BusinessDetailModal from '../ui/BusinessDetailModal';
-import { ANIM_STYLES, HorizontalCarousel } from './BusinessCarousel';
+import { ANIM_STYLES, BusinessCard, HorizontalCarousel } from './BusinessCarousel';
 
 const DashRecentlyViewed = forwardRef(function DashRecentlyViewed(
-  { businesses = [] },
+  { businesses = [], followedIds, onToggleFollow },
   ref,
 ) {
   const { visited } = useVisitedBusinesses();
@@ -43,6 +43,15 @@ const DashRecentlyViewed = forwardRef(function DashRecentlyViewed(
           emptyMsg="Aún no has visitado ningún negocio"
           autoplay={false}
           onSelect={handleSelect}
+          renderItem={(business, i) => (
+            <BusinessCard
+              business={business}
+              delay={i * 55}
+              onSelect={handleSelect}
+              isFavorite={followedIds?.has(business.id_business) ?? false}
+              onToggleFavorite={onToggleFollow}
+            />
+          )}
         />
       </div>
       {selectedBusiness && (

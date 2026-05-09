@@ -6,7 +6,9 @@ import DashMetricCards from '../Components/dashboard/DashMetricCards';
 import DashRecentlyViewed from '../Components/dashboard/DashRecentlyViewed';
 import DashSearch from '../Components/dashboard/DashSearch';
 import DashSidePanel from '../Components/dashboard/DashSidePanel';
+import { useFollows } from '../hooks/useFollows';
 import useUserProfile from '../hooks/useUserProfile';
+import { useToastContext } from '../context/ToastContext';
 import { getPublicBusinesses } from '../services/business/explore.service';
 
 function LoadingState() {
@@ -15,8 +17,8 @@ function LoadingState() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
           <div className="h-[200px] bg-edge rounded-2xl" />
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-edge rounded-2xl" />)}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => <div key={i} className="h-24 bg-edge rounded-2xl" />)}
           </div>
           <div className="h-28 bg-edge rounded-2xl" />
           <div className="h-56 bg-edge rounded-2xl" />
@@ -55,10 +57,12 @@ function ErrorState({ message, onRetry }) {
 }
 
 export default function Dashboard() {
-  const { profile, loading, error, retry } = useUserProfile();
-  const [businesses, setBusinesses] = useState([]);
-  const [loadingBiz, setLoadingBiz] = useState(true);
-  const recentlyViewedRef = useRef(null);
+  const { profile, loading, error, retry }                            = useUserProfile();
+  const { followedBusinesses, followedIds, loading: loadingFollows, toggleFollow } = useFollows();
+  const { error: showError }                                          = useToastContext();
+  const [businesses, setBusinesses]                                   = useState([]);
+  const [loadingBiz, setLoadingBiz]                                   = useState(true);
+  const recentlyViewedRef                                             = useRef(null);
 
   const scrollToRecentlyViewed = useCallback(() => {
     recentlyViewedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -73,6 +77,10 @@ export default function Dashboard() {
 
   useEffect(() => { fetchBusinesses(); }, [fetchBusinesses]);
 
+  const handleToggleFollow = useCallback((id) => {
+    toggleFollow(id, { onError: showError });
+  }, [toggleFollow, showError]);
+
   if (loading) return <LoadingState />;
   if (error)   return <ErrorState message={error} onRetry={retry} />;
 
@@ -80,14 +88,33 @@ export default function Dashboard() {
     <div className="px-4 pt-8 pb-5 sm:px-6 sm:pt-10 sm:pb-6 lg:pl-10 lg:pr-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
-          <DashMetricCards businesses={businesses} loadingBusinesses={loadingBiz} />
+          <DashMetricCards
+            businesses={businesses}
+            loadingBusinesses={loadingBiz}
+            followCount={followedBusinesses.length}
+            loadingFollows={loadingFollows}
+          />
           <DashHero profile={profile} onViewList={scrollToRecentlyViewed} />
           <DashSearch />
-          <DashFeatured businesses={businesses} loadingBusinesses={loadingBiz} />
-          <DashRecentlyViewed ref={recentlyViewedRef} businesses={businesses} />
+          <DashFeatured
+            businesses={businesses}
+            loadingBusinesses={loadingBiz}
+            followedIds={followedIds}
+            onToggleFollow={handleToggleFollow}
+          />
+          <DashRecentlyViewed
+            ref={recentlyViewedRef}
+            businesses={businesses}
+            followedIds={followedIds}
+            onToggleFollow={handleToggleFollow}
+          />
         </div>
         <div className="lg:col-span-1">
-          <DashSidePanel businesses={businesses} />
+          <DashSidePanel
+            businesses={businesses}
+            followedBusinesses={followedBusinesses}
+            loadingFollows={loadingFollows}
+          />
         </div>
       </div>
     </div>
