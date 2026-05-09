@@ -1,1 +1,1 @@
-export { getBusiness, getMyBusinesses, postBusiness } from './busienss.service';
+export { getBusiness, getMyBusinesses, postBusiness, updateMyBusiness } from './busienss.service';

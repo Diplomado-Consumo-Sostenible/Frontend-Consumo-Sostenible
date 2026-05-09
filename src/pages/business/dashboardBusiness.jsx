@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { Link, useNavigate } from 'react-router-dom';
+import BusinessProductsCarousel from '../../Components/business/BusinessProductsCarousel';
 import { getMyBusinesses } from '../../services/business/busienss.service';
 
 const POLL_INTERVAL = 15_000;
@@ -18,33 +19,21 @@ const DAY_LABELS = {
 };
 
 const STATUS_CONFIG = {
-  Active: { label: 'Aprobado', bg: 'bg-ok-bg   text-ok-text   border-ok-text/30' },
-  Pending: { label: 'Pendiente', bg: 'bg-warn-bg  text-warn-text border-warn-text/30' },
-  Rejected: { label: 'Rechazado', bg: 'bg-red-50   text-red-700   border-red-200' },
+  Active:   { label: 'Aprobado',  bg: 'bg-ok-bg   text-ok-text   border-ok-text/30'  },
+  Pending:  { label: 'Pendiente', bg: 'bg-warn-bg  text-warn-text border-warn-text/30' },
+  Rejected: { label: 'Rechazado', bg: 'bg-red-50   text-red-700   border-red-200'      },
 };
 
 const QUICK_LINKS = [
-  {
-    label: 'Estadísticas',
-    desc: 'Métricas y rendimiento',
-    icon: BarChart2,
-    to: '/dashboardBusiness/estadisticas',
-    color: 'bg-blue-50 text-blue-600',
-  },
-  {
-    label: 'Certificaciones',
-    desc: 'Sellos y certificados',
-    icon: Award,
-    to: '/dashboardBusiness/certificaciones',
-    color: 'bg-violet-50 text-violet-600',
-  },
+  { label: 'Estadísticas',   desc: 'Métricas y rendimiento', icon: BarChart2, to: '/dashboardBusiness/estadisticas',  color: 'bg-blue-50 text-blue-600'     },
+  { label: 'Certificaciones', desc: 'Sellos y certificados', icon: Award,     to: '/dashboardBusiness/certificaciones', color: 'bg-violet-50 text-violet-600' },
 ];
 
 const QUICK_ACTIONS = [
-  { label: 'Editar negocio', icon: Edit, color: 'bg-primary-softest text-primary-dark', to: null },
-  { label: 'Subir fotos', icon: Camera, color: 'bg-blue-50 text-blue-600', to: null },
-  { label: 'Certificaciones', icon: Award, color: 'bg-violet-50 text-violet-600', to: '/dashboardBusiness/certificaciones' },
-  { label: 'Ubicación', icon: MapPin, color: 'bg-primary-softest text-primary-mid', to: null },
+  { label: 'Editar negocio',  icon: Edit,   color: 'bg-primary-softest text-primary-dark', to: null },
+  { label: 'Subir fotos',     icon: Camera, color: 'bg-blue-50 text-blue-600',              to: null },
+  { label: 'Certificaciones', icon: Award,  color: 'bg-violet-50 text-violet-600',          to: '/dashboardBusiness/certificaciones' },
+  { label: 'Ubicación',       icon: MapPin, color: 'bg-primary-softest text-primary-mid',   to: null },
 ];
 
 function LoadingState() {
@@ -107,16 +96,18 @@ function ErrorState({ message }) {
 }
 
 function BusinessCard({ business }) {
-  const statusCfg = STATUS_CONFIG[business.status] ?? STATUS_CONFIG.Pending;
-  const hasSocial = business.instagramUrl || business.facebookUrl || business.xUrl;
+  const statusCfg   = STATUS_CONFIG[business.status] ?? STATUS_CONFIG.Pending;
+  const hasSocial   = business.instagramUrl || business.facebookUrl || business.xUrl;
   const hasSchedule = business.schedule && Object.keys(business.schedule).length > 0;
-  const hasTags = business.tags?.length > 0;
+  const hasTags     = business.tags?.length > 0;
 
   return (
     <div className="relative bg-card-bg rounded-2xl shadow p-5 sm:p-6 space-y-4">
       <div className="absolute top-4 right-4 sm:top-5 sm:right-5 flex items-center gap-1.5 flex-wrap justify-end">
         <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusCfg.bg}`}>{statusCfg.label}</span>
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${business.isActive ? 'bg-ok-bg text-ok-text border-ok-text/30' : 'bg-primary-softest text-muted border-edge'}`}>{business.isActive ? 'Activo' : 'Inactivo'}</span>
+        <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${business.isActive ? 'bg-ok-bg text-ok-text border-ok-text/30' : 'bg-primary-softest text-muted border-edge'}`}>
+          {business.isActive ? 'Activo' : 'Inactivo'}
+        </span>
       </div>
 
       <div className="flex items-center gap-3 pr-36 sm:pr-44">
@@ -129,7 +120,11 @@ function BusinessCard({ business }) {
         )}
         <div>
           <h2 className="text-base font-semibold text-heading leading-tight">{business.businessName}</h2>
-          {business.category?.category && <span className="inline-block text-xs text-muted bg-primary-softest border border-edge rounded-full px-2 py-0.5 mt-1">{business.category.category}</span>}
+          {business.category?.category && (
+            <span className="inline-block text-xs text-muted bg-primary-softest border border-edge rounded-full px-2 py-0.5 mt-1">
+              {business.category.category}
+            </span>
+          )}
         </div>
       </div>
 
@@ -185,31 +180,26 @@ function BusinessCard({ business }) {
         )}
       </div>
 
-      {/* Redes sociales */}
       {hasSocial && (
         <div className="flex items-center gap-4 flex-wrap pt-1">
           {business.instagramUrl && (
             <a href={business.instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-muted hover:text-pink-600 transition-colors">
-              <FaInstagram className="w-3.5 h-3.5" />
-              <span>Instagram</span>
+              <FaInstagram className="w-3.5 h-3.5" /><span>Instagram</span>
             </a>
           )}
           {business.facebookUrl && (
             <a href={business.facebookUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-muted hover:text-blue-600 transition-colors">
-              <FaFacebook className="w-3.5 h-3.5" />
-              <span>Facebook</span>
+              <FaFacebook className="w-3.5 h-3.5" /><span>Facebook</span>
             </a>
           )}
           {business.xUrl && (
             <a href={business.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-muted hover:text-heading transition-colors">
-              <FaXTwitter className="w-3.5 h-3.5" />
-              <span>X</span>
+              <FaXTwitter className="w-3.5 h-3.5" /><span>X</span>
             </a>
           )}
         </div>
       )}
 
-      {/* Horario */}
       <div className="pt-3 border-t border-edge/40 space-y-2">
         <div className="flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5 text-muted" />
@@ -229,16 +219,13 @@ function BusinessCard({ business }) {
         )}
       </div>
 
-      {/* Fecha de registro */}
       {business.createdAt && (
         <div className="flex items-center gap-1.5 pt-3 border-t border-edge/40">
           <CalendarDays className="w-3.5 h-3.5 text-muted" />
           <p className="text-xs text-muted">
             Registrado el{' '}
             {new Date(business.createdAt).toLocaleDateString('es-CO', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
+              day: 'numeric', month: 'long', year: 'numeric',
             })}
           </p>
         </div>
@@ -249,36 +236,33 @@ function BusinessCard({ business }) {
 
 function calcProgress(biz) {
   if (!biz) return { pct: 0, items: [] };
-
   const checks = [
     { label: 'Nombre del negocio', done: !!biz.businessName },
-    { label: 'Descripción', done: !!biz.description },
-    { label: 'Logo', done: !!biz.logo },
-    { label: 'Imágenes', done: !!(biz.images?.length > 0) },
-    { label: 'Dirección', done: !!biz.address },
-    { label: 'Teléfono o email', done: !!(biz.phone || biz.emailBusiness) },
-    { label: 'Horarios', done: !!(biz.schedule && Object.keys(biz.schedule).length > 0) },
-    { label: 'Categoría', done: !!biz.category },
-    { label: 'Etiquetas', done: !!(biz.tags?.length > 0) },
-    { label: 'Sitio web o redes', done: !!(biz.website || biz.instagramUrl || biz.facebookUrl || biz.xUrl) },
+    { label: 'Descripción',        done: !!biz.description },
+    { label: 'Logo',               done: !!biz.logo },
+    { label: 'Imágenes',           done: !!(biz.images?.length > 0) },
+    { label: 'Dirección',          done: !!biz.address },
+    { label: 'Teléfono o email',   done: !!(biz.phone || biz.emailBusiness) },
+    { label: 'Horarios',           done: !!(biz.schedule && Object.keys(biz.schedule).length > 0) },
+    { label: 'Categoría',          done: !!biz.category },
+    { label: 'Etiquetas',          done: !!(biz.tags?.length > 0) },
+    { label: 'Sitio web o redes',  done: !!(biz.website || biz.instagramUrl || biz.facebookUrl || biz.xUrl) },
   ];
-
   const done = checks.filter((c) => c.done).length;
   return { pct: Math.round((done / checks.length) * 100), items: checks };
 }
 
 function ProfileStatus({ business, isBlocked }) {
   const { pct, items } = calcProgress(business);
-
   const barColor = pct >= 80 ? 'bg-primary-mid' : pct >= 50 ? 'bg-earth-mid' : 'bg-red-400';
   const pctColor = pct >= 80 ? 'text-primary-dark' : pct >= 50 ? 'text-earth-mid' : 'text-red-500';
-
-  const blockedMsg = business?.status === 'Pending' ? 'Tu negocio está pendiente de aprobación.' : 'Tu negocio fue rechazado. Revisa el motivo e intenta nuevamente.';
+  const blockedMsg = business?.status === 'Pending'
+    ? 'Tu negocio está pendiente de aprobación.'
+    : 'Tu negocio fue rechazado. Revisa el motivo e intenta nuevamente.';
 
   return (
     <div className="bg-card-bg rounded-2xl shadow p-5 sm:p-6 space-y-4">
       <h3 className="text-sm font-semibold text-heading">Estado de negocio</h3>
-
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted">Información completada</span>
@@ -288,16 +272,16 @@ function ProfileStatus({ business, isBlocked }) {
           <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${pct}%` }} />
         </div>
       </div>
-
       <ul className="space-y-2">
         {items.map((v) => (
           <li key={v.label} className="flex items-center gap-2 text-xs">
-            {v.done ? <CheckCircle2 className="w-4 h-4 text-primary-dark shrink-0" /> : <AlertCircle className="w-4 h-4 text-muted shrink-0" />}
+            {v.done
+              ? <CheckCircle2 className="w-4 h-4 text-primary-dark shrink-0" />
+              : <AlertCircle className="w-4 h-4 text-muted shrink-0" />}
             <span className={v.done ? 'text-body' : 'text-muted'}>{v.label}</span>
           </li>
         ))}
       </ul>
-
       {isBlocked ? (
         <div className="space-y-2">
           <div className="flex items-start gap-2 px-3 py-2.5 bg-warn-bg border border-warn-text/20 rounded-xl">
@@ -309,15 +293,20 @@ function ProfileStatus({ business, isBlocked }) {
           </button>
         </div>
       ) : (
-        <button className="w-full text-xs font-medium py-2 px-4 bg-primary-dark text-on-dark-active rounded-xl hover:bg-primary-darkest transition-colors">Completar negocio</button>
+        <button className="w-full text-xs font-medium py-2 px-4 bg-primary-dark text-on-dark-active rounded-xl hover:bg-primary-darkest transition-colors">
+          Completar negocio
+        </button>
       )}
     </div>
   );
 }
 
 function Recommendations() {
-  const tips = ['Agrega imágenes de calidad a tu galería', 'Completa la descripción de tu negocio', 'Añade categorías y etiquetas relevantes'];
-
+  const tips = [
+    'Agrega imágenes de calidad a tu galería',
+    'Completa la descripción de tu negocio',
+    'Añade categorías y etiquetas relevantes',
+  ];
   return (
     <div className="bg-card-bg rounded-2xl shadow p-5 sm:p-6 space-y-4">
       <div className="flex items-center gap-2">
@@ -327,7 +316,9 @@ function Recommendations() {
       <ul className="space-y-2.5">
         {tips.map((tip, i) => (
           <li key={i} className="flex items-start gap-2.5 text-xs text-body">
-            <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-primary-softest text-primary-dark flex items-center justify-center font-semibold text-[10px]">{i + 1}</span>
+            <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-primary-softest text-primary-dark flex items-center justify-center font-semibold text-[10px]">
+              {i + 1}
+            </span>
             {tip}
           </li>
         ))}
@@ -338,7 +329,6 @@ function Recommendations() {
 
 function CertBadge() {
   const practices = ['Uso de materiales reciclados', 'Reducción de emisiones CO₂', 'Comercio local y justo'];
-
   return (
     <div className="bg-card-bg rounded-2xl shadow p-5 sm:p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -378,13 +368,14 @@ function Gallery({ isBlocked }) {
           </div>
         )}
       </div>
-
       {isBlocked ? (
         <div className="flex flex-col items-center justify-center py-6 gap-2">
           <div className="w-10 h-10 rounded-xl bg-edge flex items-center justify-center">
             <Lock className="w-5 h-5 text-muted" />
           </div>
-          <p className="text-xs text-muted text-center max-w-xs">La galería estará disponible una vez que tu negocio sea aprobado.</p>
+          <p className="text-xs text-muted text-center max-w-xs">
+            La galería estará disponible una vez que tu negocio sea aprobado.
+          </p>
         </div>
       ) : (
         <>
@@ -412,7 +403,6 @@ function QuickActions({ isBlocked }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {QUICK_ACTIONS.map((action) => {
           const blocked = isBlocked && action.label === 'Subir fotos';
-
           const inner = blocked ? (
             <div className="relative flex flex-col items-center gap-2 p-3 rounded-xl border border-edge text-center w-full opacity-50 cursor-not-allowed">
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${action.color}`}>
@@ -432,13 +422,9 @@ function QuickActions({ isBlocked }) {
 
           if (blocked) return <div key={action.label}>{inner}</div>;
           return action.to ? (
-            <Link key={action.label} to={action.to}>
-              {inner}
-            </Link>
+            <Link key={action.label} to={action.to}>{inner}</Link>
           ) : (
-            <button key={action.label} type="button" className="w-full">
-              {inner}
-            </button>
+            <button key={action.label} type="button" className="w-full">{inner}</button>
           );
         })}
       </div>
@@ -448,9 +434,9 @@ function QuickActions({ isBlocked }) {
 
 export default function DashboardBusiness() {
   const [businesses, setBusinesses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const mountedRef = useRef(true);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const mountedRef                  = useRef(true);
 
   const fetchBusinesses = (isInitial = false) => {
     getMyBusinesses()
@@ -479,9 +465,9 @@ export default function DashboardBusiness() {
   }, []);
 
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  if (error)   return <ErrorState message={error} />;
 
-  const biz = businesses[0] ?? null;
+  const biz       = businesses[0] ?? null;
   const isBlocked = biz?.status === 'Pending' || biz?.status === 'Rejected';
 
   return (
@@ -523,13 +509,21 @@ export default function DashboardBusiness() {
 
           <div className="space-y-3">
             <p className="text-xs font-semibold text-muted uppercase tracking-wider">Resumen del negocio</p>
-            {businesses.length === 0 ? <EmptyState /> : businesses.map((biz) => <BusinessCard key={biz.id_business} business={biz} />)}
+            {businesses.length === 0
+              ? <EmptyState />
+              : businesses.map((b) => <BusinessCard key={b.id_business} business={b} />)
+            }
           </div>
+
+          {biz && !isBlocked && (
+            <BusinessProductsCarousel businessId={biz.id_business} />
+          )}
 
           <Gallery isBlocked={isBlocked} />
 
           <QuickActions isBlocked={isBlocked} />
         </div>
+
         <div className="space-y-6">
           <ProfileStatus business={biz} isBlocked={isBlocked} />
           <Recommendations />

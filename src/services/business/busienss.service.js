@@ -30,3 +30,12 @@ export const postBusiness = async (businessData, token) => {
     throw error.response?.data || { message: 'Error al registrar el negocio' };
   }
 };
+
+export const updateMyBusiness = async (id, data) => {
+  try {
+    const response = await API.patch(`/business/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al actualizar el negocio' };
+  }
+};
