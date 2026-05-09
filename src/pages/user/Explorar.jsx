@@ -18,12 +18,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import BusinessDetailModal from '../../Components/ui/BusinessDetailModal';
 import MapView from '../../Components/map/MapView';
+import { useFollows } from '../../hooks/useFollows';
+import { useToastContext } from '../../context/ToastContext';
 import { getPublicBusinesses } from '../../services/business/explore.service';
 import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
 
-/* ─────────────────────────────────────────────────────────────────────
-   CONSTANTES
-───────────────────────────────────────────────────────────────────── */
 const CATEGORY_COLORS = [
   'bg-green-50  text-green-700  border-green-200',
   'bg-violet-50 text-violet-700 border-violet-200',
@@ -44,9 +43,6 @@ const FILTER_OPTIONS = [
 
 const tagName = (t) => t.name ?? t.tagName ?? t.tag ?? '';
 
-/* ─────────────────────────────────────────────────────────────────────
-   HELPERS UI
-───────────────────────────────────────────────────────────────────── */
 function LoadingSkeleton() {
   return (
     <div className="p-4 space-y-3 animate-pulse">
@@ -106,9 +102,6 @@ function EmptyResults({ hasSearch, onClear }) {
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   BUSINESS CARD
-───────────────────────────────────────────────────────────────────── */
 function BusinessCard({ business, isFavorite, onToggleFavorite, isSelected, onSelect }) {
   const hasCerts = business.certifications?.length > 0;
 
@@ -137,7 +130,7 @@ function BusinessCard({ business, isFavorite, onToggleFavorite, isSelected, onSe
           <button
             onClick={(e) => { e.stopPropagation(); onToggleFavorite(business.id_business); }}
             className="shrink-0 p-0.5 rounded-lg hover:bg-red-50 transition-colors"
-            aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            aria-label={isFavorite ? 'Dejar de seguir' : 'Seguir negocio'}
           >
             <Heart
               className={`w-4 h-4 transition-colors ${
@@ -172,10 +165,7 @@ function BusinessCard({ business, isFavorite, onToggleFavorite, isSelected, onSe
               <span className="truncate max-w-[160px]">{business.address}</span>
             </span>
           )}
-          <span
-            className="flex items-center gap-1 ml-auto shrink-0 opacity-50"
-            title="Valoración — Próximamente"
-          >
+          <span className="flex items-center gap-1 ml-auto shrink-0 opacity-50" title="Valoración — Próximamente">
             <Star className="w-3 h-3" />
             <span>—</span>
           </span>
@@ -184,10 +174,7 @@ function BusinessCard({ business, isFavorite, onToggleFavorite, isSelected, onSe
         {business.tags?.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap pt-0.5">
             {business.tags.slice(0, 3).map((t) => (
-              <span
-                key={t.id_tags}
-                className="text-[10px] px-1.5 py-0.5 bg-edge/60 rounded-full text-muted"
-              >
+              <span key={t.id_tags} className="text-[10px] px-1.5 py-0.5 bg-edge/60 rounded-full text-muted">
                 {tagName(t)}
               </span>
             ))}
@@ -198,36 +185,26 @@ function BusinessCard({ business, isFavorite, onToggleFavorite, isSelected, onSe
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   EXPLORAR  (componente principal)
-───────────────────────────────────────────────────────────────────── */
 export default function Explorar() {
-  /* ── URL como fuente de verdad ──────────────────────────────────── */
   const [searchParams, setSearchParams] = useSearchParams();
   const urlQ        = searchParams.get('q')        ?? '';
   const urlCategory = searchParams.get('category') ?? '';
 
-  /* ── Estado local ───────────────────────────────────────────────── */
   const [businesses,       setBusinesses]       = useState([]);
   const [categories,       setCategories]       = useState([]);
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [loading,          setLoading]          = useState(true);
   const [error,            setError]            = useState(null);
-  const [fetchKey,         setFetchKey]         = useState(0);   // para reintentar
+  const [fetchKey,         setFetchKey]         = useState(0);
   const [activeFilter,     setActiveFilter]     = useState('all');
   const [selectedId,       setSelectedId]       = useState(null);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [showMap,          setShowMap]          = useState(false);
   const [searchInput,      setSearchInput]      = useState(urlQ);
-  const [favorites,        setFavorites]        = useState(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem('cs_favorites') || '[]'));
-    } catch {
-      return new Set();
-    }
-  });
 
-  /* ── Carga de categorías (una sola vez) ─────────────────────────── */
+  const { followedIds, toggleFollow } = useFollows();
+  const { error: showError }          = useToastContext();
+
   useEffect(() => {
     getTiposNegocio()
       .then((d) => setCategories(Array.isArray(d) ? d : []))
@@ -235,72 +212,40 @@ export default function Explorar() {
       .finally(() => setCategoriesLoaded(true));
   }, []);
 
-  /* ── Fetch de negocios desde el backend ─────────────────────────── */
-  /* Se dispara cuando cambian los params de URL o cuando llegan las
-     categorías (para resolver nombre → id) o al reintentar.         */
   useEffect(() => {
-    if (!categoriesLoaded) return;   // esperar categorías para resolver id
-
+    if (!categoriesLoaded) return;
     setLoading(true);
     setError(null);
 
-    // Resolver nombre de categoría → id para el backend
     const categoryId = urlCategory
       ? categories.find((c) => c.category === urlCategory)?.id_category
       : undefined;
 
-    // Solo manda id_category — el backend rechaza cualquier param desconocido.
-    // El filtro de texto (urlQ) se aplica en cliente sobre los resultados.
     getPublicBusinesses({
       ...(categoryId !== undefined && { id_category: categoryId }),
     })
       .then((d) => setBusinesses(Array.isArray(d) ? d : []))
       .catch((err) => setError(err?.message || 'No se pudo cargar la información'))
       .finally(() => setLoading(false));
-  }, [urlCategory, categoriesLoaded, fetchKey]);  // urlQ no dispara refetch (filtro cliente)
+  }, [urlCategory, categoriesLoaded, fetchKey]);
 
-  /* ── Sincronizar input con URL (botón atrás / navegación externa) ─ */
-  useEffect(() => {
-    setSearchInput(urlQ);
-  }, [urlQ]);
+  useEffect(() => { setSearchInput(urlQ); }, [urlQ]);
 
-  /* ── Helpers de URL ─────────────────────────────────────────────── */
   const updateParams = (patch) => {
     const next = new URLSearchParams(searchParams);
     Object.entries(patch).forEach(([k, v]) => {
-      if (v) next.set(k, v);
-      else   next.delete(k);
+      if (v) next.set(k, v); else next.delete(k);
     });
     setSearchParams(next, { replace: true });
   };
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    updateParams({ q: searchInput.trim() });
-  };
+  const handleSearchSubmit  = (e) => { e.preventDefault(); updateParams({ q: searchInput.trim() }); };
+  const handleSearchClear   = () => { setSearchInput(''); updateParams({ q: '' }); };
+  const handleCategoryClick = (name) => updateParams({ category: name });
+  const handleClearAll      = () => { setSearchInput(''); setSearchParams({}, { replace: true }); };
 
-  const handleSearchClear = () => {
-    setSearchInput('');
-    updateParams({ q: '' });
-  };
-
-  const handleCategoryClick = (categoryName) => {
-    updateParams({ category: categoryName });
-  };
-
-  const handleClearAll = () => {
-    setSearchInput('');
-    setSearchParams({}, { replace: true });
-  };
-
-  /* ── Favoritos ──────────────────────────────────────────────────── */
-  const toggleFavorite = (id) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      localStorage.setItem('cs_favorites', JSON.stringify([...next]));
-      return next;
-    });
+  const handleToggleFollow = (id) => {
+    toggleFollow(id, { onError: showError });
   };
 
   const handleSelectBusiness = (business) => {
@@ -308,11 +253,8 @@ export default function Explorar() {
     setSelectedBusiness(business);
   };
 
-  /* ── Filtros cliente: texto (urlQ) + certificados ──────────────── */
   const filtered = useMemo(() => {
     let list = businesses;
-
-    // Texto: nombre, descripción o categoría (cliente, backend no lo soporta)
     if (urlQ.trim()) {
       const q = urlQ.trim().toLowerCase();
       list = list.filter(
@@ -322,11 +264,7 @@ export default function Explorar() {
           b.category?.category?.toLowerCase().includes(q),
       );
     }
-
-    // Certificados
-    if (activeFilter === 'certified')
-      list = list.filter((b) => b.certifications?.length > 0);
-
+    if (activeFilter === 'certified') list = list.filter((b) => b.certifications?.length > 0);
     return list;
   }, [businesses, urlQ, activeFilter]);
 
@@ -337,24 +275,14 @@ export default function Explorar() {
 
   const hasActiveSearch = !!(urlQ || urlCategory);
 
-  /* ─────────────────────────────────────────────────────────────────
-     RENDER
-  ──────────────────────────────────────────────────────────────────── */
   return (
     <>
       {selectedBusiness && (
-        <BusinessDetailModal
-          business={selectedBusiness}
-          onClose={() => setSelectedBusiness(null)}
-        />
+        <BusinessDetailModal business={selectedBusiness} onClose={() => setSelectedBusiness(null)} />
       )}
 
       <div className="flex flex-col h-screen overflow-hidden bg-app-bg">
-
-        {/* ── Cabecera fija ──────────────────────────────────────── */}
         <div className="shrink-0 px-4 py-3 sm:px-6 bg-card-bg border-b border-edge space-y-3">
-
-          {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 text-xs text-muted">
             <LayoutDashboard className="w-3.5 h-3.5" />
             <span className="text-body font-medium">Inicio</span>
@@ -362,7 +290,6 @@ export default function Explorar() {
             <span className="text-body font-medium">Explorar</span>
           </div>
 
-          {/* Título + toggle mapa */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
@@ -378,7 +305,6 @@ export default function Explorar() {
                 </p>
               </div>
             </div>
-
             <button
               onClick={() => setShowMap((v) => !v)}
               className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-edge text-xs font-medium text-body hover:border-primary-light transition-colors"
@@ -388,7 +314,6 @@ export default function Explorar() {
             </button>
           </div>
 
-          {/* Barra de búsqueda — actualiza URL al hacer submit */}
           <form onSubmit={handleSearchSubmit} className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
             <input
@@ -399,67 +324,43 @@ export default function Explorar() {
               className="w-full pl-9 pr-9 py-2 text-sm border border-edge rounded-xl bg-app-bg text-body placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all"
             />
             {(searchInput || urlQ) && (
-              <button
-                type="button"
-                onClick={handleSearchClear}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body transition-colors"
-              >
+              <button type="button" onClick={handleSearchClear} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body transition-colors">
                 <X className="w-4 h-4" />
               </button>
             )}
           </form>
 
-          {/* Filtros activos (pills desde URL) */}
           {hasActiveSearch && (
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[10px] text-muted shrink-0">Filtros activos:</span>
               {urlCategory && (
-                <button
-                  onClick={() => handleCategoryClick('')}
-                  className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary-softest border border-primary-light text-primary-dark font-medium"
-                >
-                  {urlCategory}
-                  <X className="w-3 h-3" />
+                <button onClick={() => handleCategoryClick('')} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary-softest border border-primary-light text-primary-dark font-medium">
+                  {urlCategory}<X className="w-3 h-3" />
                 </button>
               )}
               {urlQ && (
-                <button
-                  onClick={handleSearchClear}
-                  className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary-softest border border-primary-light text-primary-dark font-medium"
-                >
-                  &ldquo;{urlQ}&rdquo;
-                  <X className="w-3 h-3" />
+                <button onClick={handleSearchClear} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-primary-softest border border-primary-light text-primary-dark font-medium">
+                  &ldquo;{urlQ}&rdquo;<X className="w-3 h-3" />
                 </button>
               )}
-              <button
-                onClick={handleClearAll}
-                className="text-[10px] text-muted hover:text-body underline underline-offset-2 transition-colors ml-1"
-              >
+              <button onClick={handleClearAll} className="text-[10px] text-muted hover:text-body underline underline-offset-2 transition-colors ml-1">
                 Limpiar todo
               </button>
             </div>
           )}
 
-          {/* Filtros rápidos (Todos / Certificados / ...) */}
           <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
             <SlidersHorizontal className="w-3.5 h-3.5 text-muted shrink-0" />
             {FILTER_OPTIONS.map((opt) => {
               const count    = filterCounts[opt.id];
               const isActive = activeFilter === opt.id;
-
               if (opt.soon) {
                 return (
-                  <div
-                    key={opt.id}
-                    title="Próximamente"
-                    className="flex items-center gap-1 shrink-0 px-3 py-1 rounded-full border border-edge text-xs text-muted opacity-50 cursor-not-allowed select-none"
-                  >
-                    {opt.label}
-                    <span className="text-[10px] italic ml-0.5">· Próxim.</span>
+                  <div key={opt.id} title="Próximamente" className="flex items-center gap-1 shrink-0 px-3 py-1 rounded-full border border-edge text-xs text-muted opacity-50 cursor-not-allowed select-none">
+                    {opt.label}<span className="text-[10px] italic ml-0.5">· Próxim.</span>
                   </div>
                 );
               }
-
               return (
                 <button
                   key={opt.id}
@@ -472,9 +373,7 @@ export default function Explorar() {
                 >
                   {opt.label}
                   {count !== undefined && (
-                    <span className={`font-bold ${isActive ? 'text-on-dark-active' : 'text-primary-dark'}`}>
-                      {count}
-                    </span>
+                    <span className={`font-bold ${isActive ? 'text-on-dark-active' : 'text-primary-dark'}`}>{count}</span>
                   )}
                 </button>
               );
@@ -482,10 +381,7 @@ export default function Explorar() {
           </div>
         </div>
 
-        {/* ── Cuerpo ─────────────────────────────────────────────── */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-
-          {/* Lista */}
           <div className={`flex-1 flex flex-col overflow-hidden ${showMap ? 'hidden lg:flex' : 'flex'}`}>
             {loading ? (
               <LoadingSkeleton />
@@ -499,24 +395,19 @@ export default function Explorar() {
                   <BusinessCard
                     key={biz.id_business}
                     business={biz}
-                    isFavorite={favorites.has(biz.id_business)}
-                    onToggleFavorite={toggleFavorite}
+                    isFavorite={followedIds.has(biz.id_business)}
+                    onToggleFavorite={handleToggleFollow}
                     isSelected={selectedId === biz.id_business}
                     onSelect={handleSelectBusiness}
                   />
                 ))}
 
-                {/* Chips de categoría — visibles solo cuando no hay filtros activos */}
                 {!hasActiveSearch && activeFilter === 'all' && categories.length > 0 && (
                   <div className="pt-2">
-                    <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 px-0.5">
-                      Filtrar por categoría
-                    </p>
+                    <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 px-0.5">Filtrar por categoría</p>
                     <div className="flex flex-wrap gap-2">
                       {categories.map((cat, i) => {
-                        const count = businesses.filter(
-                          (b) => b.category?.id_category === cat.id_category,
-                        ).length;
+                        const count = businesses.filter((b) => b.category?.id_category === cat.id_category).length;
                         return (
                           <button
                             key={cat.id_category}
@@ -535,15 +426,7 @@ export default function Explorar() {
             )}
           </div>
 
-          {/* Mapa */}
-          <div
-            className={`
-              border-l border-edge bg-app-bg
-              ${showMap ? 'flex flex-1' : 'hidden lg:flex'}
-              lg:w-[260px] xl:w-[300px] lg:flex-none
-              p-3
-            `}
-          >
+          <div className={`border-l border-edge bg-app-bg ${showMap ? 'flex flex-1' : 'hidden lg:flex'} lg:w-[260px] xl:w-[300px] lg:flex-none p-3`}>
             <MapView
               businesses={filtered}
               selectedId={selectedId}

@@ -4,16 +4,21 @@ import {
   CalendarDays,
   Clock,
   Globe,
+  Loader2,
   Mail,
   MapPin,
   Phone,
   Star,
   Tag,
+  UserCheck,
+  UserPlus,
   X,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
+import { useToastContext } from '../../context/ToastContext';
+import useFollow from '../../hooks/useFollow';
 
 const DAY_LABELS = {
   monday:    'Lunes',
@@ -28,6 +33,31 @@ const DAY_LABELS = {
 const tagName = (t) => t.name ?? t.tagName ?? t.tag ?? '';
 
 export default function BusinessDetailModal({ business, onClose }) {
+  const { success, error: toastError } = useToastContext();
+  const { isFollowing, toggle, loading, initializing, isAuthenticated } =
+    useFollow(business.id_business);
+
+  const handleFollow = async () => {
+    if (!isAuthenticated) {
+      toastError('Inicia sesión para seguir negocios');
+      return;
+    }
+    try {
+      const result = await toggle();
+      if (result) {
+        result.nowFollowing
+          ? success(`¡Ahora sigues a ${business.businessName}!`)
+          : success(`Dejaste de seguir a ${business.businessName}`);
+      }
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 401) toastError('Sesión expirada. Inicia sesión de nuevo');
+      else if (status === 409) toastError('Ya sigues a este negocio');
+      else if (status === 404) toastError('Negocio no disponible');
+      else toastError('No se pudo completar la acción');
+    }
+  };
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
@@ -238,6 +268,33 @@ export default function BusinessDetailModal({ business, onClose }) {
               Valoraciones disponibles próximamente
             </p>
           </div>
+        </div>
+
+        {/* Footer: botón Seguir */}
+        <div className="px-5 py-4 border-t border-edge/40 shrink-0">
+          <button
+            onClick={handleFollow}
+            disabled={initializing || loading}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
+              isFollowing
+                ? 'bg-primary-softest text-primary-dark border border-edge hover:bg-primary-light'
+                : 'bg-primary-dark text-on-dark-active hover:bg-primary-darkest'
+            }`}
+          >
+            {initializing || loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isFollowing ? (
+              <>
+                <UserCheck className="w-4 h-4" />
+                Siguiendo
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-4 h-4" />
+                Seguir negocio
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

@@ -39,56 +39,36 @@ const TAG_COLORS = [
   'bg-violet-100 text-violet-700 border-violet-200',
 ];
 
-function seedGradient(id) {
-  return CAT_GRADIENTS[(id ?? 0) % CAT_GRADIENTS.length];
-}
-function seedRating(id) {
-  return (3.8 + (((id ?? 1) * 97 + 41) % 13) * 0.1).toFixed(1);
-}
-function seedDistance(id) {
-  return ((((id ?? 1) * 137 + 23) % 47) / 10 + 0.3).toFixed(1);
-}
+function seedGradient(id) { return CAT_GRADIENTS[(id ?? 0) % CAT_GRADIENTS.length]; }
+function seedRating(id)   { return (3.8 + (((id ?? 1) * 97 + 41) % 13) * 0.1).toFixed(1); }
+function seedDistance(id) { return ((((id ?? 1) * 137 + 23) % 47) / 10 + 0.3).toFixed(1); }
 
-export function BusinessCard({ business, delay = 0, onSelect }) {
-  const name     = business.businessName ?? business.nombre     ?? 'Sin nombre';
+export function BusinessCard({
+  business,
+  delay = 0,
+  onSelect,
+  isFavorite = false,
+  onToggleFavorite,
+}) {
+  const name     = business.businessName ?? business.nombre      ?? 'Sin nombre';
   const category = business.category?.category ?? business.tipo_negocio ?? null;
-  const address  = business.address ?? business.direccion       ?? null;
-  const logo     = business.logo                                ?? null;
-  const tags     = (business.tags   ?? []).slice(0, 3);
+  const address  = business.address ?? business.direccion        ?? null;
+  const logo     = business.logo                                 ?? null;
+  const tags     = (business.tags ?? []).slice(0, 3);
   const hasCert  = (business.certifications ?? []).length > 0;
   const gradient = seedGradient(business.id_business);
   const rating   = seedRating(business.id_business);
   const distance = seedDistance(business.id_business);
 
   const [imgError, setImgError] = useState(false);
-  const [fav, setFav] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cs_favorites') || '[]')
-        .includes(business.id_business);
-    } catch {
-      return false;
-    }
-  });
 
-  const toggleFav = useCallback(
+  const handleToggle = useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
-      setFav((prev) => {
-        const next = !prev;
-        try {
-          const saved   = JSON.parse(localStorage.getItem('cs_favorites') || '[]');
-          const updated = next
-            ? [...new Set([...saved, business.id_business])]
-            : saved.filter((id) => id !== business.id_business);
-          localStorage.setItem('cs_favorites', JSON.stringify(updated));
-        } catch {
-          // TODO: manejar error
-          }
-        return next;
-      });
+      onToggleFavorite?.(business.id_business);
     },
-    [business.id_business],
+    [business.id_business, onToggleFavorite],
   );
 
   return (
@@ -96,8 +76,8 @@ export function BusinessCard({ business, delay = 0, onSelect }) {
       role="button"
       tabIndex={0}
       draggable={false}
-      onClick={() => onSelect(business)}
-      onKeyDown={(e) => e.key === 'Enter' && onSelect(business)}
+      onClick={() => onSelect?.(business)}
+      onKeyDown={(e) => e.key === 'Enter' && onSelect?.(business)}
       className="df-card group flex flex-col rounded-2xl border border-edge bg-card-bg overflow-hidden h-full transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-black/8 hover:border-primary-light cursor-pointer"
       style={{ animationDelay: `${delay}ms` }}
     >
@@ -119,18 +99,20 @@ export function BusinessCard({ business, delay = 0, onSelect }) {
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
-        <button
-          type="button"
-          onClick={toggleFav}
-          aria-label={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-          className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full flex items-center justify-center bg-black/20 backdrop-blur-sm border border-white/25 transition-all duration-200 hover:bg-black/40 hover:scale-110 active:scale-95"
-        >
-          <Heart
-            className={`w-3.5 h-3.5 transition-all duration-200 ${
-              fav ? 'fill-red-400 text-red-400' : 'text-white'
-            }`}
-          />
-        </button>
+        {onToggleFavorite && (
+          <button
+            type="button"
+            onClick={handleToggle}
+            aria-label={isFavorite ? 'Dejar de seguir' : 'Seguir negocio'}
+            className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full flex items-center justify-center bg-black/20 backdrop-blur-sm border border-white/25 transition-all duration-200 hover:bg-black/40 hover:scale-110 active:scale-95"
+          >
+            <Heart
+              className={`w-3.5 h-3.5 transition-all duration-200 ${
+                isFavorite ? 'fill-red-400 text-red-400' : 'text-white'
+              }`}
+            />
+          </button>
+        )}
 
         {hasCert && (
           <span className="absolute top-2.5 left-2.5 flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/80 backdrop-blur-sm text-white">
@@ -172,9 +154,7 @@ export function BusinessCard({ business, delay = 0, onSelect }) {
             {tags.map((t, i) => (
               <span
                 key={t.id_tag ?? t.tag ?? i}
-                className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full border ${
-                  TAG_COLORS[i % TAG_COLORS.length]
-                }`}
+                className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full border ${TAG_COLORS[i % TAG_COLORS.length]}`}
               >
                 {t.tag ?? t}
               </span>

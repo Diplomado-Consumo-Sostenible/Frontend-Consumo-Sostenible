@@ -2,7 +2,7 @@ import { Store } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { saveVisitedBusiness } from '../../utils/visitedBusinesses';
 import BusinessDetailModal from '../ui/BusinessDetailModal';
-import { ANIM_STYLES, HorizontalCarousel } from './BusinessCarousel';
+import { ANIM_STYLES, BusinessCard, HorizontalCarousel } from './BusinessCarousel';
 
 function LoadingSkeleton() {
   return (
@@ -13,22 +13,17 @@ function LoadingSkeleton() {
       </div>
       <div className="flex gap-3">
         {[1, 2, 3].map((j) => (
-          <div
-            key={j}
-            className="shrink-0 w-[80vw] sm:w-[calc(50%-6px)] lg:w-[calc(33.333%-8px)] h-56 bg-edge rounded-2xl"
-          />
+          <div key={j} className="shrink-0 w-[80vw] sm:w-[calc(50%-6px)] lg:w-[calc(33.333%-8px)] h-56 bg-edge rounded-2xl" />
         ))}
       </div>
       <div className="flex justify-center gap-1.5">
-        {[1, 2, 3, 4].map((j) => (
-          <div key={j} className="h-1.5 w-1.5 rounded-full bg-edge" />
-        ))}
+        {[1, 2, 3, 4].map((j) => <div key={j} className="h-1.5 w-1.5 rounded-full bg-edge" />)}
       </div>
     </div>
   );
 }
 
-export default function DashFeatured({ businesses, loadingBusinesses }) {
+export default function DashFeatured({ businesses, loadingBusinesses, followedIds, onToggleFollow }) {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
 
   const handleSelect = useCallback((business) => {
@@ -51,6 +46,15 @@ export default function DashFeatured({ businesses, loadingBusinesses }) {
         autoplay
         autoplayDelay={4000}
         onSelect={handleSelect}
+        renderItem={(business, i) => (
+          <BusinessCard
+            business={business}
+            delay={i * 55}
+            onSelect={handleSelect}
+            isFavorite={followedIds?.has(business.id_business) ?? false}
+            onToggleFavorite={onToggleFollow}
+          />
+        )}
       />
       {selectedBusiness && (
         <BusinessDetailModal
