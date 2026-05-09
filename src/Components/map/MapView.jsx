@@ -66,13 +66,12 @@
  *      });
  * ═══════════════════════════════════════════════════════════
  *
- * Props (interfaz lista para uso futuro):
- * @param {Array}    businesses  - Negocios con { id_business, businessName, address, lat?, lng?, certifications? }
- * @param {string}   selectedId  - id_business del negocio seleccionado/resaltado
- * @param {Function} onSelect    - Callback(id_business) al hacer clic en un pin
- * @param {string}   className   - Clases CSS adicionales
- * @param {boolean}  compact     - Modo compacto para sidebar/preview
- * @param {boolean}  showLegend  - Mostrar leyenda de colores de pines
+ * @param {Array}    businesses   
+ * @param {string}   selectedId
+ * @param {Function} onSelect    
+ * @param {string}   className   
+ * @param {boolean}  compact    
+ * @param {boolean}  showLegend   
  */
 
 import { Map, MapPin } from 'lucide-react';
