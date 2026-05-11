@@ -2,8 +2,10 @@ import { Award, LayoutDashboard, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CertCard from '../../Components/business/CertCard';
+import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
 import ImageUploader from '../../Components/ui/ImageUploader';
 import { useToastContext } from '../../context/ToastContext';
+import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
 import { createCertification, deleteCertification, getMyCertifications } from '../../services/certifications/certifications.service';
 import { uploadGeneralImage } from '../../services/upload/upload.service';
 
@@ -225,7 +227,10 @@ function EmptyCertifications({ onAdd }) {
 }
 
 export default function BusinessCertifications() {
+  const { isRejected, isPending, rejectionReason, status } = useOwnerBusinessStatus();
   const { success: showSuccess, error: showError } = useToastContext();
+
+  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
 
   const [certs, setCerts]                 = useState([]);
   const [pageLoading, setPageLoading]     = useState(true);
