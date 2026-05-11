@@ -7,6 +7,7 @@ import {
   HelpCircle,
   LayoutDashboard,
   Leaf,
+  Lock,
   Map as MapIcon,
   Package,
   Store,
@@ -16,6 +17,7 @@ import {
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getPublicBusinesses } from '../../services/business/explore.service';
+import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
 import { decodeToken } from '../../utils/jwt.utils';
 import { getToken } from '../../utils/storage';
 
@@ -43,11 +45,11 @@ const NAV_CONFIG = {
   },
   owner: {
     menu: [
-      { label: 'Dashboard',       icon: LayoutDashboard, to: '/dashboardBusiness'                  },
-      { label: 'Perfil de Negocio', icon: Store,            to: '/dashboardBusiness/perfil' },
-      { label: 'Productos',       icon: Package,          to: '/dashboardBusiness/productos'       },
-      { label: 'Estadísticas',    icon: BarChart2,        to: '/dashboardBusiness/estadisticas'    },
-      { label: 'Certificaciones', icon: Award,            to: '/dashboardBusiness/certificaciones' },
+      { label: 'Dashboard',         icon: LayoutDashboard, to: '/dashboardBusiness',                  alwaysAccessible: true  },
+      { label: 'Perfil de Negocio', icon: Store,           to: '/dashboardBusiness/perfil',            alwaysAccessible: true  },
+      { label: 'Productos',         icon: Package,         to: '/dashboardBusiness/productos',         alwaysAccessible: false },
+      { label: 'Estadísticas',      icon: BarChart2,       to: '/dashboardBusiness/estadisticas',      alwaysAccessible: false },
+      { label: 'Certificaciones',   icon: Award,           to: '/dashboardBusiness/certificaciones',   alwaysAccessible: false },
     ],
     account: [
       { label: 'Mi perfil', icon: User, to: '/dashboard/profile' },
@@ -55,7 +57,17 @@ const NAV_CONFIG = {
   },
 };
 
-function NavItem({ item, active, bizCount }) {
+function NavItem({ item, active, bizCount, locked }) {
+  if (locked) {
+    return (
+      <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium opacity-40 cursor-not-allowed select-none">
+        <item.icon className="w-4 h-4 shrink-0 text-on-dark" />
+        <span className="flex-1 truncate text-on-dark">{item.label}</span>
+        <Lock className="w-3.5 h-3.5 text-on-dark shrink-0" />
+      </div>
+    );
+  }
+
   return (
     <Link
       to={item.to}
@@ -86,6 +98,8 @@ export default function Sidebar() {
   const config   = NAV_CONFIG[role] || NAV_CONFIG.user;
 
   const [bizCount, setBizCount] = useState(null);
+  const { isRejected, isPending } = useOwnerBusinessStatus();
+  const isBlocked = isRejected || isPending;
 
   useEffect(() => {
     if (role !== 'user') return;
@@ -113,7 +127,13 @@ export default function Sidebar() {
         <div className="space-y-0.5">
           <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Menú</p>
           {config.menu.map((item) => (
-            <NavItem key={item.to} item={item} active={location.pathname === item.to} bizCount={bizCount} />
+            <NavItem
+              key={item.to}
+              item={item}
+              active={location.pathname === item.to}
+              bizCount={bizCount}
+              locked={isBlocked && item.alwaysAccessible === false}
+            />
           ))}
         </div>
 

@@ -1,8 +1,10 @@
 import { AlertTriangle, Clock, LayoutDashboard, Loader2, PackageOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
 import ImageUploader from '../../Components/ui/ImageUploader';
 import { useToastContext } from '../../context/ToastContext';
+import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
 import { getMyBusinesses } from '../../services/business/busienss.service';
 import { createProduct, deleteProduct, getProductsByBusiness, updateProduct } from '../../services/product/product.service';
 import { uploadGeneralImage } from '../../services/upload/upload.service';
@@ -283,8 +285,11 @@ function EmptyProducts({ onAdd }) {
 // ─── BusinessProducts (página principal) ─────────────────────────────────────
 
 export default function BusinessProducts() {
+  const { isRejected, isPending, rejectionReason, status } = useOwnerBusinessStatus();
   const navigate = useNavigate();
   const { success: showSuccess, error: showError } = useToastContext();
+
+  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
 
   const [business, setBusiness]         = useState(null);
   const [products, setProducts]         = useState([]);

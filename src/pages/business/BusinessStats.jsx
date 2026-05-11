@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Users, Star, FileText, Loader2, AlertCircle, TrendingUp } from 'lucide-react';
 import useBusinessStats from '../../hooks/useBusinessStats';
+import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
+import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
 import StatsMetricCard from '../../Components/business/stats/StatsMetricCard';
 import StatsLineChart from '../../Components/business/stats/StatsLineChart';
 import RecentFollowersList from '../../Components/business/stats/RecentFollowersList';
@@ -75,7 +77,9 @@ export default function BusinessStats() {
   const [period, setPeriod] = useState('30d');
   const { business, chartData, rawFollowers, loading, chartLoading, error, retry } =
     useBusinessStats(period);
+  const { isRejected, isPending, rejectionReason, status } = useOwnerBusinessStatus();
 
+  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
   if (loading) return <LoadingState />;
   if (error) return <ErrorState onRetry={retry} />;
   if (!business) return null;
