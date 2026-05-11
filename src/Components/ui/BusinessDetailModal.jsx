@@ -8,7 +8,6 @@ import {
   Mail,
   MapPin,
   Phone,
-  Star,
   Tag,
   UserCheck,
   UserPlus,
@@ -32,7 +31,7 @@ const DAY_LABELS = {
 
 const tagName = (t) => t.name ?? t.tagName ?? t.tag ?? '';
 
-export default function BusinessDetailModal({ business, onClose }) {
+export default function BusinessDetailModal({ business, onClose, footerSlot }) {
   const { success, error: toastError } = useToastContext();
   const { isFollowing, toggle, loading, initializing, isAuthenticated } =
     useFollow(business.id_business);
@@ -262,39 +261,35 @@ export default function BusinessDetailModal({ business, onClose }) {
             </div>
           )}
 
-          <div className="flex items-center gap-2 pt-3 border-t border-edge/40">
-            <Star className="w-3.5 h-3.5 text-muted" />
-            <p className="text-xs text-muted italic">
-              Valoraciones disponibles próximamente
-            </p>
-          </div>
         </div>
 
-        {/* Footer: botón Seguir */}
+        {/* Footer: footerSlot o botón Seguir por defecto */}
         <div className="px-5 py-4 border-t border-edge/40 shrink-0">
-          <button
-            onClick={handleFollow}
-            disabled={initializing || loading}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
-              isFollowing
-                ? 'bg-primary-softest text-primary-dark border border-edge hover:bg-primary-light'
-                : 'bg-primary-dark text-on-dark-active hover:bg-primary-darkest'
-            }`}
-          >
-            {initializing || loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : isFollowing ? (
-              <>
-                <UserCheck className="w-4 h-4" />
-                Siguiendo
-              </>
-            ) : (
-              <>
-                <UserPlus className="w-4 h-4" />
-                Seguir negocio
-              </>
-            )}
-          </button>
+          {footerSlot ? footerSlot : (
+            <button
+              onClick={handleFollow}
+              disabled={initializing || loading}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
+                isFollowing
+                  ? 'bg-primary-softest text-primary-dark border border-edge hover:bg-primary-light'
+                  : 'bg-primary-dark text-on-dark-active hover:bg-primary-darkest'
+              }`}
+            >
+              {initializing || loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isFollowing ? (
+                <>
+                  <UserCheck className="w-4 h-4" />
+                  Siguiendo
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4" />
+                  Seguir negocio
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

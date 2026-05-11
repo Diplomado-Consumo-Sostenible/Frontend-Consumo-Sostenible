@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Building2, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight, Loader2, AlertTriangle, X, Power, PowerOff, Plus, Edit2, Trash2, Tag as TagIcon, LayoutDashboard, Eye } from 'lucide-react';
+import { Building2, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight, Loader2, AlertTriangle, X, Power, PowerOff, Plus, Edit2, Trash2, Tag as TagIcon, LayoutDashboard, Eye, LayoutGrid, LayoutList, MapPin, Phone, Mail, Globe, CalendarDays } from 'lucide-react';
 import { getBusinessesForAdmin, changeBusinessStatus, toggleBusinessActive, createBusiness, updateBusiness, deleteBusiness } from '../../services/business/business.admin.service';
 import { useToastContext } from '../../context/ToastContext';
+import BusinessDetailModal from '../../Components/ui/BusinessDetailModal';
+import Button from '../../Components/button';
 import API from '../../api/api';
 
 const STATUS = { ALL: '', PENDING: 'Pending', ACTIVE: 'Active', REJECTED: 'Rejected' };
@@ -364,6 +366,176 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
   );
 }
 
+/* ─── Business review card (card view) ──────────────────────────────────── */
+function BusinessReviewCard({ business, onApprove, onReject, onDetail, actionLoading }) {
+  const isLoading = actionLoading === business.id_business;
+  const { status, isActive } = business;
+  const hasSocial = business.instagramUrl || business.facebookUrl || business.xUrl;
+
+  const formattedDate = business.createdAt
+    ? new Date(business.createdAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+
+  return (
+    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm flex flex-col overflow-hidden">
+      {/* Header: avatar + nombre + badge */}
+      <div className="flex items-start justify-between p-4 gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <BusinessAvatar logo={business.logo} name={business.businessName} onPreview={() => {}} />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-stone-800 truncate">{business.businessName}</p>
+            <p className="text-xs text-stone-400 truncate">{business.user?.email || '—'}</p>
+          </div>
+        </div>
+        <StatusBadge status={status} />
+      </div>
+
+      {/* Motivo de rechazo */}
+      {status === 'Rejected' && business.rejectionReason && (
+        <div className="mx-4 mb-3 px-3 py-2 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
+          <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-red-600">{business.rejectionReason}</p>
+        </div>
+      )}
+
+      <div className="px-4 pb-4 flex flex-col gap-3 flex-1">
+        {/* Descripción */}
+        {business.description && (
+          <p className="text-xs text-stone-500 line-clamp-3 leading-relaxed">{business.description}</p>
+        )}
+
+        {/* Categoría y tags */}
+        {(business.category?.category || business.tags?.length > 0) && (
+          <div className="flex flex-wrap gap-1.5">
+            {business.category?.category && (
+              <span className="text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                {business.category.category}
+              </span>
+            )}
+            {business.tags?.map((t) => (
+              <span key={t.id_tags} className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">
+                {t.tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Contacto */}
+        {(business.address || business.phone || business.emailBusiness || business.website) && (
+          <div className="space-y-1.5">
+            {business.address && (
+              <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                <MapPin className="w-3 h-3 text-stone-400 shrink-0" />
+                <span className="truncate">{business.address}</span>
+              </div>
+            )}
+            {business.phone && (
+              <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                <Phone className="w-3 h-3 text-stone-400 shrink-0" />
+                <span>{business.phone}</span>
+              </div>
+            )}
+            {business.emailBusiness && (
+              <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                <Mail className="w-3 h-3 text-stone-400 shrink-0" />
+                <span className="truncate">{business.emailBusiness}</span>
+              </div>
+            )}
+            {business.website && (
+              <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                <Globe className="w-3 h-3 text-stone-400 shrink-0" />
+                <span className="truncate">{business.website}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Redes sociales */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {hasSocial ? (
+            <>
+              {business.instagramUrl && (
+                <a href={business.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-400 hover:text-pink-500 transition-colors">Instagram</a>
+              )}
+              {business.facebookUrl && (
+                <a href={business.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-400 hover:text-blue-600 transition-colors">Facebook</a>
+              )}
+              {business.xUrl && (
+                <a href={business.xUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-400 hover:text-stone-700 transition-colors">X</a>
+              )}
+            </>
+          ) : (
+            <p className="text-xs text-stone-300 italic">Sin redes registradas</p>
+          )}
+        </div>
+
+        {/* Meta: fecha y estado activo */}
+        <div className="flex items-center gap-4 text-xs text-stone-400 border-t border-stone-50 pt-3 mt-auto">
+          {formattedDate && (
+            <span className="flex items-center gap-1">
+              <CalendarDays className="w-3 h-3" />
+              {formattedDate}
+            </span>
+          )}
+          <span className={`flex items-center gap-1 ${isActive ? 'text-emerald-500' : 'text-stone-300'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+            {isActive ? 'Activo' : 'Inactivo'}
+          </span>
+        </div>
+
+        {/* Acciones */}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            className="!w-auto !py-1.5 !px-3 !text-xs !rounded-lg !bg-none !from-transparent !to-transparent bg-white !text-stone-600 border border-stone-200 hover:bg-stone-50"
+            onClick={() => onDetail(business)}
+          >
+            <Eye className="w-3 h-3" /> Ver detalle
+          </Button>
+
+          {status === 'Pending' && (
+            <>
+              <Button
+                className="!w-auto !py-1.5 !px-3 !text-xs !rounded-lg"
+                onClick={() => onApprove(business)}
+                loading={isLoading}
+              >
+                <CheckCircle className="w-3 h-3" /> Aprobar
+              </Button>
+              <Button
+                className="!w-auto !py-1.5 !px-3 !text-xs !rounded-lg !from-red-500 !to-red-500 hover:!from-red-600 hover:!to-red-600"
+                onClick={() => onReject(business)}
+                loading={isLoading}
+              >
+                <XCircle className="w-3 h-3" /> Rechazar
+              </Button>
+            </>
+          )}
+
+          {status === 'Rejected' && (
+            <Button
+              className="!w-auto !py-1.5 !px-3 !text-xs !rounded-lg"
+              onClick={() => onApprove(business)}
+              loading={isLoading}
+            >
+              <CheckCircle className="w-3 h-3" /> Revertir y aprobar
+            </Button>
+          )}
+
+          {status === 'Active' && (
+            <Button
+              className="!w-auto !py-1.5 !px-3 !text-xs !rounded-lg !from-red-500 !to-red-500 hover:!from-red-600 hover:!to-red-600"
+              onClick={() => onReject(business)}
+              loading={isLoading}
+            >
+              <XCircle className="w-3 h-3" /> Revocar
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main page ──────────────────────────────────────────────────────────── */
 export default function AdminBusinesses() {
   const toast = useToastContext();
@@ -378,6 +550,9 @@ export default function AdminBusinesses() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const [viewMode, setViewMode] = useState('table');
+  const [detailBusiness, setDetailBusiness] = useState(null);
 
   const [rejectTarget, setRejectTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -527,120 +702,186 @@ export default function AdminBusinesses() {
         ))}
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-        <input type="text" placeholder="Buscar por nombre, propietario o categoría..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all bg-white" />
+      {/* Search + toggle de vista */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <input type="text" placeholder="Buscar por nombre, propietario o categoría..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all bg-white" />
+        </div>
+        <div className="flex items-center gap-1 p-1 bg-stone-100 rounded-xl shrink-0">
+          <button
+            onClick={() => setViewMode('table')}
+            title="Vista tabla"
+            className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white shadow-sm text-stone-700' : 'text-stone-400 hover:text-stone-600'}`}
+          >
+            <LayoutList className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setViewMode('cards')}
+            title="Vista cards"
+            className={`p-2 rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white shadow-sm text-stone-700' : 'text-stone-400 hover:text-stone-600'}`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
-        {loading ? (
-          <div className="flex items-center justify-center py-20 gap-3 text-stone-400">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm">Cargando negocios...</span>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-stone-400 gap-3">
-            <Building2 className="w-10 h-10 opacity-30" />
-            <p className="text-sm">{search ? 'No se encontraron resultados' : `No hay negocios ${activeTab ? `en estado "${STATUS_LABELS[activeTab]}"` : 'registrados'}`}</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-stone-100 bg-stone-50/50">
-                <tr>
-                  <th className={thClass}>#</th>
-                  <th className={thClass}>Negocio</th>
-                  <th className={thClass}>Propietario</th>
-                  <th className={thClass}>Categoría</th>
-                  <th className={thClass}>Dirección</th>
-                  <th className={thClass}>Estado</th>
-                  <th className={thClass}>Activo</th>
-                  <th className={thClass}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-50">
-                {filtered.map((business, idx) => {
-                  const isLoading = actionLoading === business.id_business;
-                  const { status, isActive } = business;
-                  return (
-                    <tr key={business.id_business} className="hover:bg-stone-50/50 transition-colors">
-                      <td className="px-4 py-3.5 text-xs text-stone-400 font-mono">{(page - 1) * LIMIT + idx + 1}</td>
-                      <td className="px-4 py-3.5 overflow-visible">
-                        <div className="flex items-center gap-3">
-                          <BusinessAvatar logo={business.logo} name={business.businessName} onPreview={(src, alt) => setPreview({ src, alt })} />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-stone-700 truncate max-w-[140px]">{business.businessName}</p>
-                            {status === 'Rejected' && business.rejectionReason && (
-                              <p title={business.rejectionReason} className="text-xs text-red-400 flex items-center gap-1 mt-0.5 truncate max-w-[140px]">
-                                <AlertTriangle className="w-3 h-3 shrink-0" />
-                                {business.rejectionReason}
-                              </p>
-                            )}
+      {/* Contenido: tabla o cards */}
+      {viewMode === 'table' ? (
+        <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
+          {loading ? (
+            <div className="flex items-center justify-center py-20 gap-3 text-stone-400">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Cargando negocios...</span>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-stone-400 gap-3">
+              <Building2 className="w-10 h-10 opacity-30" />
+              <p className="text-sm">{search ? 'No se encontraron resultados' : `No hay negocios ${activeTab ? `en estado "${STATUS_LABELS[activeTab]}"` : 'registrados'}`}</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-stone-100 bg-stone-50/50">
+                  <tr>
+                    <th className={thClass}>#</th>
+                    <th className={thClass}>Negocio</th>
+                    <th className={thClass}>Propietario</th>
+                    <th className={thClass}>Categoría</th>
+                    <th className={thClass}>Dirección</th>
+                    <th className={thClass}>Estado</th>
+                    <th className={thClass}>Activo</th>
+                    <th className={thClass}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-50">
+                  {filtered.map((business, idx) => {
+                    const isLoading = actionLoading === business.id_business;
+                    const { status, isActive } = business;
+                    return (
+                      <tr key={business.id_business} className="hover:bg-stone-50/50 transition-colors">
+                        <td className="px-4 py-3.5 text-xs text-stone-400 font-mono">{(page - 1) * LIMIT + idx + 1}</td>
+                        <td className="px-4 py-3.5 overflow-visible">
+                          <div className="flex items-center gap-3">
+                            <BusinessAvatar logo={business.logo} name={business.businessName} onPreview={(src, alt) => setPreview({ src, alt })} />
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-stone-700 truncate max-w-[140px]">{business.businessName}</p>
+                              {status === 'Rejected' && business.rejectionReason && (
+                                <p title={business.rejectionReason} className="text-xs text-red-400 flex items-center gap-1 mt-0.5 truncate max-w-[140px]">
+                                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                                  {business.rejectionReason}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-sm text-stone-500">{business.user?.email || '—'}</td>
-                      <td className="px-4 py-3.5">
-                        <span className="text-xs font-medium text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full">{business.category?.category || '—'}</span>
-                      </td>
-                      <td className="px-4 py-3.5 text-xs text-stone-400 max-w-[160px] truncate">{business.address || '—'}</td>
-                      <td className="px-4 py-3.5">
-                        <StatusBadge status={status} />
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${isActive ? 'text-emerald-600' : 'text-stone-400'}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-stone-300'}`} />
-                          {isActive ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-1">
-                          {isLoading ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-stone-400" />
-                          ) : (
-                            <>
-                              {(status === 'Pending' || status === 'Rejected') && (
-                                <button title="Aprobar" onClick={() => handleApprove(business)} className="p-1.5 rounded-lg text-emerald-500 hover:bg-emerald-50 transition-colors">
-                                  <CheckCircle className="w-4 h-4" />
-                                </button>
-                              )}
-                              {status === 'Pending' && (
-                                <button title="Rechazar" onClick={() => setRejectTarget(business)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors">
-                                  <XCircle className="w-4 h-4" />
-                                </button>
-                              )}
-                              {(status === 'Active' || status === 'Rejected') && (
-                                <button title={isActive ? 'Desactivar' : 'Activar'} onClick={() => handleToggleActive(business, !isActive)} className={`p-1.5 rounded-lg transition-colors ${isActive ? 'text-stone-400 hover:bg-stone-100' : 'text-emerald-500 hover:bg-emerald-50'}`}>
-                                  {isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
-                                </button>
-                              )}
-                              <div className="w-px h-4 bg-stone-200 mx-0.5" />
-                              <button title="Editar" onClick={() => openEdit(business)} className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors">
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                              <button title="Eliminar" onClick={() => setDeleteTarget(business)} className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                        </td>
+                        <td className="px-4 py-3.5 text-sm text-stone-500">{business.user?.email || '—'}</td>
+                        <td className="px-4 py-3.5">
+                          <span className="text-xs font-medium text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full">{business.category?.category || '—'}</span>
+                        </td>
+                        <td className="px-4 py-3.5 text-xs text-stone-400 max-w-[160px] truncate">{business.address || '—'}</td>
+                        <td className="px-4 py-3.5">
+                          <StatusBadge status={status} />
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${isActive ? 'text-emerald-600' : 'text-stone-400'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+                            {isActive ? 'Activo' : 'Inactivo'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center gap-1">
+                            <button
+                              title="Ver detalle"
+                              onClick={() => setDetailBusiness(business)}
+                              className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
 
-        {!loading && filtered.length > 0 && (
-          <div className="px-4 py-3 border-t border-stone-50 flex items-center justify-between">
-            <p className="text-xs text-stone-400">
-              Mostrando {filtered.length} de {total} negocios
-            </p>
-            {totalPages > 1 && (
+                            <div className="w-px h-4 bg-stone-200 mx-0.5" />
+
+                            <button
+                              title="Editar"
+                              onClick={() => openEdit(business)}
+                              disabled={isLoading}
+                              className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+
+                            <button
+                              title="Eliminar"
+                              onClick={() => setDeleteTarget(business)}
+                              disabled={isLoading}
+                              className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {!loading && filtered.length > 0 && (
+            <div className="px-4 py-3 border-t border-stone-50 flex items-center justify-between">
+              <p className="text-xs text-stone-400">
+                Mostrando {filtered.length} de {total} negocios
+              </p>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-colors">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm text-stone-600 font-medium px-1">
+                    {page} / {totalPages}
+                  </span>
+                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-colors">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Vista cards */
+        <>
+          {loading ? (
+            <div className="flex items-center justify-center py-20 gap-3 text-stone-400">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Cargando negocios...</span>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-stone-400 gap-3">
+              <Building2 className="w-10 h-10 opacity-30" />
+              <p className="text-sm">{search ? 'No se encontraron resultados' : `No hay negocios ${activeTab ? `en estado "${STATUS_LABELS[activeTab]}"` : 'registrados'}`}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filtered.map((b) => (
+                <BusinessReviewCard
+                  key={b.id_business}
+                  business={b}
+                  onApprove={handleApprove}
+                  onReject={setRejectTarget}
+                  onDetail={setDetailBusiness}
+                  actionLoading={actionLoading}
+                />
+              ))}
+            </div>
+          )}
+
+          {!loading && filtered.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-stone-400">
+                Mostrando {filtered.length} de {total} negocios
+              </p>
               <div className="flex items-center gap-2">
                 <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-colors">
                   <ChevronLeft className="w-4 h-4" />
@@ -652,10 +893,10 @@ export default function AdminBusinesses() {
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
 
       {/* Modals & Drawer */}
       {rejectTarget && <RejectModal business={rejectTarget} onConfirm={handleRejectConfirm} onCancel={() => setRejectTarget(null)} loading={actionLoading === rejectTarget.id_business} />}
@@ -663,6 +904,45 @@ export default function AdminBusinesses() {
       <BusinessFormDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onSaved={() => fetchBusinesses(activeTab, page)} editTarget={editTarget} categories={categories} tags={tags} />
 
       {preview && <PhotoPreviewModal src={preview.src} alt={preview.alt} onClose={() => setPreview(null)} />}
+      {detailBusiness && (
+        <BusinessDetailModal
+          business={detailBusiness}
+          onClose={() => setDetailBusiness(null)}
+          footerSlot={
+            <div className="flex gap-3">
+              {(detailBusiness.status === 'Pending' || detailBusiness.status === 'Rejected') && (
+                <button
+                  onClick={() => {
+                    handleApprove(detailBusiness);
+                    setDetailBusiness(null);
+                  }}
+                  disabled={actionLoading === detailBusiness.id_business}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 disabled:opacity-60 transition-colors"
+                >
+                  {actionLoading === detailBusiness.id_business
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <CheckCircle className="w-4 h-4" />}
+                  {detailBusiness.status === 'Rejected' ? 'Revertir y aprobar' : 'Aprobar'}
+                </button>
+              )}
+
+              {(detailBusiness.status === 'Pending' || detailBusiness.status === 'Active') && (
+                <button
+                  onClick={() => {
+                    setRejectTarget(detailBusiness);
+                    setDetailBusiness(null);
+                  }}
+                  disabled={actionLoading === detailBusiness.id_business}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-50 text-red-600 border border-red-100 text-sm font-semibold hover:bg-red-100 disabled:opacity-60 transition-colors"
+                >
+                  <XCircle className="w-4 h-4" />
+                  {detailBusiness.status === 'Active' ? 'Revocar' : 'Rechazar'}
+                </button>
+              )}
+            </div>
+          }
+        />
+      )}
     </div>
   );
 }
