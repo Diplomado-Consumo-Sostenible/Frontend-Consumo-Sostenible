@@ -3,7 +3,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Eye, EyeOff,
-  KeyRound, Lock,
+  KeyRound, Leaf, Lock,
   Mail,
   RotateCcw,
 } from "lucide-react";
@@ -40,13 +40,13 @@ function StepEmail({ onSuccess }) {
   return (
     <>
       <div className="mb-7">
-        <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
-          <Mail className="w-6 h-6 text-emerald-600" />
+        <div className="w-12 h-12 bg-primary-softest rounded-2xl flex items-center justify-center mb-4">
+          <Mail className="w-6 h-6 text-primary-dark" />
         </div>
-        <h1 className="text-stone-800 text-2xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
+        <h1 className="text-heading text-2xl font-serif">
           ¿Olvidaste tu contraseña?
         </h1>
-        <p className="text-stone-400 text-sm mt-2 leading-relaxed">
+        <p className="text-muted text-sm mt-2 leading-relaxed">
           Ingresa tu correo y te enviaremos un código de 6 dígitos para recuperar tu cuenta.
         </p>
       </div>
@@ -68,14 +68,13 @@ function StepEmail({ onSuccess }) {
           })}
         />
 
-        <Button type="submit" loading={loading} icon={ArrowRight}
-          className="mt-2 shadow-md shadow-emerald-200">
+        <Button type="submit" loading={loading} icon={ArrowRight}>
           Enviar código
         </Button>
 
-        <p className="text-center text-sm text-stone-400">
+        <p className="text-center text-sm text-muted">
           <Link to="/login"
-            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2">
+            className="inline-flex items-center gap-1 text-primary-dark hover:text-primary-darkest font-medium underline underline-offset-2 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio de sesión
           </Link>
         </p>
@@ -124,16 +123,16 @@ function StepOtp({ email, onSuccess }) {
   return (
     <>
       <div className="mb-7">
-        <div className="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center mb-4">
-          <KeyRound className="w-6 h-6 text-teal-600" />
+        <div className="w-12 h-12 bg-primary-softest rounded-2xl flex items-center justify-center mb-4">
+          <KeyRound className="w-6 h-6 text-primary-dark" />
         </div>
-        <h1 className="text-stone-800 text-2xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
+        <h1 className="text-heading text-2xl font-serif">
           Ingresa el código
         </h1>
-        <p className="text-stone-400 text-sm mt-2 leading-relaxed">
+        <p className="text-muted text-sm mt-2 leading-relaxed">
           Enviamos un código de 6 dígitos a{" "}
-          <span className="font-medium text-stone-600">{email}</span>.
-          Válido por <span className="font-medium text-emerald-600">10 minutos</span>.
+          <span className="font-medium text-body">{email}</span>.
+          Válido por <span className="font-medium text-primary-dark">10 minutos</span>.
         </p>
       </div>
 
@@ -151,24 +150,23 @@ function StepOtp({ email, onSuccess }) {
           })}
         />
 
-        <Button type="submit" loading={loading} icon={ArrowRight}
-          className="shadow-md shadow-emerald-200">
+        <Button type="submit" loading={loading} icon={ArrowRight}>
           Verificar código
         </Button>
       </form>
 
-      <div className="mt-5 flex items-center justify-center gap-2 text-sm text-stone-400">
+      <div className="mt-5 flex items-center justify-center gap-2 text-sm text-muted">
         <span>¿No recibiste el código?</span>
         {countdown > 0 ? (
-          <span className="text-stone-400 font-medium">
-            Reenviar en <span className="text-emerald-600">{countdown}s</span>
+          <span className="text-muted font-medium">
+            Reenviar en <span className="text-primary-dark">{countdown}s</span>
           </span>
         ) : (
           <button
             type="button"
             onClick={handleResend}
             disabled={resending}
-            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2 disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-primary-dark hover:text-primary-darkest font-medium underline underline-offset-2 disabled:opacity-50 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             {resending ? "Reenviando..." : "Reenviar código"}
@@ -198,8 +196,8 @@ function StepNewPassword({ otp, onSuccess }) {
   };
   const strength = getStrength(passwordValue);
   const strengthLabel = ["", "Débil", "Regular", "Buena", "Fuerte"][strength];
-  const strengthColor = ["", "bg-red-400", "bg-amber-400", "bg-lime-500", "bg-emerald-500"][strength];
-  const strengthText = ["", "text-red-500", "text-amber-500", "text-lime-600", "text-emerald-600"][strength];
+  const strengthColor = ["", "bg-red-400", "bg-amber-400", "bg-lime-500", "bg-primary-mid"][strength];
+  const strengthText = ["", "text-red-500", "text-amber-500", "text-lime-600", "text-primary-dark"][strength];
 
   const onSubmit = async ({ newPassword }) => {
     setLoading(true);
@@ -217,13 +215,13 @@ function StepNewPassword({ otp, onSuccess }) {
   return (
     <>
       <div className="mb-7">
-        <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
-          <Lock className="w-6 h-6 text-emerald-600" />
+        <div className="w-12 h-12 bg-primary-softest rounded-2xl flex items-center justify-center mb-4">
+          <Lock className="w-6 h-6 text-primary-dark" />
         </div>
-        <h1 className="text-stone-800 text-2xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
+        <h1 className="text-heading text-2xl font-serif">
           Nueva contraseña
         </h1>
-        <p className="text-stone-400 text-sm mt-2 leading-relaxed">
+        <p className="text-muted text-sm mt-2 leading-relaxed">
           Elige una contraseña segura. Recuerda incluir mayúsculas y números.
         </p>
       </div>
@@ -247,7 +245,7 @@ function StepNewPassword({ otp, onSuccess }) {
             })}
             rightSlot={
               <button type="button" onClick={() => setShowPass(!showPass)}
-                className="text-stone-400 hover:text-emerald-600 transition-colors">
+                className="text-muted hover:text-primary-dark transition-colors">
                 {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             }
@@ -258,7 +256,7 @@ function StepNewPassword({ otp, onSuccess }) {
               <div className="flex gap-1 flex-1">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i}
-                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor : "bg-stone-200"}`}
+                    className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor : "bg-edge"}`}
                   />
                 ))}
               </div>
@@ -280,14 +278,13 @@ function StepNewPassword({ otp, onSuccess }) {
           })}
           rightSlot={
             <button type="button" onClick={() => setShowConf(!showConf)}
-              className="text-stone-400 hover:text-emerald-600 transition-colors">
+              className="text-muted hover:text-primary-dark transition-colors">
               {showConf ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           }
         />
 
-        <Button type="submit" loading={loading} icon={ArrowRight}
-          className="shadow-md shadow-emerald-200">
+        <Button type="submit" loading={loading} icon={ArrowRight}>
           Guardar contraseña
         </Button>
       </form>
@@ -298,19 +295,19 @@ function StepNewPassword({ otp, onSuccess }) {
 function StepSuccess() {
   return (
     <div className="flex flex-col items-center justify-center text-center gap-5 py-6">
-      <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-        <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+      <div className="w-16 h-16 bg-primary-softest rounded-full flex items-center justify-center">
+        <CheckCircle2 className="w-8 h-8 text-primary-dark" />
       </div>
       <div>
-        <h1 className="text-stone-800 text-2xl font-semibold" style={{ fontFamily: "'Georgia', serif" }}>
+        <h1 className="text-heading text-2xl font-serif">
           ¡Contraseña actualizada!
         </h1>
-        <p className="text-stone-400 text-sm mt-2">
+        <p className="text-muted text-sm mt-2">
           Tu contraseña fue restablecida correctamente. Ya puedes iniciar sesión.
         </p>
       </div>
       <Link to="/login">
-        <Button icon={ArrowRight} className="w-auto px-8 shadow-md shadow-emerald-200">
+        <Button icon={ArrowRight} className="w-auto px-8">
           Ir al inicio de sesión
         </Button>
       </Link>
@@ -324,11 +321,11 @@ function StepIndicator({ current, total }) {
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} className="flex items-center gap-2">
           <div className={`h-1.5 rounded-full transition-all duration-300 ${
-            i < current ? "bg-emerald-500 w-8" : i === current ? "bg-emerald-400 w-8" : "bg-stone-200 w-5"
+            i < current ? "bg-primary-dark w-8" : i === current ? "bg-primary-mid w-8" : "bg-edge w-5"
           }`} />
         </div>
       ))}
-      <span className="text-xs text-stone-400 ml-1">
+      <span className="text-xs text-muted ml-1">
         {current < total ? `Paso ${current + 1} de ${total}` : "Completado"}
       </span>
     </div>
@@ -341,13 +338,12 @@ export default function ForgotPasswordForm() {
   const [otp, setOtp] = useState("");
 
   return (
-    <div className="flex-1 bg-white/80 backdrop-blur-xl flex flex-col justify-center px-10 py-10">
+    <div className="flex-1 bg-card-bg flex flex-col justify-center px-10 py-10">
 
+      {/* Logo móvil */}
       <div className="flex md:hidden items-center gap-2 mb-4">
-        <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-emerald-500" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 22C6.5 22 2 17.5 2 12C2 7 5.5 3.5 10 2C10 2 8 8 12 12C16 16 22 14 22 14C22 18.5 17.5 22 12 22Z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span className="text-emerald-600 font-semibold text-sm tracking-widest uppercase">EcoVida</span>
+        <Leaf className="w-5 h-5 text-primary-dark" />
+        <span className="text-primary-dark font-semibold text-sm tracking-wide">EcoVida</span>
       </div>
 
       {step < 3 && <StepIndicator current={step} total={3} />}

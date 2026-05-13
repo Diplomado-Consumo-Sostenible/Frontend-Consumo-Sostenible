@@ -144,7 +144,7 @@ const ImageUploader = forwardRef(function ImageUploader(
   return (
     <div className="w-full space-y-2">
       {hasPreview ? (
-        <div className="relative w-full h-48 rounded-xl overflow-hidden bg-gray-100">
+        <div className="relative w-full h-48 rounded-xl overflow-hidden bg-app-bg">
           <img src={preview} alt="Vista previa" className="w-full h-full object-cover" />
 
           {isUploading && (
@@ -155,7 +155,7 @@ const ImageUploader = forwardRef(function ImageUploader(
           )}
 
           {isSuccess && !isUploading && (
-            <div className="absolute top-2 left-2 flex items-center gap-1 bg-green-500/90 text-white text-xs font-medium px-2 py-1 rounded-full">
+            <div className="absolute top-2 left-2 flex items-center gap-1 bg-primary-mid/90 text-white text-xs font-medium px-2 py-1 rounded-full">
               <CheckCircle2 className="w-3 h-3" />
               Subida completada
             </div>
@@ -169,7 +169,7 @@ const ImageUploader = forwardRef(function ImageUploader(
               aria-label="Quitar imagen"
               className="absolute top-2 right-2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-sm transition-colors disabled:opacity-50"
             >
-              <X className="w-4 h-4 text-gray-600" />
+              <X className="w-4 h-4 text-body" />
             </button>
           )}
         </div>
@@ -186,30 +186,30 @@ const ImageUploader = forwardRef(function ImageUploader(
             'flex flex-col items-center justify-center gap-2',
             'transition-colors select-none',
             isDragging
-              ? 'border-green-400 bg-green-50/50'
+              ? 'border-primary-mid bg-primary-softest/50'
               : isError
                 ? 'border-red-300 bg-red-50/30'
-                : 'border-gray-200 hover:border-green-400 hover:bg-green-50/30',
+                : 'border-edge hover:border-primary-mid hover:bg-primary-softest/30',
             disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
           ].join(' ')}
         >
           {isDragging
-            ? <UploadCloud className="w-6 h-6 text-green-500" />
-            : <ImagePlus className="w-6 h-6 text-gray-400" />
+            ? <UploadCloud className="w-6 h-6 text-primary-mid" />
+            : <ImagePlus className="w-6 h-6 text-muted" />
           }
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted">
             {isDragging ? 'Suelta la imagen aquí' : 'Arrastra o haz clic para seleccionar'}
           </span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-muted/70">
             JPG, PNG, WEBP, GIF · máx.&nbsp;{validationConfig?.maxSizeMb ?? 5}&nbsp;MB
           </span>
         </button>
       )}
 
       {isUploading && (
-        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-1.5 w-full bg-edge rounded-full overflow-hidden">
           <div
-            className="h-full bg-green-500 rounded-full transition-all duration-200"
+            className="h-full bg-primary-mid rounded-full transition-all duration-200"
             style={{ width: `${progress}%` }}
           />
         </div>

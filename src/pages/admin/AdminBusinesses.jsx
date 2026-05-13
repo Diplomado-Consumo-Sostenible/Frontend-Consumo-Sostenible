@@ -8,8 +8,8 @@ import API from '../../api/api';
 
 const STATUS = { ALL: '', PENDING: 'Pending', ACTIVE: 'Active', REJECTED: 'Rejected' };
 const STATUS_LABELS = { Pending: 'Pendiente', Active: 'Aprobado', Rejected: 'Rechazado' };
-const STATUS_STYLES = { Pending: 'bg-amber-50 text-amber-700', Active: 'bg-emerald-50 text-emerald-700', Rejected: 'bg-red-50 text-red-600' };
-const STATUS_DOT = { Pending: 'bg-amber-500', Active: 'bg-emerald-500', Rejected: 'bg-red-500' };
+const STATUS_STYLES = { Pending: 'bg-amber-50 text-amber-700', Active: 'bg-primary-softest text-primary-dark', Rejected: 'bg-red-50 text-red-600' };
+const STATUS_DOT = { Pending: 'bg-amber-500', Active: 'bg-primary-mid', Rejected: 'bg-red-500' };
 const TABS = [
   { label: 'Todos', value: STATUS.ALL },
   { label: 'Pendientes', value: STATUS.PENDING },
@@ -43,9 +43,9 @@ function PhotoPreviewModal({ src, alt, onClose }) {
         <div className="relative max-w-xs w-full pointer-events-auto">
           <button
             onClick={onClose}
-            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-stone-100 transition-colors"
+            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-card-bg rounded-full shadow-warm flex items-center justify-center hover:bg-app-bg transition-colors"
           >
-            <X className="w-4 h-4 text-stone-600" />
+            <X className="w-4 h-4 text-body" />
           </button>
           <img src={src} alt={alt} className="w-full rounded-2xl shadow-2xl object-cover aspect-square" />
         </div>
@@ -69,28 +69,28 @@ function BusinessAvatar({ logo, name, onPreview }) {
     );
   }
   return (
-    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-      <span className="text-xs font-bold text-emerald-600">{name?.charAt(0)?.toUpperCase() || '?'}</span>
+    <div className="w-8 h-8 rounded-lg bg-primary-softest flex items-center justify-center shrink-0">
+      <span className="text-xs font-bold text-primary-dark">{name?.charAt(0)?.toUpperCase() || '?'}</span>
     </div>
   );
 }
 
 function StatusBadge({ status }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[status] || 'bg-stone-100 text-stone-500'}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] || 'bg-stone-400'}`} />
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[status] || 'bg-app-bg text-muted'}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] || 'bg-muted'}`} />
       {STATUS_LABELS[status] || status}
     </span>
   );
 }
 
-const inp = 'w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all bg-white';
+const inp = 'w-full px-3.5 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg';
 const sel = `${inp} cursor-pointer`;
 
 function Field({ label, error, children, half }) {
   return (
     <div className={`flex flex-col gap-1.5 ${half ? '' : ''}`}>
-      <label className="text-xs font-semibold text-stone-500 uppercase tracking-wide">{label}</label>
+      <label className="text-xs font-semibold text-muted uppercase tracking-wide">{label}</label>
       {children}
       {error && (
         <p className="text-red-400 text-xs flex items-center gap-1">
@@ -116,16 +116,16 @@ function RejectModal({ business, onConfirm, onCancel, loading }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-          <h2 className="text-base font-semibold text-stone-800">Rechazar negocio</h2>
-          <button onClick={onCancel} className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors">
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-md">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
+          <h2 className="text-base font-semibold text-heading">Rechazar negocio</h2>
+          <button onClick={onCancel} className="p-1.5 rounded-lg text-muted hover:text-body hover:bg-app-bg transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
         <div className="px-6 py-5 space-y-4">
-          <p className="text-sm text-stone-500">
-            Estás rechazando <span className="font-semibold text-stone-700">{business?.businessName}</span>. Indica el motivo.
+          <p className="text-sm text-muted">
+            Estás rechazando <span className="font-semibold text-body">{business?.businessName}</span>. Indica el motivo.
           </p>
           <Field label="Motivo del rechazo" error={err}>
             <textarea
@@ -140,7 +140,7 @@ function RejectModal({ business, onConfirm, onCancel, loading }) {
             />
           </Field>
           <div className="flex gap-3">
-            <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 disabled:opacity-50 transition-colors">
+            <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg disabled:opacity-50 transition-colors">
               Cancelar
             </button>
             <button onClick={handleConfirm} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
@@ -158,19 +158,19 @@ function DeleteConfirm({ business, onConfirm, onCancel, loading }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6">
         <div className="flex flex-col items-center text-center gap-3">
           <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6 text-red-500" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-stone-800">Eliminar negocio</h3>
-            <p className="text-sm text-stone-500 mt-1">
-              ¿Eliminar permanentemente <span className="font-medium text-stone-700">{business?.businessName}</span>? Esta acción no se puede deshacer.
+            <h3 className="text-base font-semibold text-heading">Eliminar negocio</h3>
+            <p className="text-sm text-muted mt-1">
+              ¿Eliminar permanentemente <span className="font-medium text-body">{business?.businessName}</span>? Esta acción no se puede deshacer.
             </p>
           </div>
           <div className="flex gap-3 w-full mt-1">
-            <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 disabled:opacity-50 transition-colors">
+            <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg disabled:opacity-50 transition-colors">
               Cancelar
             </button>
             <button onClick={onConfirm} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
@@ -251,14 +251,14 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
       {/* Backdrop */}
       <div className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose} />
       {/* Drawer */}
-      <div className={`fixed top-0 right-0 z-50 h-full w-full max-w-xl bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed top-0 right-0 z-50 h-full w-full max-w-xl bg-card-bg shadow-warm flex flex-col transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : 'translate-x-full'}`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-edge shrink-0">
           <div>
-            <h2 className="text-base font-semibold text-stone-800">{isEdit ? 'Editar negocio' : 'Nuevo negocio'}</h2>
-            <p className="text-xs text-stone-400 mt-0.5">{isEdit ? editTarget?.businessName : 'Completa los datos del negocio'}</p>
+            <h2 className="text-base font-semibold text-heading">{isEdit ? 'Editar negocio' : 'Nuevo negocio'}</h2>
+            <p className="text-xs text-muted mt-0.5">{isEdit ? editTarget?.businessName : 'Completa los datos del negocio'}</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-xl text-muted hover:text-body hover:bg-app-bg transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -274,7 +274,7 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
 
           {/* Info básica */}
           <section className="space-y-4">
-            <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Información básica</p>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider">Información básica</p>
             <Field label="Nombre del negocio" error={errors.businessName}>
               <input type="text" placeholder="Ej. EcoMarket Bogotá" value={form.businessName} onChange={(e) => set('businessName', e.target.value)} className={inp} />
             </Field>
@@ -298,7 +298,7 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
 
           {/* Contacto */}
           <section className="space-y-4">
-            <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Contacto y ubicación</p>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider">Contacto y ubicación</p>
             <Field label="Dirección">
               <input type="text" placeholder="Calle 123 #45-67, Barrio Centro" value={form.address} onChange={(e) => set('address', e.target.value)} className={inp} />
             </Field>
@@ -314,7 +314,7 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
 
           {/* Redes sociales */}
           <section className="space-y-4">
-            <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Redes sociales y web</p>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider">Redes sociales y web</p>
             <Field label="Sitio web">
               <input type="url" placeholder="https://www.minegocio.com" value={form.website} onChange={(e) => set('website', e.target.value)} className={inp} />
             </Field>
@@ -334,29 +334,29 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
           {/* Tags */}
           {tags.length > 0 && (
             <section className="space-y-3">
-              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Productos / etiquetas sostenibles</p>
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider">Productos / etiquetas sostenibles</p>
               <div className="flex flex-wrap gap-2">
                 {tags.map((t) => {
                   const selected = form.tagIds.includes(t.id_tags);
                   return (
-                    <button type="button" key={t.id_tags} onClick={() => toggleTag(t.id_tags)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selected ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-stone-600 border-stone-200 hover:border-emerald-400'}`}>
+                    <button type="button" key={t.id_tags} onClick={() => toggleTag(t.id_tags)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selected ? 'bg-primary-dark text-on-dark-active border-primary-dark' : 'bg-card-bg text-body border-edge hover:border-primary-light'}`}>
                       <TagIcon className="w-3 h-3" />
                       {t.tag}
                     </button>
                   );
                 })}
               </div>
-              <p className="text-xs text-stone-400">{form.tagIds.length} seleccionados</p>
+              <p className="text-xs text-muted">{form.tagIds.length} seleccionados</p>
             </section>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-stone-100 flex gap-3 shrink-0">
-          <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">
+        <div className="px-6 py-4 border-t border-edge flex gap-3 shrink-0">
+          <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors">
             Cancelar
           </button>
-          <button onClick={handleSubmit} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 text-sm font-medium text-white hover:bg-emerald-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+          <button onClick={handleSubmit} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-primary-dark text-sm font-medium text-on-dark-active hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {isEdit ? 'Guardar cambios' : 'Crear negocio'}
           </button>
@@ -377,14 +377,14 @@ function BusinessReviewCard({ business, onApprove, onReject, onDetail, actionLoa
     : null;
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm flex flex-col overflow-hidden">
+    <div className="bg-card-bg rounded-2xl border border-edge shadow-warm-sm flex flex-col overflow-hidden">
       {/* Header: avatar + nombre + badge */}
       <div className="flex items-start justify-between p-4 gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <BusinessAvatar logo={business.logo} name={business.businessName} onPreview={() => {}} />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-stone-800 truncate">{business.businessName}</p>
-            <p className="text-xs text-stone-400 truncate">{business.user?.email || '—'}</p>
+            <p className="text-sm font-semibold text-heading truncate">{business.businessName}</p>
+            <p className="text-xs text-muted truncate">{business.user?.email || '—'}</p>
           </div>
         </div>
         <StatusBadge status={status} />
@@ -401,19 +401,19 @@ function BusinessReviewCard({ business, onApprove, onReject, onDetail, actionLoa
       <div className="px-4 pb-4 flex flex-col gap-3 flex-1">
         {/* Descripción */}
         {business.description && (
-          <p className="text-xs text-stone-500 line-clamp-3 leading-relaxed">{business.description}</p>
+          <p className="text-xs text-muted line-clamp-3 leading-relaxed">{business.description}</p>
         )}
 
         {/* Categoría y tags */}
         {(business.category?.category || business.tags?.length > 0) && (
           <div className="flex flex-wrap gap-1.5">
             {business.category?.category && (
-              <span className="text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              <span className="text-xs font-medium bg-primary-softest text-primary-dark px-2.5 py-0.5 rounded-full border border-edge">
                 {business.category.category}
               </span>
             )}
             {business.tags?.map((t) => (
-              <span key={t.id_tags} className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">
+              <span key={t.id_tags} className="text-xs bg-app-bg text-body px-2 py-0.5 rounded-full border border-edge">
                 {t.tag}
               </span>
             ))}
@@ -424,26 +424,26 @@ function BusinessReviewCard({ business, onApprove, onReject, onDetail, actionLoa
         {(business.address || business.phone || business.emailBusiness || business.website) && (
           <div className="space-y-1.5">
             {business.address && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                <MapPin className="w-3 h-3 text-stone-400 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-muted">
+                <MapPin className="w-3 h-3 text-muted shrink-0" />
                 <span className="truncate">{business.address}</span>
               </div>
             )}
             {business.phone && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                <Phone className="w-3 h-3 text-stone-400 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-muted">
+                <Phone className="w-3 h-3 text-muted shrink-0" />
                 <span>{business.phone}</span>
               </div>
             )}
             {business.emailBusiness && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                <Mail className="w-3 h-3 text-stone-400 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-muted">
+                <Mail className="w-3 h-3 text-muted shrink-0" />
                 <span className="truncate">{business.emailBusiness}</span>
               </div>
             )}
             {business.website && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                <Globe className="w-3 h-3 text-stone-400 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-muted">
+                <Globe className="w-3 h-3 text-muted shrink-0" />
                 <span className="truncate">{business.website}</span>
               </div>
             )}
@@ -455,30 +455,30 @@ function BusinessReviewCard({ business, onApprove, onReject, onDetail, actionLoa
           {hasSocial ? (
             <>
               {business.instagramUrl && (
-                <a href={business.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-400 hover:text-pink-500 transition-colors">Instagram</a>
+                <a href={business.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-muted hover:text-pink-500 transition-colors">Instagram</a>
               )}
               {business.facebookUrl && (
-                <a href={business.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-400 hover:text-blue-600 transition-colors">Facebook</a>
+                <a href={business.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-muted hover:text-blue-600 transition-colors">Facebook</a>
               )}
               {business.xUrl && (
-                <a href={business.xUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-400 hover:text-stone-700 transition-colors">X</a>
+                <a href={business.xUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-muted hover:text-body transition-colors">X</a>
               )}
             </>
           ) : (
-            <p className="text-xs text-stone-300 italic">Sin redes registradas</p>
+            <p className="text-xs text-muted italic">Sin redes registradas</p>
           )}
         </div>
 
         {/* Meta: fecha y estado activo */}
-        <div className="flex items-center gap-4 text-xs text-stone-400 border-t border-stone-50 pt-3 mt-auto">
+        <div className="flex items-center gap-4 text-xs text-muted border-t border-edge/40 pt-3 mt-auto">
           {formattedDate && (
             <span className="flex items-center gap-1">
               <CalendarDays className="w-3 h-3" />
               {formattedDate}
             </span>
           )}
-          <span className={`flex items-center gap-1 ${isActive ? 'text-emerald-500' : 'text-stone-300'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+          <span className={`flex items-center gap-1 ${isActive ? 'text-primary-mid' : 'text-muted'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-primary-mid' : 'bg-edge'}`} />
             {isActive ? 'Activo' : 'Inactivo'}
           </span>
         </div>
@@ -486,7 +486,7 @@ function BusinessReviewCard({ business, onApprove, onReject, onDetail, actionLoa
         {/* Acciones */}
         <div className="flex flex-wrap gap-2">
           <Button
-            className="!w-auto !py-1.5 !px-3 !text-xs !rounded-lg !bg-none !from-transparent !to-transparent bg-white !text-stone-600 border border-stone-200 hover:bg-stone-50"
+            className="!w-auto !py-1.5 !px-3 !text-xs !rounded-lg !bg-none !from-transparent !to-transparent bg-card-bg !text-body border border-edge hover:bg-app-bg"
             onClick={() => onDetail(business)}
           >
             <Eye className="w-3 h-3" /> Ver detalle
@@ -664,38 +664,38 @@ export default function AdminBusinesses() {
     }
   };
 
-  const thClass = 'px-4 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide';
+  const thClass = 'px-4 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wide';
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <div className="flex items-center gap-1.5 text-xs text-stone-400">
+        <div className="flex items-center gap-1.5 text-xs text-muted">
           <LayoutDashboard className="w-3.5 h-3.5" />
           <span>Administrador</span>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-stone-600 font-medium">Negocios</span>
+          <span className="text-body font-medium">Negocios</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-              <Building2 className="w-5 h-5 text-emerald-600" />
+            <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
+              <Building2 className="w-5 h-5 text-primary-dark" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-stone-800">Moderación de Negocios</h1>
-              <p className="text-sm text-stone-400 mt-0.5">Revisa y gestiona los negocios de la plataforma</p>
+              <h1 className="text-xl font-serif text-heading">Moderación de Negocios</h1>
+              <p className="text-sm text-muted mt-0.5">Revisa y gestiona los negocios de la plataforma</p>
             </div>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white text-sm font-medium rounded-xl hover:bg-emerald-600 transition-colors shadow-sm shrink-0">
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary-dark text-on-dark-active text-sm font-medium rounded-xl hover:bg-primary-darkest transition-colors shadow-warm-sm shrink-0">
             <Plus className="w-4 h-4" /> Nuevo Negocio
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl w-fit">
+      <div className="flex items-center gap-1 bg-app-bg p-1 rounded-xl w-fit border border-edge">
         {TABS.map((tab) => (
-          <button key={tab.value} onClick={() => handleTabChange(tab.value)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.value ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>
+          <button key={tab.value} onClick={() => handleTabChange(tab.value)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.value ? 'bg-card-bg text-heading shadow-warm-sm' : 'text-muted hover:text-body'}`}>
             {tab.label}
             {tab.value === STATUS.PENDING && activeTab === STATUS.PENDING && total > 0 && <span className="ml-1.5 bg-amber-100 text-amber-700 text-xs font-semibold px-1.5 py-0.5 rounded-full">{total}</span>}
           </button>
@@ -705,21 +705,21 @@ export default function AdminBusinesses() {
       {/* Search + toggle de vista */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-          <input type="text" placeholder="Buscar por nombre, propietario o categoría..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all bg-white" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+          <input type="text" placeholder="Buscar por nombre, propietario o categoría..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg" />
         </div>
-        <div className="flex items-center gap-1 p-1 bg-stone-100 rounded-xl shrink-0">
+        <div className="flex items-center gap-1 p-1 bg-app-bg rounded-xl shrink-0 border border-edge">
           <button
             onClick={() => setViewMode('table')}
             title="Vista tabla"
-            className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white shadow-sm text-stone-700' : 'text-stone-400 hover:text-stone-600'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-card-bg shadow-warm-sm text-heading' : 'text-muted hover:text-body'}`}
           >
             <LayoutList className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode('cards')}
             title="Vista cards"
-            className={`p-2 rounded-lg transition-all ${viewMode === 'cards' ? 'bg-white shadow-sm text-stone-700' : 'text-stone-400 hover:text-stone-600'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'cards' ? 'bg-card-bg shadow-warm-sm text-heading' : 'text-muted hover:text-body'}`}
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
@@ -728,21 +728,21 @@ export default function AdminBusinesses() {
 
       {/* Contenido: tabla o cards */}
       {viewMode === 'table' ? (
-        <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
+        <div className="bg-card-bg rounded-2xl border border-edge overflow-hidden shadow-warm-sm">
           {loading ? (
-            <div className="flex items-center justify-center py-20 gap-3 text-stone-400">
+            <div className="flex items-center justify-center py-20 gap-3 text-muted">
               <Loader2 className="w-5 h-5 animate-spin" />
               <span className="text-sm">Cargando negocios...</span>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-stone-400 gap-3">
+            <div className="flex flex-col items-center justify-center py-20 text-muted gap-3">
               <Building2 className="w-10 h-10 opacity-30" />
               <p className="text-sm">{search ? 'No se encontraron resultados' : `No hay negocios ${activeTab ? `en estado "${STATUS_LABELS[activeTab]}"` : 'registrados'}`}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="border-b border-stone-100 bg-stone-50/50">
+                <thead className="border-b border-edge bg-app-bg/50">
                   <tr>
                     <th className={thClass}>#</th>
                     <th className={thClass}>Negocio</th>
@@ -754,18 +754,18 @@ export default function AdminBusinesses() {
                     <th className={thClass}>Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-50">
+                <tbody className="divide-y divide-edge/40">
                   {filtered.map((business, idx) => {
                     const isLoading = actionLoading === business.id_business;
                     const { status, isActive } = business;
                     return (
-                      <tr key={business.id_business} className="hover:bg-stone-50/50 transition-colors">
-                        <td className="px-4 py-3.5 text-xs text-stone-400 font-mono">{(page - 1) * LIMIT + idx + 1}</td>
+                      <tr key={business.id_business} className="hover:bg-app-bg/50 transition-colors">
+                        <td className="px-4 py-3.5 text-xs text-muted font-mono">{(page - 1) * LIMIT + idx + 1}</td>
                         <td className="px-4 py-3.5 overflow-visible">
                           <div className="flex items-center gap-3">
                             <BusinessAvatar logo={business.logo} name={business.businessName} onPreview={(src, alt) => setPreview({ src, alt })} />
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-stone-700 truncate max-w-[140px]">{business.businessName}</p>
+                              <p className="text-sm font-medium text-body truncate max-w-[140px]">{business.businessName}</p>
                               {status === 'Rejected' && business.rejectionReason && (
                                 <p title={business.rejectionReason} className="text-xs text-red-400 flex items-center gap-1 mt-0.5 truncate max-w-[140px]">
                                   <AlertTriangle className="w-3 h-3 shrink-0" />
@@ -775,17 +775,17 @@ export default function AdminBusinesses() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 text-sm text-stone-500">{business.user?.email || '—'}</td>
+                        <td className="px-4 py-3.5 text-sm text-muted">{business.user?.email || '—'}</td>
                         <td className="px-4 py-3.5">
-                          <span className="text-xs font-medium text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full">{business.category?.category || '—'}</span>
+                          <span className="text-xs font-medium text-body bg-app-bg px-2.5 py-1 rounded-full border border-edge">{business.category?.category || '—'}</span>
                         </td>
-                        <td className="px-4 py-3.5 text-xs text-stone-400 max-w-[160px] truncate">{business.address || '—'}</td>
+                        <td className="px-4 py-3.5 text-xs text-muted max-w-[160px] truncate">{business.address || '—'}</td>
                         <td className="px-4 py-3.5">
                           <StatusBadge status={status} />
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${isActive ? 'text-emerald-600' : 'text-stone-400'}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+                          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${isActive ? 'text-primary-dark' : 'text-muted'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-primary-mid' : 'bg-edge'}`} />
                             {isActive ? 'Activo' : 'Inactivo'}
                           </span>
                         </td>
@@ -794,18 +794,18 @@ export default function AdminBusinesses() {
                             <button
                               title="Ver detalle"
                               onClick={() => setDetailBusiness(business)}
-                              className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                              className="p-1.5 rounded-lg text-muted hover:text-primary-dark hover:bg-primary-softest/50 transition-colors"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
 
-                            <div className="w-px h-4 bg-stone-200 mx-0.5" />
+                            <div className="w-px h-4 bg-edge mx-0.5" />
 
                             <button
                               title="Editar"
                               onClick={() => openEdit(business)}
                               disabled={isLoading}
-                              className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="p-1.5 rounded-lg text-muted hover:text-primary-dark hover:bg-primary-softest/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
@@ -814,7 +814,7 @@ export default function AdminBusinesses() {
                               title="Eliminar"
                               onClick={() => setDeleteTarget(business)}
                               disabled={isLoading}
-                              className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="p-1.5 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -829,19 +829,19 @@ export default function AdminBusinesses() {
           )}
 
           {!loading && filtered.length > 0 && (
-            <div className="px-4 py-3 border-t border-stone-50 flex items-center justify-between">
-              <p className="text-xs text-stone-400">
+            <div className="px-4 py-3 border-t border-edge flex items-center justify-between">
+              <p className="text-xs text-muted">
                 Mostrando {filtered.length} de {total} negocios
               </p>
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-colors">
+                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-sm text-stone-600 font-medium px-1">
+                  <span className="text-sm text-body font-medium px-1">
                     {page} / {totalPages}
                   </span>
-                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-colors">
+                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -853,12 +853,12 @@ export default function AdminBusinesses() {
         /* Vista cards */
         <>
           {loading ? (
-            <div className="flex items-center justify-center py-20 gap-3 text-stone-400">
+            <div className="flex items-center justify-center py-20 gap-3 text-muted">
               <Loader2 className="w-5 h-5 animate-spin" />
               <span className="text-sm">Cargando negocios...</span>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-stone-400 gap-3">
+            <div className="flex flex-col items-center justify-center py-20 text-muted gap-3">
               <Building2 className="w-10 h-10 opacity-30" />
               <p className="text-sm">{search ? 'No se encontraron resultados' : `No hay negocios ${activeTab ? `en estado "${STATUS_LABELS[activeTab]}"` : 'registrados'}`}</p>
             </div>
@@ -879,17 +879,17 @@ export default function AdminBusinesses() {
 
           {!loading && filtered.length > 0 && totalPages > 1 && (
             <div className="flex items-center justify-between pt-2">
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-muted">
                 Mostrando {filtered.length} de {total} negocios
               </p>
               <div className="flex items-center gap-2">
-                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-colors">
+                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="text-sm text-stone-600 font-medium px-1">
+                <span className="text-sm text-body font-medium px-1">
                   {page} / {totalPages}
                 </span>
-                <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-colors">
+                <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -917,7 +917,7 @@ export default function AdminBusinesses() {
                     setDetailBusiness(null);
                   }}
                   disabled={actionLoading === detailBusiness.id_business}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 disabled:opacity-60 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary-dark text-on-dark-active text-sm font-semibold hover:bg-primary-darkest disabled:opacity-60 transition-colors"
                 >
                   {actionLoading === detailBusiness.id_business
                     ? <Loader2 className="w-4 h-4 animate-spin" />

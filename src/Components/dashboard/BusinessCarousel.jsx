@@ -32,7 +32,7 @@ const CAT_GRADIENTS = [
 ];
 
 const TAG_COLORS = [
-  'bg-green-100  text-green-700  border-green-200',
+  'bg-primary-softest text-primary-dark border-edge',
   'bg-amber-100  text-amber-700  border-amber-200',
   'bg-blue-100   text-blue-700   border-blue-200',
   'bg-teal-100   text-teal-700   border-teal-200',
@@ -115,7 +115,7 @@ export function BusinessCard({
         )}
 
         {hasCert && (
-          <span className="absolute top-2.5 left-2.5 flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/80 backdrop-blur-sm text-white">
+          <span className="absolute top-2.5 left-2.5 flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary-mid/80 backdrop-blur-sm text-white">
             <Award className="w-2.5 h-2.5" />
             Cert.
           </span>

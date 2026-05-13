@@ -178,7 +178,7 @@ export function HeaderDisplay({ business, editSlot, onShare, onLogoSave }) {
       )}
 
       <div className="flex-1 min-w-0">
-        <h1 className="text-2xl font-bold text-heading leading-tight">
+        <h1 className="text-2xl font-serif text-heading leading-tight">
           {business.businessName}
         </h1>
 

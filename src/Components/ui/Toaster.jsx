@@ -5,10 +5,10 @@ function ToastItem({ toast, onDismiss }) {
   const ok = toast.type === 'success';
 
   return (
-    <div role="alert" className={`flex items-start gap-3 pl-4 pr-3 py-3.5 rounded-xl shadow-lg border w-80 transition-all duration-300 ease-in-out ${toast.visible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} ${ok ? 'bg-white border-emerald-100' : 'bg-white border-red-100'}`}>
-      <span className={`mt-0.5 shrink-0 ${ok ? 'text-emerald-500' : 'text-red-500'}`}>{ok ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}</span>
-      <p className="text-sm text-stone-700 flex-1 leading-snug">{toast.message}</p>
-      <button onClick={() => onDismiss(toast.id)} className="mt-0.5 shrink-0 text-stone-300 hover:text-stone-500 transition-colors">
+    <div role="alert" className={`flex items-start gap-3 pl-4 pr-3 py-3.5 rounded-xl shadow-lg border w-80 transition-all duration-300 ease-in-out ${toast.visible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} ${ok ? 'bg-card-bg border-primary-light/40' : 'bg-card-bg border-red-100'}`}>
+      <span className={`mt-0.5 shrink-0 ${ok ? 'text-primary-mid' : 'text-red-500'}`}>{ok ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}</span>
+      <p className="text-sm text-body flex-1 leading-snug">{toast.message}</p>
+      <button onClick={() => onDismiss(toast.id)} className="mt-0.5 shrink-0 text-muted hover:text-body transition-colors">
         <X className="w-3.5 h-3.5" />
       </button>
     </div>

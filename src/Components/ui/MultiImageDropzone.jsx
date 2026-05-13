@@ -134,12 +134,12 @@ export default function MultiImageDropzone({ images = [], onAdd, onRemove }) {
           'w-full border-2 border-dashed rounded-xl py-7',
           'flex flex-col items-center justify-center gap-2 transition-colors select-none',
           isDragging
-            ? 'border-green-400 bg-green-50/50'
-            : 'border-edge hover:border-green-400 hover:bg-green-50/30',
+            ? 'border-primary-mid bg-primary-softest/50'
+            : 'border-edge hover:border-primary-mid hover:bg-primary-softest/30',
         ].join(' ')}
       >
         {isDragging
-          ? <UploadCloud className="w-6 h-6 text-green-500" />
+          ? <UploadCloud className="w-6 h-6 text-primary-mid" />
           : <ImagePlus className="w-6 h-6 text-muted" />
         }
         <span className="text-sm text-muted">

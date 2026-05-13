@@ -6,7 +6,7 @@ const variants = {
     icon: <AlertCircle className="w-4 h-4 shrink-0" />,
   },
   success: {
-    wrapper: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    wrapper: "bg-primary-softest border-primary-light text-primary-dark",
     icon: <CheckCircle2 className="w-4 h-4 shrink-0" />,
   },
   info: {

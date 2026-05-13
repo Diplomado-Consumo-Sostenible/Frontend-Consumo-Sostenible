@@ -1,37 +1,66 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Primarios (verde bosque) ─────────────────────────── */
-  --color-primary-darkest:  #1A3D2B;
-  --color-primary-dark:     #2E6B47;
-  --color-primary-mid:      #4A9C6D;
-  --color-primary-light:    #A8D5B5;
-  --color-primary-softest:  #E8F5EC;
+  /* ── Verdes profundos ────────────────────────────────── */
+  --color-primary-darkest:  #0F2118;
+  --color-primary-dark:     #1F3D2B;
+  --color-primary-mid:      #3A6647;
+  --color-primary-light:    #5B8A66;
+  --color-primary-softest:  #C8DBBF;
 
-  /* ── Tierra (cálidos complementarios) ────────────────── */
+  /* ── Tierra (cálidos complementarios) ───────────────── */
   --color-earth-dark:   #3D2B1A;
   --color-earth-mid:    #1A3D2B;
   --color-earth-light:  #C8A882;
   --color-earth-cream:  #F2E4CC;
 
   /* ── Superficies ─────────────────────────────────────── */
-  --color-app-bg:    #F4F7F5;
+  --color-app-bg:    #FAF7EE;
   --color-card-bg:   #FFFFFF;
-  --color-edge:      #C8DED1;
+  --color-edge:      #E2D9C5;
+  --color-footer-bg: #F2EDE0;
+
+  /* ── Acento cálido ───────────────────────────────────── */
+  --color-terracotta:      #C76E4A;
+  --color-terracotta-soft: #F5E4DC;
+  --color-amber:           #C99744;
 
   /* ── Estados ─────────────────────────────────────────── */
-  --color-ok-bg:       #D5EDDF;
-  --color-ok-text:     #1A5C35;
-  --color-warn-bg:     #FDF0D0;
-  --color-warn-text:   #8C5A0A;
+  --color-ok-bg:       #DCE8D4;
+  --color-ok-text:     #2A5C35;
+  --color-warn-bg:     #F5ECD4;
+  --color-warn-text:   #8C6020;
 
   /* ── Tipografía ──────────────────────────────────────── */
-  --color-heading:      #1A3D2B;
-  --color-body:         #2E4A38;
-  --color-muted:        #5B8A6F;
-  --color-on-dark:      #A8D5B5;
-  --color-on-dark-active: #E8F5EC;
+  --color-heading:        #1A2D1F;
+  --color-body:           #2E4035;
+  --color-muted:          #7A9A82;
+  --color-on-dark:        #A8C9B0;
+  --color-on-dark-active: #F0EBE0;
+
+  /* ── Fuentes ─────────────────────────────────────────── */
+  --font-sans:  'Geist', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+
+  /* ── Sombras cálidas ─────────────────────────────────── */
+  --shadow-warm-sm: 0 1px 4px 0 rgb(31 61 43 / 0.06);
+  --shadow-warm:    0 4px 16px 0 rgb(31 61 43 / 0.08);
 }
 
+/* ── Base ────────────────────────────────────────────── */
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  background-color: var(--color-app-bg);
+  color: var(--color-body);
+}
 
-
+/* ── Highlight tipo marcador — solo en h1 landing ─────── */
+.highlight-warm {
+  background-image: linear-gradient(
+    transparent calc(100% - 3px),
+    var(--color-terracotta) calc(100% - 3px)
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding-bottom: 2px;
+}

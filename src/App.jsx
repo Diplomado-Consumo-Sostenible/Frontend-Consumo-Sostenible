@@ -22,12 +22,14 @@ import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './Routes/protectedRoute';
 import GoogleCallback from './pages/GoogleCallback';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
     <ToastProvider>
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -188,7 +190,7 @@ function App() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
     </ToastProvider>

@@ -31,3 +31,13 @@ export const getPublicBusinesses = async (filters = {}) => {
     throw error.response?.data || { message: 'Error al obtener los negocios' };
   }
 };
+
+export const getTopBusinesses = async () => {
+  try {
+    const response = await API.get('/business/top');
+    return Array.isArray(response.data) ? response.data : (response.data?.data ?? []);
+  } catch (error) {
+    if (error.response?.status === 404) return [];
+    throw error.response?.data || { message: 'Error al obtener los negocios destacados' };
+  }
+};

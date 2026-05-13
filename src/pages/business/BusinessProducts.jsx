@@ -63,15 +63,15 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
+          <h2 className="text-lg font-semibold text-heading">
             {isEdit ? 'Editar producto' : 'Nuevo producto'}
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-1 rounded-lg hover:bg-app-bg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-muted" />
           </button>
         </div>
 
@@ -79,7 +79,7 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
 
           {/* Imagen — el uploader gestiona todo su estado internamente */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-body mb-2">
               Imagen del producto
             </label>
             <ImageUploader
@@ -92,7 +92,7 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
 
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-body mb-1">
               Nombre <span className="text-red-500">*</span>
             </label>
             <input
@@ -103,10 +103,10 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
                 setErrors((er) => ({ ...er, name: '' }));
               }}
               placeholder="Ej: Canasta de frutas orgánicas"
-              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none transition-colors focus:ring-2 focus:ring-green-400/30 ${
+              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none transition-colors focus:ring-2 focus:ring-primary-mid/30 ${
                 errors.name
                   ? 'border-red-400 bg-red-50'
-                  : 'border-gray-200 focus:border-green-400'
+                  : 'border-edge focus:border-primary-mid'
               }`}
             />
             {errors.name && (
@@ -116,7 +116,7 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
 
           {/* Descripción */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-body mb-1">
               Descripción <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -127,10 +127,10 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
                 setErrors((er) => ({ ...er, description: '' }));
               }}
               placeholder="Describe brevemente tu producto…"
-              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none resize-none transition-colors focus:ring-2 focus:ring-green-400/30 ${
+              className={`w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none resize-none transition-colors focus:ring-2 focus:ring-primary-mid/30 ${
                 errors.description
                   ? 'border-red-400 bg-red-50'
-                  : 'border-gray-200 focus:border-green-400'
+                  : 'border-edge focus:border-primary-mid'
               }`}
             />
             {errors.description && (
@@ -143,14 +143,14 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              className="flex-1 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+              className="flex-1 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest disabled:opacity-60 text-on-dark-active text-sm font-medium flex items-center justify-center gap-2 transition-colors"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading
@@ -177,17 +177,17 @@ function DeleteConfirmModal({ product, onClose, onConfirm, loading }) {
             <Trash2 className="w-5 h-5 text-red-500" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-800">Eliminar producto</h3>
-            <p className="text-sm text-gray-500 mt-0.5">Esta acción no se puede deshacer.</p>
+            <h3 className="font-semibold text-heading">Eliminar producto</h3>
+            <p className="text-sm text-muted mt-0.5">Esta acción no se puede deshacer.</p>
           </div>
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-body">
           ¿Seguro que deseas eliminar <strong>"{product.name}"</strong>?
         </p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            className="flex-1 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors"
           >
             Cancelar
           </button>
@@ -209,8 +209,8 @@ function DeleteConfirmModal({ product, onClose, onConfirm, loading }) {
 
 function ProductCard({ product, onEdit, onDelete }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-      <div className="h-44 bg-gray-100 relative overflow-hidden">
+    <div className="bg-card-bg rounded-2xl shadow-warm-sm border border-edge overflow-hidden flex flex-col hover:shadow-warm transition-shadow">
+      <div className="h-44 bg-app-bg relative overflow-hidden">
         {product.image ? (
           <img
             src={product.image}
@@ -223,25 +223,25 @@ function ProductCard({ product, onEdit, onDelete }) {
           />
         ) : null}
         <div
-          className="w-full h-full flex items-center justify-center bg-gray-50"
+          className="w-full h-full flex items-center justify-center bg-app-bg"
           style={{ display: product.image ? 'none' : 'flex' }}
         >
-          <PackageOpen className="w-10 h-10 text-gray-300" />
+          <PackageOpen className="w-10 h-10 text-muted" />
         </div>
       </div>
 
       <div className="flex-1 p-4 flex flex-col gap-2">
-        <h3 className="font-semibold text-gray-800 text-sm leading-tight line-clamp-2">
+        <h3 className="font-semibold text-heading text-sm leading-tight line-clamp-2">
           {product.name}
         </h3>
-        <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
+        <p className="text-xs text-muted leading-relaxed line-clamp-3 flex-1">
           {product.description}
         </p>
 
         <div className="flex gap-2 mt-auto pt-2">
           <button
             onClick={() => onEdit(product)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-edge text-xs font-medium text-body hover:bg-app-bg hover:border-primary-light transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" />
             Editar
@@ -264,16 +264,16 @@ function ProductCard({ product, onEdit, onDelete }) {
 function EmptyProducts({ onAdd }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center mb-4">
-        <PackageOpen className="w-8 h-8 text-green-400" />
+      <div className="w-16 h-16 rounded-2xl bg-primary-softest border border-edge flex items-center justify-center mb-4">
+        <PackageOpen className="w-8 h-8 text-primary-mid" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-700 mb-1">Sin productos aún</h3>
-      <p className="text-sm text-gray-400 max-w-xs mb-6">
+      <h3 className="text-lg font-semibold text-body mb-1">Sin productos aún</h3>
+      <p className="text-sm text-muted max-w-xs mb-6">
         Agrega tu primer producto para que los usuarios puedan explorar lo que ofreces.
       </p>
       <button
         onClick={onAdd}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors"
       >
         <Plus className="w-4 h-4" />
         Agregar producto
@@ -368,7 +368,7 @@ export default function BusinessProducts() {
   if (pageLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-7 h-7 animate-spin text-green-500" />
+        <Loader2 className="w-7 h-7 animate-spin text-primary-mid" />
       </div>
     );
   }
@@ -389,10 +389,10 @@ export default function BusinessProducts() {
             : <AlertTriangle className="w-7 h-7 text-red-400" />
           }
         </div>
-        <h3 className="text-base font-semibold text-gray-700 mb-1">
+        <h3 className="text-base font-semibold text-body mb-1">
           {isPending ? 'Negocio pendiente de aprobación' : 'Negocio rechazado'}
         </h3>
-        <p className="text-sm text-gray-400 max-w-xs">
+        <p className="text-sm text-muted max-w-xs">
           {isPending
             ? 'Podrás gestionar tus productos una vez que el administrador apruebe tu negocio.'
             : 'Tu negocio fue rechazado. Contacta al administrador para más información.'}
@@ -404,16 +404,16 @@ export default function BusinessProducts() {
   if (!business) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center mb-4">
-          <PackageOpen className="w-7 h-7 text-green-400" />
+        <div className="w-14 h-14 rounded-2xl bg-primary-softest border border-edge flex items-center justify-center mb-4">
+          <PackageOpen className="w-7 h-7 text-primary-mid" />
         </div>
-        <h3 className="text-base font-semibold text-gray-700 mb-1">Sin negocio registrado</h3>
-        <p className="text-sm text-gray-400 max-w-xs mb-5">
+        <h3 className="text-base font-semibold text-body mb-1">Sin negocio registrado</h3>
+        <p className="text-sm text-muted max-w-xs mb-5">
           Registra tu negocio primero para poder agregar productos.
         </p>
         <button
           onClick={() => navigate('/dashboardBusiness/crear-negocio')}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
           Crear negocio
@@ -442,7 +442,7 @@ export default function BusinessProducts() {
               <PackageOpen className="w-5 h-5 text-primary-dark" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-heading">Productos</h1>
+              <h1 className="text-xl font-serif text-heading">Productos</h1>
               <p className="text-sm text-muted mt-0.5">
                 {business.name ?? business.businessName} ·{' '}
                 {products.length} producto{products.length !== 1 ? 's' : ''}
@@ -453,7 +453,7 @@ export default function BusinessProducts() {
           {products.length > 0 && (
             <button
               onClick={openCreate}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
               Agregar
