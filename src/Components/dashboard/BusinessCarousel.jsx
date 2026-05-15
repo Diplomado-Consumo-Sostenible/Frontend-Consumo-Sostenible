@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   Award,
   Building2,
   ChevronLeft,
@@ -173,7 +174,7 @@ export function HorizontalCarousel({
   titleBadge    = null,
   iconClassName = 'text-primary-mid',
   linkTo        = '/dashboard/explorar',
-  linkLabel     = 'Ver todos →',
+  linkLabel     = 'Ver todos',
   emptyMsg      = 'No hay negocios disponibles',
   autoplay      = false,
   autoplayDelay = 4000,
@@ -340,9 +341,10 @@ export function HorizontalCarousel({
           </button>
           <Link
             to={linkTo}
-            className="text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors ml-1"
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors ml-1"
           >
             {linkLabel}
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>

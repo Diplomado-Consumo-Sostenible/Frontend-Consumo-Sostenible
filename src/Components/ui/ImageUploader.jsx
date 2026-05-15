@@ -1,4 +1,4 @@
-import { CheckCircle2, ImagePlus, Loader2, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ImagePlus, Loader2, UploadCloud, X } from 'lucide-react';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { validateImageFile } from '../../services/upload/upload.service';
 
@@ -217,7 +217,7 @@ const ImageUploader = forwardRef(function ImageUploader(
 
       {isError && errorMsg && (
         <p className="text-xs text-red-500 flex items-center gap-1">
-          <span aria-hidden="true">⚠</span> {errorMsg}
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> {errorMsg}
         </p>
       )}
 

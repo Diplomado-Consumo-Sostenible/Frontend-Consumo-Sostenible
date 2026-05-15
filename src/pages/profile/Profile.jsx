@@ -108,7 +108,7 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
               />
               {errors.nombre && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.nombre}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.nombre}
                 </p>
               )}
             </div>
@@ -133,7 +133,7 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
               </select>
               {errors.generoId && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.generoId}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.generoId}
                 </p>
               )}
             </div>
@@ -233,7 +233,7 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
               />
               {errors.newEmail && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.newEmail}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.newEmail}
                 </p>
               )}
             </div>
@@ -276,7 +276,7 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
               </div>
               {errors.password && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.password}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.password}
                 </p>
               )}
             </div>
@@ -396,7 +396,7 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
                 <EyeToggle show={showCurrent} onToggle={() => setShowCurrent((v) => !v)} />
               </div>
               {errors.currentPassword && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.currentPassword}</p>
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.currentPassword}</p>
               )}
             </div>
 
@@ -415,7 +415,7 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
                 <EyeToggle show={showNew} onToggle={() => setShowNew((v) => !v)} />
               </div>
               {errors.newPassword && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.newPassword}</p>
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.newPassword}</p>
               )}
             </div>
 
@@ -434,7 +434,7 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
                 <EyeToggle show={showConfirm} onToggle={() => setShowConfirm((v) => !v)} />
               </div>
               {errors.confirmPassword && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.confirmPassword}</p>
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.confirmPassword}</p>
               )}
             </div>
 

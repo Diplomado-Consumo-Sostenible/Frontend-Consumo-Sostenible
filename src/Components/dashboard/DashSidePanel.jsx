@@ -1,4 +1,4 @@
-import { Award, Heart, Lightbulb, Map as MapIcon, MapPin, Recycle, ShoppingBag, Store } from 'lucide-react';
+import { ArrowRight, Award, Heart, Lightbulb, Map as MapIcon, MapPin, Recycle, ShoppingBag, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import MapView from '../map/MapView';
 
@@ -44,7 +44,7 @@ function MapWidget({ businesses }) {
           <h3 className="text-sm font-semibold text-heading">Negocios cerca de ti</h3>
         </div>
         <Link to="/dashboard/mapa" className="text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors">
-          Ver mapa →
+          Ver mapa <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
@@ -94,7 +94,7 @@ function FollowingWidget({ followedBusinesses, loading }) {
           <h3 className="text-sm font-semibold text-heading">Negocios que sigo</h3>
         </div>
         <Link to="/dashboard/favoritos" className="text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors">
-          Ver todos →
+          Ver todos <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
@@ -118,7 +118,7 @@ function FollowingWidget({ followedBusinesses, loading }) {
             to="/dashboard/explorar"
             className="text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors"
           >
-            Explorar negocios →
+            Explorar negocios <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       ) : (

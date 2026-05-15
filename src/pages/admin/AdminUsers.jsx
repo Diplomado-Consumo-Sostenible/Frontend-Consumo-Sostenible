@@ -110,7 +110,7 @@ function FormField({ label, error, children }) {
       {children}
       {error && (
         <p className="text-red-400 text-xs flex items-center gap-1">
-          <span>⚠</span> {error}
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> {error}
         </p>
       )}
     </div>

@@ -4,22 +4,24 @@ import API from '../../api/api';
  * Servicio público de negocios para la exploración del usuario consumidor.
  *
  * Parámetros aceptados por el backend:
- *   - id_category : number → filtra por id de categoría
- *   - id_tag      : number → filtra por id de tag
- *   - page        : number → paginación
- *   - limit       : number → paginación
- *
- * Nota: el backend usa forbidNonWhitelisted — enviar cualquier otro
- * parámetro (categoryId, search, etc.) provoca un 400. El filtro de
- * texto se aplica en cliente sobre los resultados recibidos.
+ *   - id_category   : number → filtra por id de categoría
+ *   - id_tag        : number → filtra por id de tag
+ *   - search        : string → filtra por nombre de negocio
+ *   - sortBy        : 'recent' | 'rated' | 'reviews' → ordenamiento en BD
+ *   - sortDirection : 'ASC' | 'DESC'
+ *   - page          : number → paginación
+ *   - limit         : number → paginación
  */
 export const getPublicBusinesses = async (filters = {}) => {
   try {
     const params = {};
-    if (filters.id_category) params.id_category = filters.id_category;
-    if (filters.id_tag)      params.id_tag      = filters.id_tag;
-    if (filters.page)        params.page        = filters.page;
-    if (filters.limit)       params.limit       = filters.limit;
+    if (filters.id_category)   params.id_category   = filters.id_category;
+    if (filters.id_tag)        params.id_tag        = filters.id_tag;
+    if (filters.search)        params.search        = filters.search;
+    if (filters.sortBy)        params.sortBy        = filters.sortBy;
+    if (filters.sortDirection) params.sortDirection = filters.sortDirection;
+    if (filters.page)          params.page          = filters.page;
+    params.limit = filters.limit ?? 50;
 
     const response = await API.get('/business', { params });
     const raw  = response.data;

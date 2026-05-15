@@ -47,12 +47,22 @@ export default function RegisterForm({ onNext, onBack, defaultValues }) {
 
       {/* Logo móvil */}
       <div className="flex md:hidden items-center gap-2 mb-4">
-        <Leaf className="w-5 h-5 text-primary-dark" />
-        <span className="text-primary-dark font-semibold text-sm tracking-wide">EcoVida</span>
+        <Link to="/" className="flex items-center gap-2 shrink-0">
+          <div className="relative flex items-center gap-2.5">
+            <img
+                src="https://res.cloudinary.com/dhhlvuzqa/image/upload/v1777184416/ecovida_perfiles/dns8fzkguprwuca0ydgv.webp"
+                alt="Consumo Sostenible"
+                className="w-8 h-8 rounded-lg object-contain shrink-0"
+              />
+            <span className="text-heading text-sm font-semibold tracking-wide">
+              EcoVida
+            </span>
+          </div>
+        </Link>
       </div>
 
       <div className="mb-6">
-        <h1 className="text-heading text-2xl font-serif">Crea tu cuenta</h1>
+        <h1 className="text-heading text-4xl font-serif">Crea tu cuenta</h1>
         <p className="text-muted text-sm mt-1">Completa los datos para registrarte</p>
       </div>
 

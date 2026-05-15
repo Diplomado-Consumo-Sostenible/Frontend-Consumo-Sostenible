@@ -41,7 +41,7 @@ export default function DashFeatured({ businesses, loadingBusinesses, followedId
         title="Destacados cerca de ti"
         TitleIcon={Store}
         iconClassName="text-primary-mid"
-        linkLabel="Ver todos →"
+        linkLabel="Ver todos"
         emptyMsg="No hay negocios disponibles aún"
         autoplay
         autoplayDelay={4000}

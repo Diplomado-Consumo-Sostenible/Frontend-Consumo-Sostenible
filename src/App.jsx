@@ -26,8 +26,8 @@ import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
-    <ToastProvider>
     <BrowserRouter>
+    <ToastProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -149,11 +149,9 @@ function App() {
         <Route
           path="/dashboard/explorar"
           element={
-            <ProtectedRoute roles={['USER']}>
-              <DashboardLayout>
-                <Explorar />
-              </DashboardLayout>
-            </ProtectedRoute>
+            <DashboardLayout>
+              <Explorar />
+            </DashboardLayout>
           }
         />
 
@@ -192,8 +190,8 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
     </ToastProvider>
+    </BrowserRouter>
   );
 }
 

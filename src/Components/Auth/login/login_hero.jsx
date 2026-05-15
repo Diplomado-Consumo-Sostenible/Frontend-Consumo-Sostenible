@@ -1,4 +1,5 @@
-import { Globe, Leaf, Recycle, Users } from "lucide-react";
+import { Globe, Recycle, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function LoginHero() {
   return (
@@ -14,14 +15,18 @@ export default function LoginHero() {
       />
 
       {/* Logo */}
-      <div className="relative flex items-center gap-2.5">
-        <div className="w-8 h-8 bg-primary-mid rounded-xl flex items-center justify-center">
-          <Leaf className="w-4 h-4 text-on-dark-active" />
+      <Link to="/" className="flex items-center gap-2 shrink-0">
+        <div className="relative flex items-center gap-2.5">
+          <img
+              src="https://res.cloudinary.com/dhhlvuzqa/image/upload/v1777184416/ecovida_perfiles/dns8fzkguprwuca0ydgv.webp"
+              alt="Consumo Sostenible"
+              className="w-8 h-8 rounded-lg object-contain shrink-0"
+            />
+          <span className="text-on-dark-active text-sm font-semibold tracking-wide">
+            EcoVida
+          </span>
         </div>
-        <span className="text-on-dark-active text-sm font-semibold tracking-wide">
-          EcoVida
-        </span>
-      </div>
+      </Link>  
 
       {/* Ilustración + texto central */}
       <div className="relative flex flex-col items-center justify-center flex-1 py-8 gap-8">

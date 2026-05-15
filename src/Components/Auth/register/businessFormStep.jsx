@@ -55,7 +55,7 @@ export default function BusinessForm({ onNext, onBack }) {
         <BackButton onBack={onBack} />
 
         <div className="mb-6">
-          <h1 className="text-heading text-2xl font-serif">Registra tu negocio</h1>
+          <h1 className="text-heading text-4xl font-serif">Registra tu negocio</h1>
           <p className="text-muted text-sm mt-1">Completa la información de tu negocio</p>
         </div>
 

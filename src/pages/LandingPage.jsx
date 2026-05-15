@@ -1,70 +1,187 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import usePublicReviewsTotal from '../hooks/usePublicReviewsTotal';
 import BusinessDetailModal from '../Components/ui/BusinessDetailModal';
 import CTABanner from '../Components/landing/CTABanner';
-import FeaturedSection from '../Components/landing/FeaturedSection';
+import FavoritesDrawer from '../Components/landing/FavoritesDrawer';
+import FavoritesFAB from '../Components/landing/FavoritesFAB';
 import HeroSection from '../Components/landing/HeroSection';
+import LandingFilterBar from '../Components/landing/LandingFilterBar';
 import LandingFooter from '../Components/landing/LandingFooter';
 import LandingNavbar from '../Components/landing/LandingNavbar';
-import NearbySection from '../Components/landing/NearbySection';
+import MapSection from '../Components/landing/MapSection';
+import ResultsGrid from '../Components/landing/ResultsGrid';
+import TrendSection from '../Components/landing/TrendSection';
 import { useToastContext } from '../context/ToastContext';
 import { useFollows } from '../hooks/useFollows';
+import { getToken } from '../utils/storage';
 import usePublicBusinesses from '../hooks/usePublicBusinesses';
 import useTopBusinesses from '../hooks/useTopBusinesses';
 
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const PAGE_LOAD_TIME = Date.now();
+
 export default function LandingPage() {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen]         = useState(false);
+  const resultsSectionRef                        = useRef(null);
 
-  const {
-    businesses: topBusinesses,
-    loading: topLoading,
-    error: topError,
-    retry: retryTop,
-  } = useTopBusinesses();
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [activeTagIds, setActiveTagIds]         = useState(() => new Set());
+  const [sortOrder, setSortOrder]               = useState('relevant');
+  const [searchText, setSearchText]             = useState('');
 
-  const {
-    businesses: nearbyBusinesses,
-    loading: nearbyLoading,
-    error: nearbyError,
-    retry: retryNearby,
-  } = usePublicBusinesses({ limit: 3 });
+  const SORT_MAP = { relevant: 'relevant', rated: 'rated', reviews: 'reviews' };
+
+  const { businesses: topBusinesses } = useTopBusinesses();
 
   const {
     businesses: allBusinesses,
-  } = usePublicBusinesses({});
+    loading: allLoading,
+    error: allError,
+    retry: retryAll,
+  } = usePublicBusinesses({
+    sortBy: SORT_MAP[sortOrder] ?? 'recent',
+    sortDirection: 'DESC',
+    limit: 50,
+  });
 
-  const { followedIds, toggleFollow } = useFollows();
-  const { error: showError } = useToastContext();
+  const { followedIds, followedBusinesses, toggleFollow } = useFollows();
+  const { error: showError, auth: showAuthPrompt } = useToastContext();
 
-  const handleToggleFavorite = (id) => {
-    toggleFollow(id, { onError: showError });
-  };
+  const heroStats = useMemo(() => {
+    const newThisWeek = allBusinesses.filter(
+      (b) => b.createdAt && PAGE_LOAD_TIME - new Date(b.createdAt).getTime() < ONE_WEEK_MS,
+    ).length;
+    return { newThisWeek };
+  }, [allBusinesses]);
 
-  const totalBusinesses = allBusinesses.length;
+  const topBusinessIds = useMemo(
+    () => topBusinesses.slice(0, 4).map((b) => b.id_business),
+    [topBusinesses],
+  );
+  const { total: totalReviews } = usePublicReviewsTotal(topBusinessIds);
+
+  const communityFavorites = useMemo(() =>
+    [...allBusinesses]
+      .sort((a, b) => Number(b.followers_count ?? 0) - Number(a.followers_count ?? 0))
+      .slice(0, 3),
+  [allBusinesses]);
+
+  const weeklyBusinesses = useMemo(() => topBusinesses.slice(0, 8), [topBusinesses]);
+
+  const hasFilters = Boolean(activeCategoryId || activeTagIds.size > 0 || searchText.trim());
+
+  const filteredAndSorted = useMemo(() => {
+    let list = [...allBusinesses];
+
+    if (activeCategoryId) {
+      list = list.filter(
+        (b) => (b.category?.id_category ?? b.id_category) === activeCategoryId,
+      );
+    }
+
+    if (activeTagIds.size > 0) {
+      list = list.filter((b) =>
+        b.tags?.some((t) => activeTagIds.has(t.id_tags ?? t.id)),
+      );
+    }
+
+    if (searchText.trim()) {
+      const q = searchText.trim().toLowerCase();
+      list = list.filter(
+        (b) =>
+          b.businessName?.toLowerCase().includes(q) ||
+          b.description?.toLowerCase().includes(q) ||
+          b.category?.category?.toLowerCase().includes(q) ||
+          b.address?.toLowerCase().includes(q),
+      );
+    }
+
+    return list;
+  }, [allBusinesses, activeCategoryId, activeTagIds, searchText]);
+
+  const handleToggleFavorite = useCallback(
+    (id) => {
+      if (!getToken()) {
+        showAuthPrompt('Para guardar favoritos necesitas iniciar sesión');
+        return;
+      }
+      toggleFollow(id, { onError: showError });
+    },
+    [toggleFollow, showError, showAuthPrompt],
+  );
+
+  const handleTagToggle = useCallback((id) => {
+    setActiveTagIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleClear = useCallback(() => {
+    setActiveCategoryId(null);
+    setActiveTagIds(new Set());
+    setSearchText('');
+  }, []);
+
+  const handleHeroSearch = useCallback((query) => {
+    if (query) setSearchText(query);
+    requestAnimationFrame(() => {
+      resultsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-app-bg">
       <LandingNavbar />
 
       <main>
-        <HeroSection totalBusinesses={totalBusinesses} />
+        <HeroSection
+          totalBusinesses={allBusinesses.length}
+          newThisWeek={heroStats.newThisWeek}
+          totalReviews={totalReviews}
+          avatarBusinesses={topBusinesses.slice(0, 4)}
+          onSearch={handleHeroSearch}
+        />
 
-        <FeaturedSection
-          businesses={topBusinesses.slice(0, 3)}
-          loading={topLoading}
-          error={topError}
-          onRetry={retryTop}
+        <LandingFilterBar
+          activeCategoryId={activeCategoryId}
+          activeTagIds={activeTagIds}
+          sortOrder={sortOrder}
+          searchText={searchText}
+          onCategoryChange={setActiveCategoryId}
+          onTagToggle={handleTagToggle}
+          onSortChange={setSortOrder}
+          onSearchClear={() => setSearchText('')}
+          onClear={handleClear}
+        />
+
+        {!hasFilters && (
+          <TrendSection
+            businesses={weeklyBusinesses}
+            followedIds={followedIds}
+            onToggleFavorite={handleToggleFavorite}
+            onViewDetail={setSelectedBusiness}
+          />
+        )}
+
+        <ResultsGrid
+          ref={resultsSectionRef}
+          businesses={filteredAndSorted}
+          loading={allLoading}
+          error={allError}
+          onRetry={retryAll}
+          hasFilters={hasFilters}
+          onClear={handleClear}
           followedIds={followedIds}
           onToggleFavorite={handleToggleFavorite}
           onViewDetail={setSelectedBusiness}
         />
 
-        <NearbySection
-          businesses={nearbyBusinesses}
-          loading={nearbyLoading}
-          error={nearbyError}
-          onRetry={retryNearby}
-          followedIds={followedIds}
-          onToggleFavorite={handleToggleFavorite}
+        <MapSection
+          businesses={allBusinesses.slice(0, 8)}
+          communityFavorites={communityFavorites}
           onViewDetail={setSelectedBusiness}
         />
 
@@ -72,6 +189,17 @@ export default function LandingPage() {
       </main>
 
       <LandingFooter />
+
+      <FavoritesFAB
+        count={followedIds.size}
+        onOpen={() => setIsDrawerOpen(true)}
+      />
+      <FavoritesDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        followedBusinesses={followedBusinesses}
+        onRemoveFavorite={handleToggleFavorite}
+      />
 
       {selectedBusiness && (
         <BusinessDetailModal

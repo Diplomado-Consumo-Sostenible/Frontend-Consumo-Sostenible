@@ -43,7 +43,7 @@ export default function LandingFooter() {
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold text-heading uppercase tracking-wider">Compañía</p>
             <ul className="flex flex-col gap-2">
-              {['Sobre nosotros', 'Nuestra misión', 'Impacto', 'Prensa'].map((item) => (
+              {['Sobre nosotros', 'Nuestra misión', 'Impacto'].map((item) => (
                 <li key={item}>
                   <a href="#" className="text-xs text-muted hover:text-body transition-colors">{item}</a>
                 </li>
@@ -60,7 +60,7 @@ export default function LandingFooter() {
                   Panel de control
                 </Link>
               </li>
-              {['Certificaciones', 'Historias de éxito', 'Recursos para PYMES'].map((item) => (
+              {['Certificaciones'].map((item) => (
                 <li key={item}>
                   <a href="#" className="text-xs text-muted hover:text-body transition-colors">{item}</a>
                 </li>
@@ -74,7 +74,7 @@ export default function LandingFooter() {
             <ul className="flex flex-col gap-2.5">
               <li className="flex items-center gap-2 text-xs text-muted">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
-                <span>hola@consumosostenible.co</span>
+                <span>ecovidasupport@gmail.com</span>
               </li>
               <li className="flex items-center gap-2 text-xs text-muted">
                 <Phone className="w-3.5 h-3.5 shrink-0" />

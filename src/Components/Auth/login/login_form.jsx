@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Leaf, Lock, LogIn, Mail, Store, User, X } from "lucide-react";
+import { Eye, EyeOff, Lock, LogIn, Mail, Store, User, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -94,13 +94,23 @@ export default function LoginForm({ onLogin }) {
     <div className="flex-1 bg-card-bg flex flex-col justify-center px-10 py-10">
 
       {/* Logo móvil */}
-      <div className="flex md:hidden items-center gap-2 mb-6">
-        <Leaf className="w-5 h-5 text-primary-dark" />
-        <span className="text-primary-dark font-semibold text-sm tracking-wide">EcoVida</span>
-      </div>
+      <div className="flex md:hidden items-center gap-2 mb-4">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
+          <div className="relative flex items-center gap-2.5">
+            <img
+                src="https://res.cloudinary.com/dhhlvuzqa/image/upload/v1777184416/ecovida_perfiles/dns8fzkguprwuca0ydgv.webp"
+                alt="Consumo Sostenible"
+                className="w-8 h-8 rounded-lg object-contain shrink-0"
+              />
+            <span className="text-heading text-sm font-semibold tracking-wide">
+              EcoVida
+            </span>
+          </div>
+        </Link>
+      </div> 
 
       <div className="mb-7">
-        <h1 className="text-heading text-2xl font-serif">
+        <h1 className="text-heading text-4xl font-serif">
           Bienvenido de nuevo
         </h1>
         <p className="text-muted text-sm mt-1">Ingresa tu cuenta para continuar</p>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { followBusiness, getMyFollowing, unfollowBusiness } from '../services/follow/follow.service';
+import { getToken } from '../utils/storage';
 
 export function useFollows() {
   const [followedBusinesses, setFollowedBusinesses] = useState([]);
@@ -13,6 +14,15 @@ export function useFollows() {
   }, []);
 
   const fetchFollowing = useCallback(async () => {
+    // Skip the authenticated request entirely when there is no session token.
+    // This avoids a 401 network error on public pages.
+    if (!getToken()) {
+      setFollowedBusinesses([]);
+      setFollowedIds(new Set());
+      setLoading(false);
+      return;
+    }
+
     try {
       const { businesses } = await getMyFollowing();
       if (!mountedRef.current) return;

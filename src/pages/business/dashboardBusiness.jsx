@@ -1,6 +1,7 @@
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowRight,
   Award,
   BarChart2,
   Building2,
@@ -467,8 +468,8 @@ function CertBadge() {
           </li>
         ))}
       </ul>
-      <Link to="/dashboardBusiness/certificaciones" className="block text-center text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors">
-        Ver todas →
+      <Link to="/dashboardBusiness/certificaciones" className="flex items-center justify-center gap-1 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors">
+        Ver todas <ArrowRight className="w-3.5 h-3.5" />
       </Link>
     </div>
   );

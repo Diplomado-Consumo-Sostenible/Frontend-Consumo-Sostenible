@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LandingBusinessCard from '../business/LandingBusinessCard';
 import MapView from '../map/MapView';
@@ -31,7 +31,7 @@ export default function FeaturedSection({
             to="/dashboard/explorar"
             className="text-sm font-medium text-primary-dark hover:text-primary-darkest transition-colors shrink-0"
           >
-            Ver todos los destacados →
+            Ver todos los destacados <ArrowRight className="w-3.5 h-3.5 inline-block" />
           </Link>
         </div>
 

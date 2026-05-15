@@ -7,7 +7,7 @@ export default function RoleStep({ onSelectRole }) {
       <BackButton />
 
       <div className="mb-8">
-        <h1 className="text-heading text-2xl font-serif">
+        <h1 className="text-heading text-4xl font-serif">
           ¿Cómo deseas registrarte?
         </h1>
         <p className="text-muted text-sm mt-1">

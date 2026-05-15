@@ -11,11 +11,13 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import AuthRequiredModal from '../../Components/ui/AuthRequiredModal';
 import BusinessDetailModal from '../../Components/ui/BusinessDetailModal';
 import LandingBusinessCard from '../../Components/business/LandingBusinessCard';
 import MapView from '../../Components/map/MapView';
 import { useFollows } from '../../hooks/useFollows';
 import { useToastContext } from '../../context/ToastContext';
+import { getToken } from '../../utils/storage';
 import { getPublicBusinesses } from '../../services/business/explore.service';
 import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
 
@@ -114,6 +116,7 @@ export default function Explorar() {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [showMap,          setShowMap]          = useState(false);
   const [searchInput,      setSearchInput]      = useState(urlQ);
+  const [showAuthModal,    setShowAuthModal]    = useState(false);
 
   const { followedIds, toggleFollow } = useFollows();
   const { error: showError }          = useToastContext();
@@ -158,6 +161,10 @@ export default function Explorar() {
   const handleClearAll      = () => { setSearchInput(''); setSearchParams({}, { replace: true }); };
 
   const handleToggleFollow = (id) => {
+    if (!getToken()) {
+      setShowAuthModal(true);
+      return;
+    }
     toggleFollow(id, { onError: showError });
   };
 
@@ -192,6 +199,9 @@ export default function Explorar() {
     <>
       {selectedBusiness && (
         <BusinessDetailModal business={selectedBusiness} onClose={() => setSelectedBusiness(null)} />
+      )}
+      {showAuthModal && (
+        <AuthRequiredModal onClose={() => setShowAuthModal(false)} />
       )}
 
       <div className="flex flex-col h-screen overflow-hidden bg-app-bg">
