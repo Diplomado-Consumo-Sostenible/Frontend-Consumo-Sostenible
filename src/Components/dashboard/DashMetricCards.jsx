@@ -43,7 +43,7 @@ export default function DashMetricCards({ businesses, loadingBusinesses, followC
       value: loadingBusinesses ? '…' : businesses.length,
       sub: '+12% este mes',
       Icon: Store,
-      iconBg: 'bg-green-100', iconColor: 'text-green-700',
+      iconBg: 'bg-primary-softest', iconColor: 'text-primary-dark',
       badge: null, showTrend: true,
       to: '/dashboard/explorar',
     },
@@ -52,8 +52,8 @@ export default function DashMetricCards({ businesses, loadingBusinesses, followC
       label: 'Cerca de ti',
       value: nearbyValue, sub: nearbySub,
       Icon: geoStatus === 'loading' ? Loader2 : MapPin,
-      iconBg:    geoStatus === 'granted' ? 'bg-blue-100'   : 'bg-gray-100',
-      iconColor: geoStatus === 'granted' ? 'text-blue-600' : 'text-gray-400',
+      iconBg:    geoStatus === 'granted' ? 'bg-blue-100'   : 'bg-app-bg',
+      iconColor: geoStatus === 'granted' ? 'text-blue-600' : 'text-muted',
       badge: geoStatus === 'denied' ? 'Sin acceso' : null,
       showTrend: false, spin: geoStatus === 'loading',
       to: '/dashboard/mapa',
@@ -74,7 +74,7 @@ export default function DashMetricCards({ businesses, loadingBusinesses, followC
       value: loadingFollows ? '…' : followCount,
       sub: followCount > 0 ? 'Ver mis seguidos' : 'Empieza a seguir',
       Icon: Heart,
-      iconBg: 'bg-red-50', iconColor: loadingFollows ? 'text-gray-400' : 'text-red-500',
+      iconBg: 'bg-red-50', iconColor: loadingFollows ? 'text-muted' : 'text-red-500',
       badge: null, showTrend: false,
       to: '/dashboard/favoritos',
     },
@@ -93,14 +93,14 @@ export default function DashMetricCards({ businesses, loadingBusinesses, followC
                 <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-2xl font-bold text-heading leading-none">{m.value}</span>
                   {m.badge && (
-                    <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-lg">
+                    <span className="text-[10px] font-semibold text-muted bg-app-bg px-1.5 py-0.5 rounded-lg">
                       {m.badge}
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-muted mt-0.5 truncate">{m.label}</p>
                 <div className="flex items-center gap-1 mt-1">
-                  {m.showTrend && <TrendingUp className="w-3 h-3 text-green-500 shrink-0" />}
+                  {m.showTrend && <TrendingUp className="w-3 h-3 text-primary-mid shrink-0" />}
                   <span className="text-[11px] text-muted">{m.sub}</span>
                 </div>
               </div>

@@ -14,9 +14,9 @@ function PhotoPreviewModal({ src, alt, onClose }) {
         <div className="relative max-w-xs w-full pointer-events-auto">
           <button
             onClick={onClose}
-            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-stone-100 transition-colors"
+            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-card-bg rounded-full shadow-warm flex items-center justify-center hover:bg-app-bg transition-colors"
           >
-            <X className="w-4 h-4 text-stone-600" />
+            <X className="w-4 h-4 text-body" />
           </button>
           <img src={src} alt={alt} className="w-full rounded-2xl shadow-2xl object-cover aspect-square" />
         </div>
@@ -41,7 +41,7 @@ function Avatar({ perfil, email, onPreview }) {
     );
   }
   return (
-    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-semibold text-emerald-700 shrink-0">
+    <div className="w-8 h-8 rounded-full bg-primary-softest flex items-center justify-center text-xs font-semibold text-primary-dark shrink-0">
       {initial}
     </div>
   );
@@ -49,8 +49,8 @@ function Avatar({ perfil, email, onPreview }) {
 
 function StatusBadge({ isActive }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-500'}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-stone-400'}`} />
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-primary-softest text-primary-dark' : 'bg-app-bg text-muted'}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-primary-mid' : 'bg-edge'}`} />
       {isActive ? 'Activo' : 'Inactivo'}
     </span>
   );
@@ -60,10 +60,10 @@ function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-          <h2 className="text-base font-semibold text-stone-800">{title}</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors">
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
+          <h2 className="text-base font-semibold text-heading">{title}</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg text-muted hover:text-body hover:bg-app-bg transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -77,19 +77,19 @@ function ConfirmDialog({ user, onConfirm, onCancel, loading }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6">
         <div className="flex flex-col items-center text-center gap-3">
           <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6 text-red-500" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-stone-800">Eliminar usuario</h3>
-            <p className="text-sm text-stone-500 mt-1">
-              ¿Estás seguro de que deseas eliminar a <span className="font-medium text-stone-700">{user?.perfil?.nombre || user?.email}</span>? Esta acción no se puede deshacer.
+            <h3 className="text-base font-semibold text-heading">Eliminar usuario</h3>
+            <p className="text-sm text-muted mt-1">
+              ¿Estás seguro de que deseas eliminar a <span className="font-medium text-body">{user?.perfil?.nombre || user?.email}</span>? Esta acción no se puede deshacer.
             </p>
           </div>
           <div className="flex gap-3 w-full mt-1">
-            <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors disabled:opacity-50">
+            <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors disabled:opacity-50">
               Cancelar
             </button>
             <button onClick={onConfirm} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
@@ -106,19 +106,19 @@ function ConfirmDialog({ user, onConfirm, onCancel, loading }) {
 function FormField({ label, error, children }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-stone-600">{label}</label>
+      <label className="text-sm font-medium text-body">{label}</label>
       {children}
       {error && (
         <p className="text-red-400 text-xs flex items-center gap-1">
-          <span>⚠</span> {error}
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> {error}
         </p>
       )}
     </div>
   );
 }
 
-const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all bg-white';
-const selectClass = 'w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all bg-white';
+const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg';
+const selectClass = 'w-full px-3.5 py-2.5 rounded-xl border border-edge text-sm text-body focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg';
 
 export default function AdminUsers() {
   const toast = useToastContext();
@@ -297,18 +297,18 @@ export default function AdminUsers() {
     return sortDir === 'asc' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />;
   };
 
-  const thClass = 'px-4 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide';
-  const thSortClass = `${thClass} cursor-pointer hover:text-stone-700 select-none`;
+  const thClass = 'px-4 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wide';
+  const thSortClass = `${thClass} cursor-pointer hover:text-body select-none`;
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <div className="flex items-center gap-1.5 text-xs text-stone-400">
+        <div className="flex items-center gap-1.5 text-xs text-muted">
           <LayoutDashboard className="w-3.5 h-3.5" />
           <span>Administrador</span>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-stone-600 font-medium">Usuarios</span>
+          <span className="text-body font-medium">Usuarios</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -316,11 +316,11 @@ export default function AdminUsers() {
               <Users className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-stone-800">Gestión de Usuarios</h1>
-              <p className="text-sm text-stone-400 mt-0.5">Administra los usuarios registrados en la plataforma</p>
+              <h1 className="text-xl font-serif text-heading">Gestión de Usuarios</h1>
+              <p className="text-sm text-muted mt-0.5">Administra los usuarios registrados en la plataforma</p>
             </div>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white text-sm font-medium rounded-xl hover:bg-emerald-600 transition-colors shadow-sm shrink-0">
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary-dark text-on-dark-active text-sm font-medium rounded-xl hover:bg-primary-darkest transition-colors shadow-warm-sm shrink-0">
             <Plus className="w-4 h-4" /> Nuevo Usuario
           </button>
         </div>
@@ -329,12 +329,12 @@ export default function AdminUsers() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total Usuarios', value: stats.total, color: 'text-stone-700', bg: 'bg-white' },
-          { label: 'Activos', value: stats.active, color: 'text-emerald-700', bg: 'bg-emerald-50' },
-          { label: 'Inactivos', value: stats.inactive, color: 'text-stone-500', bg: 'bg-stone-100' },
+          { label: 'Total Usuarios', value: stats.total, color: 'text-heading', bg: 'bg-card-bg' },
+          { label: 'Activos', value: stats.active, color: 'text-primary-dark', bg: 'bg-primary-softest' },
+          { label: 'Inactivos', value: stats.inactive, color: 'text-muted', bg: 'bg-app-bg' },
         ].map((s) => (
-          <div key={s.label} className={`${s.bg} rounded-xl px-5 py-4 border border-stone-100`}>
-            <p className="text-xs text-stone-400 font-medium">{s.label}</p>
+          <div key={s.label} className={`${s.bg} rounded-xl px-5 py-4 border border-edge`}>
+            <p className="text-xs text-muted font-medium">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -342,26 +342,26 @@ export default function AdminUsers() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-        <input type="text" placeholder="Buscar por nombre, correo o rol..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 text-sm text-stone-700 placeholder-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all bg-white" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+        <input type="text" placeholder="Buscar por nombre, correo o rol..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg" />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
+      <div className="bg-card-bg rounded-2xl border border-edge overflow-hidden shadow-warm-sm">
         {loading ? (
-          <div className="flex items-center justify-center py-20 gap-3 text-stone-400">
+          <div className="flex items-center justify-center py-20 gap-3 text-muted">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span className="text-sm">Cargando usuarios...</span>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-stone-400 gap-3">
+          <div className="flex flex-col items-center justify-center py-20 text-muted gap-3">
             <Users className="w-10 h-10 opacity-30" />
             <p className="text-sm">{search ? 'No se encontraron resultados' : 'No hay usuarios registrados'}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="border-b border-stone-100 bg-stone-50/50">
+              <thead className="border-b border-edge bg-app-bg/50">
                 <tr>
                   <th className={thClass}>#</th>
                   <th className={thSortClass} onClick={() => handleSort('nombre')}>
@@ -379,26 +379,26 @@ export default function AdminUsers() {
                   <th className={thClass}>Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-50">
+              <tbody className="divide-y divide-edge/40">
                 {filtered.map((user, idx) => (
-                  <tr key={user.id_usuario} className="hover:bg-stone-50/50 transition-colors">
-                    <td className="px-4 py-3.5 text-xs text-stone-400 font-mono">{idx + 1}</td>
+                  <tr key={user.id_usuario} className="hover:bg-app-bg/50 transition-colors">
+                    <td className="px-4 py-3.5 text-xs text-muted font-mono">{idx + 1}</td>
                     <td className="px-4 py-3.5 overflow-visible">
                       <div className="flex items-center gap-3">
                         <Avatar perfil={user.perfil} email={user.email} onPreview={(src, alt) => setPreview({ src, alt })} />
-                        <span className="text-sm font-medium text-stone-700">{user.perfil?.nombre || '—'}</span>
+                        <span className="text-sm font-medium text-body">{user.perfil?.nombre || '—'}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-sm text-stone-500">{user.email}</td>
+                    <td className="px-4 py-3.5 text-sm text-muted">{user.email}</td>
                     <td className="px-4 py-3.5">
-                      <span className="text-xs font-medium text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full">{user.rol?.nombre || '—'}</span>
+                      <span className="text-xs font-medium text-body bg-app-bg px-2.5 py-1 rounded-full border border-edge">{user.rol?.nombre || '—'}</span>
                     </td>
                     <td className="px-4 py-3.5">
                       <StatusBadge isActive={user.isActive} />
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1">
-                        <button title={user.isActive ? 'Desactivar' : 'Activar'} onClick={() => handleToggleStatus(user)} disabled={actionLoading === user.id_usuario} className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${user.isActive ? 'text-emerald-500 hover:bg-emerald-50' : 'text-stone-400 hover:bg-stone-100'}`}>
+                        <button title={user.isActive ? 'Desactivar' : 'Activar'} onClick={() => handleToggleStatus(user)} disabled={actionLoading === user.id_usuario} className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${user.isActive ? 'text-primary-mid hover:bg-primary-softest/50' : 'text-muted hover:bg-app-bg'}`}>
                           {actionLoading === user.id_usuario ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : user.isActive ? (
@@ -411,10 +411,10 @@ export default function AdminUsers() {
                             </svg>
                           )}
                         </button>
-                        <button title="Editar" onClick={() => openEdit(user)} className="p-1.5 rounded-lg text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors">
+                        <button title="Editar" onClick={() => openEdit(user)} className="p-1.5 rounded-lg text-muted hover:text-primary-dark hover:bg-primary-softest/50 transition-colors">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button title="Eliminar" onClick={() => setDeleteUser(user)} className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                        <button title="Eliminar" onClick={() => setDeleteUser(user)} className="p-1.5 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -426,7 +426,7 @@ export default function AdminUsers() {
           </div>
         )}
         {!loading && filtered.length > 0 && (
-          <div className="px-4 py-3 border-t border-stone-50 text-xs text-stone-400">
+          <div className="px-4 py-3 border-t border-edge text-xs text-muted">
             Mostrando {filtered.length} de {users.length} usuarios
           </div>
         )}
@@ -451,7 +451,7 @@ export default function AdminUsers() {
             <FormField label="Contraseña" error={formErrors.password}>
               <div className="relative">
                 <input type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={`${inputClass} pr-10`} />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -477,10 +477,10 @@ export default function AdminUsers() {
               </select>
             </FormField>
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">
+              <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors">
                 Cancelar
               </button>
-              <button type="submit" disabled={formLoading} className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 text-sm font-medium text-white hover:bg-emerald-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+              <button type="submit" disabled={formLoading} className="flex-1 px-4 py-2.5 rounded-xl bg-primary-dark text-sm font-medium text-on-dark-active hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                 {formLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Crear Usuario
               </button>
@@ -508,7 +508,7 @@ export default function AdminUsers() {
             <FormField label="Nueva contraseña (opcional)" error={formErrors.password}>
               <div className="relative">
                 <input type={showPassword ? 'text' : 'password'} placeholder="Dejar vacío para no cambiar" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={`${inputClass} pr-10`} />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -534,10 +534,10 @@ export default function AdminUsers() {
               </select>
             </FormField>
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setEditUser(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">
+              <button type="button" onClick={() => setEditUser(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors">
                 Cancelar
               </button>
-              <button type="submit" disabled={formLoading} className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 text-sm font-medium text-white hover:bg-emerald-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+              <button type="submit" disabled={formLoading} className="flex-1 px-4 py-2.5 rounded-xl bg-primary-dark text-sm font-medium text-on-dark-active hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                 {formLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Guardar Cambios
               </button>

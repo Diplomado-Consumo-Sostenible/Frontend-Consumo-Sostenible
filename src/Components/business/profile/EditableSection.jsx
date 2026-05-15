@@ -67,7 +67,7 @@ export default function EditableSection({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-70"
+            className="flex items-center gap-1.5 text-xs font-medium text-white bg-primary-dark hover:bg-primary-darkest px-3 py-1.5 rounded-lg transition-colors disabled:opacity-70"
           >
             {saving
               ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

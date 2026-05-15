@@ -117,7 +117,7 @@ export default function BusinessStats() {
         {/* Encabezado + filtros de período */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-xl font-bold text-heading">Estadísticas de Negocio</h1>
+            <h1 className="text-xl font-serif text-heading">Estadísticas de Negocio</h1>
             <p className="text-sm text-muted mt-0.5">
               Monitorea el crecimiento y compromiso de tu comunidad sostenible.
             </p>

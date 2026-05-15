@@ -66,10 +66,10 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
   };
 
   const inputCls = (err) =>
-    `w-full px-4 py-2.5 rounded-xl border text-sm text-stone-700 focus:outline-none focus:ring-2 transition-all bg-white ${
+    `w-full px-4 py-2.5 rounded-xl border text-sm text-body focus:outline-none focus:ring-2 transition-all bg-card-bg ${
       err
         ? 'border-red-300 focus:ring-red-200'
-        : 'border-stone-200 focus:ring-emerald-300 focus:border-emerald-400'
+        : 'border-edge focus:ring-primary-mid/30 focus:border-primary-mid'
     }`;
 
   return (
@@ -79,21 +79,21 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
         onClick={!loading ? onClose : undefined}
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-bold text-stone-800">Editar datos personales</h3>
+            <h3 className="text-lg font-bold text-heading">Editar datos personales</h3>
             <button
               onClick={!loading ? onClose : undefined}
               disabled={loading}
-              className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors disabled:opacity-50"
+              className="p-1.5 rounded-lg hover:bg-app-bg transition-colors disabled:opacity-50"
             >
-              <X className="w-4 h-4 text-stone-500" />
+              <X className="w-4 h-4 text-muted" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-stone-600 block mb-1.5">
+              <label className="text-sm font-medium text-body block mb-1.5">
                 Nombre de usuario
               </label>
               <input
@@ -108,13 +108,13 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
               />
               {errors.nombre && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.nombre}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.nombre}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="text-sm font-medium text-stone-600 block mb-1.5">Género</label>
+              <label className="text-sm font-medium text-body block mb-1.5">Género</label>
               <select
                 value={generoId}
                 onChange={(e) => {
@@ -133,7 +133,7 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
               </select>
               {errors.generoId && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.generoId}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.generoId}
                 </p>
               )}
             </div>
@@ -143,14 +143,14 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
                 type="button"
                 onClick={!loading ? onClose : undefined}
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-xl bg-emerald-800 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-xl bg-primary-dark text-white text-sm font-medium hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {loading ? 'Guardando…' : 'Guardar cambios'}
@@ -186,10 +186,10 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
   };
 
   const inputCls = (err) =>
-    `w-full px-4 py-2.5 rounded-xl border text-sm text-stone-700 focus:outline-none focus:ring-2 transition-all bg-white ${
+    `w-full px-4 py-2.5 rounded-xl border text-sm text-body focus:outline-none focus:ring-2 transition-all bg-card-bg ${
       err
         ? 'border-red-300 focus:ring-red-200'
-        : 'border-stone-200 focus:ring-emerald-300 focus:border-emerald-400'
+        : 'border-edge focus:ring-primary-mid/30 focus:border-primary-mid'
     }`;
 
   return (
@@ -199,24 +199,24 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
         onClick={!loading ? onClose : undefined}
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-bold text-stone-800">Cambiar correo electrónico</h3>
+            <h3 className="text-lg font-bold text-heading">Cambiar correo electrónico</h3>
             <button
               onClick={!loading ? onClose : undefined}
               disabled={loading}
-              className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors disabled:opacity-50"
+              className="p-1.5 rounded-lg hover:bg-app-bg transition-colors disabled:opacity-50"
             >
-              <X className="w-4 h-4 text-stone-500" />
+              <X className="w-4 h-4 text-muted" />
             </button>
           </div>
-          <p className="text-xs text-stone-400 mb-5">
-            Correo actual: <span className="font-medium text-stone-600">{currentEmail}</span>
+          <p className="text-xs text-muted mb-5">
+            Correo actual: <span className="font-medium text-body">{currentEmail}</span>
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-stone-600 block mb-1.5">
+              <label className="text-sm font-medium text-body block mb-1.5">
                 Nuevo correo electrónico
               </label>
               <input
@@ -233,13 +233,13 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
               />
               {errors.newEmail && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.newEmail}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.newEmail}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="text-sm font-medium text-stone-600 block mb-1.5">
+              <label className="text-sm font-medium text-body block mb-1.5">
                 Contraseña actual
               </label>
               <div className="relative">
@@ -258,7 +258,7 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body transition-colors"
                   tabIndex={-1}
                 >
                   {showPass ? (
@@ -276,7 +276,7 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
               </div>
               {errors.password && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <span>⚠</span> {errors.password}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.password}
                 </p>
               )}
             </div>
@@ -286,14 +286,14 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
                 type="button"
                 onClick={!loading ? onClose : undefined}
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-xl bg-emerald-800 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-xl bg-primary-dark text-white text-sm font-medium hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {loading ? 'Guardando…' : 'Cambiar correo'}
@@ -334,17 +334,17 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
   };
 
   const inputCls = (err) =>
-    `w-full px-4 py-2.5 rounded-xl border text-sm text-stone-700 focus:outline-none focus:ring-2 transition-all bg-white ${
+    `w-full px-4 py-2.5 rounded-xl border text-sm text-body focus:outline-none focus:ring-2 transition-all bg-card-bg ${
       err
         ? 'border-red-300 focus:ring-red-200'
-        : 'border-stone-200 focus:ring-emerald-300 focus:border-emerald-400'
+        : 'border-edge focus:ring-primary-mid/30 focus:border-primary-mid'
     }`;
 
   const EyeToggle = ({ show, onToggle }) => (
     <button
       type="button"
       onClick={onToggle}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body transition-colors"
       tabIndex={-1}
     >
       {show ? (
@@ -368,21 +368,21 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
         onClick={!loading ? onClose : undefined}
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-bold text-stone-800">Cambiar contraseña</h3>
+            <h3 className="text-lg font-bold text-heading">Cambiar contraseña</h3>
             <button
               onClick={!loading ? onClose : undefined}
               disabled={loading}
-              className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors disabled:opacity-50"
+              className="p-1.5 rounded-lg hover:bg-app-bg transition-colors disabled:opacity-50"
             >
-              <X className="w-4 h-4 text-stone-500" />
+              <X className="w-4 h-4 text-muted" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-stone-600 block mb-1.5">Contraseña actual</label>
+              <label className="text-sm font-medium text-body block mb-1.5">Contraseña actual</label>
               <div className="relative">
                 <input
                   type={showCurrent ? 'text' : 'password'}
@@ -396,12 +396,12 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
                 <EyeToggle show={showCurrent} onToggle={() => setShowCurrent((v) => !v)} />
               </div>
               {errors.currentPassword && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.currentPassword}</p>
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.currentPassword}</p>
               )}
             </div>
 
             <div>
-              <label className="text-sm font-medium text-stone-600 block mb-1.5">Nueva contraseña</label>
+              <label className="text-sm font-medium text-body block mb-1.5">Nueva contraseña</label>
               <div className="relative">
                 <input
                   type={showNew ? 'text' : 'password'}
@@ -415,12 +415,12 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
                 <EyeToggle show={showNew} onToggle={() => setShowNew((v) => !v)} />
               </div>
               {errors.newPassword && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.newPassword}</p>
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.newPassword}</p>
               )}
             </div>
 
             <div>
-              <label className="text-sm font-medium text-stone-600 block mb-1.5">Confirmar nueva contraseña</label>
+              <label className="text-sm font-medium text-body block mb-1.5">Confirmar nueva contraseña</label>
               <div className="relative">
                 <input
                   type={showConfirm ? 'text' : 'password'}
@@ -434,7 +434,7 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
                 <EyeToggle show={showConfirm} onToggle={() => setShowConfirm((v) => !v)} />
               </div>
               {errors.confirmPassword && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><span>⚠</span> {errors.confirmPassword}</p>
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.confirmPassword}</p>
               )}
             </div>
 
@@ -443,14 +443,14 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
                 type="button"
                 onClick={!loading ? onClose : undefined}
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2.5 rounded-xl bg-emerald-800 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-xl bg-primary-dark text-white text-sm font-medium hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {loading ? 'Guardando…' : 'Cambiar contraseña'}
@@ -471,9 +471,9 @@ function PhotoPreviewModal({ src, onClose }) {
         <div className="relative max-w-sm w-full">
           <button
             onClick={onClose}
-            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-stone-100 transition-colors"
+            className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-card-bg rounded-full shadow-lg flex items-center justify-center hover:bg-app-bg transition-colors"
           >
-            <X className="w-4 h-4 text-stone-600" />
+            <X className="w-4 h-4 text-body" />
           </button>
           <img
             src={src}
@@ -556,7 +556,7 @@ function AvatarButton({ src, initials, onClick, loading }) {
           }
         </div>
       </button>
-      <span className="absolute bottom-1 left-1 w-3 h-3 bg-green-400 rounded-full border-2 border-primary-darkest" />
+      <span className="absolute bottom-1 left-1 w-3 h-3 bg-primary-mid rounded-full border-2 border-primary-darkest" />
     </div>
   );
 }

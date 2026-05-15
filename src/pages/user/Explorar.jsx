@@ -1,30 +1,28 @@
 import {
   AlertTriangle,
-  Award,
-  Building2,
   ChevronRight,
   Compass,
-  Heart,
   LayoutDashboard,
   LayoutList,
   Map as MapIcon,
-  MapPin,
   Search,
   SlidersHorizontal,
-  Star,
   X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import AuthRequiredModal from '../../Components/ui/AuthRequiredModal';
 import BusinessDetailModal from '../../Components/ui/BusinessDetailModal';
+import LandingBusinessCard from '../../Components/business/LandingBusinessCard';
 import MapView from '../../Components/map/MapView';
 import { useFollows } from '../../hooks/useFollows';
 import { useToastContext } from '../../context/ToastContext';
+import { getToken } from '../../utils/storage';
 import { getPublicBusinesses } from '../../services/business/explore.service';
 import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
 
 const CATEGORY_COLORS = [
-  'bg-green-50  text-green-700  border-green-200',
+  'bg-primary-softest text-primary-dark border-edge',
   'bg-violet-50 text-violet-700 border-violet-200',
   'bg-amber-50  text-amber-700  border-amber-200',
   'bg-blue-50   text-blue-700   border-blue-200',
@@ -41,7 +39,6 @@ const FILTER_OPTIONS = [
   { id: 'top',       label: 'Mejor valorados', soon: true  },
 ];
 
-const tagName = (t) => t.name ?? t.tagName ?? t.tag ?? '';
 
 function LoadingSkeleton() {
   return (
@@ -102,88 +99,6 @@ function EmptyResults({ hasSearch, onClear }) {
   );
 }
 
-function BusinessCard({ business, isFavorite, onToggleFavorite, isSelected, onSelect }) {
-  const hasCerts = business.certifications?.length > 0;
-
-  return (
-    <div
-      onClick={() => onSelect(business)}
-      className={`flex gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${
-        isSelected
-          ? 'border-primary-mid bg-primary-softest shadow-sm'
-          : 'border-edge bg-card-bg hover:border-primary-light hover:shadow-sm'
-      }`}
-    >
-      <div className="w-12 h-12 rounded-xl shrink-0 overflow-hidden bg-primary-softest flex items-center justify-center">
-        {business.logo ? (
-          <img src={business.logo} alt={business.businessName} className="w-full h-full object-cover" />
-        ) : (
-          <Building2 className="w-6 h-6 text-muted" />
-        )}
-      </div>
-
-      <div className="flex-1 min-w-0 space-y-1.5">
-        <div className="flex items-start justify-between gap-2">
-          <h4 className="text-sm font-semibold text-heading leading-tight truncate">
-            {business.businessName}
-          </h4>
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleFavorite(business.id_business); }}
-            className="shrink-0 p-0.5 rounded-lg hover:bg-red-50 transition-colors"
-            aria-label={isFavorite ? 'Dejar de seguir' : 'Seguir negocio'}
-          >
-            <Heart
-              className={`w-4 h-4 transition-colors ${
-                isFavorite ? 'fill-red-500 text-red-500' : 'text-muted hover:text-red-400'
-              }`}
-            />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {business.category?.category && (
-            <span className="text-xs px-2 py-0.5 bg-primary-softest border border-edge rounded-full text-body">
-              {business.category.category}
-            </span>
-          )}
-          {hasCerts && (
-            <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-ok-bg border border-ok-text/30 rounded-full text-ok-text">
-              <Award className="w-3 h-3" />
-              Certificado
-            </span>
-          )}
-        </div>
-
-        {business.description && (
-          <p className="text-xs text-muted leading-snug line-clamp-2">{business.description}</p>
-        )}
-
-        <div className="flex items-center gap-3 text-xs text-muted pt-0.5">
-          {business.address && (
-            <span className="flex items-center gap-1 min-w-0">
-              <MapPin className="w-3 h-3 shrink-0" />
-              <span className="truncate max-w-[160px]">{business.address}</span>
-            </span>
-          )}
-          <span className="flex items-center gap-1 ml-auto shrink-0 opacity-50" title="Valoración — Próximamente">
-            <Star className="w-3 h-3" />
-            <span>—</span>
-          </span>
-        </div>
-
-        {business.tags?.length > 0 && (
-          <div className="flex items-center gap-1 flex-wrap pt-0.5">
-            {business.tags.slice(0, 3).map((t) => (
-              <span key={t.id_tags} className="text-[10px] px-1.5 py-0.5 bg-edge/60 rounded-full text-muted">
-                {tagName(t)}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 export default function Explorar() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -201,6 +116,7 @@ export default function Explorar() {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [showMap,          setShowMap]          = useState(false);
   const [searchInput,      setSearchInput]      = useState(urlQ);
+  const [showAuthModal,    setShowAuthModal]    = useState(false);
 
   const { followedIds, toggleFollow } = useFollows();
   const { error: showError }          = useToastContext();
@@ -245,6 +161,10 @@ export default function Explorar() {
   const handleClearAll      = () => { setSearchInput(''); setSearchParams({}, { replace: true }); };
 
   const handleToggleFollow = (id) => {
+    if (!getToken()) {
+      setShowAuthModal(true);
+      return;
+    }
     toggleFollow(id, { onError: showError });
   };
 
@@ -279,6 +199,9 @@ export default function Explorar() {
     <>
       {selectedBusiness && (
         <BusinessDetailModal business={selectedBusiness} onClose={() => setSelectedBusiness(null)} />
+      )}
+      {showAuthModal && (
+        <AuthRequiredModal onClose={() => setShowAuthModal(false)} />
       )}
 
       <div className="flex flex-col h-screen overflow-hidden bg-app-bg">
@@ -392,13 +315,13 @@ export default function Explorar() {
             ) : (
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {filtered.map((biz) => (
-                  <BusinessCard
+                  <LandingBusinessCard
                     key={biz.id_business}
                     business={biz}
+                    variant="nearby"
                     isFavorite={followedIds.has(biz.id_business)}
                     onToggleFavorite={handleToggleFollow}
-                    isSelected={selectedId === biz.id_business}
-                    onSelect={handleSelectBusiness}
+                    onViewDetail={handleSelectBusiness}
                   />
                 ))}
 

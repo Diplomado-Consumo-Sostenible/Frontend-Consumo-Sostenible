@@ -1,14 +1,14 @@
-import { MessageSquare, Loader2 } from 'lucide-react';
+import { Loader2, MessageSquare, Star } from 'lucide-react';
 import ReviewCard from './ReviewCard';
 import useBusinessReviews from '../../../hooks/useBusinessReviews';
 
 const FILTER_OPTIONS = [
   { label: 'Todas', value: null },
-  { label: '5 ★', value: 5 },
-  { label: '4 ★', value: 4 },
-  { label: '3 ★', value: 3 },
-  { label: '2 ★', value: 2 },
-  { label: '1 ★', value: 1 },
+  { label: '5', value: 5 },
+  { label: '4', value: 4 },
+  { label: '3', value: 3 },
+  { label: '2', value: 2 },
+  { label: '1', value: 1 },
 ];
 
 export default function ReviewsSection({ businessId }) {
@@ -34,13 +34,14 @@ export default function ReviewsSection({ businessId }) {
           <button
             key={String(opt.value)}
             onClick={() => setFilter(opt.value)}
-            className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
               filter === opt.value
                 ? 'bg-primary-dark text-on-dark-active'
                 : 'bg-primary-softest text-primary-dark hover:bg-primary-light'
             }`}
           >
             {opt.label}
+            {opt.value !== null && <Star className="w-3 h-3 fill-current" />}
           </button>
         ))}
       </div>

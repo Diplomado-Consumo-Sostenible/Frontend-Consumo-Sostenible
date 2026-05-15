@@ -80,19 +80,19 @@ export default function DashHero({ profile, onViewList }) {
       <div className="relative z-10 p-5 sm:p-6 lg:p-8 flex items-start gap-4">
         <div className="flex-1 flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <Leaf className="w-3.5 h-3.5 text-green-300" />
-            <span className="text-xs font-medium text-green-300 tracking-wide uppercase">
+            <Leaf className="w-3.5 h-3.5 text-on-dark" />
+            <span className="text-xs font-medium text-on-dark tracking-wide uppercase">
               Tu impacto positivo
             </span>
           </div>
           <div>
-            <p className="text-sm text-green-200/75 leading-none mb-1">{getGreeting()},</p>
-            <h2 className="flex items-center gap-2.5 text-3xl sm:text-4xl font-extrabold text-white leading-tight tracking-tight">
+            <p className="text-sm text-on-dark/75 leading-none mb-1">{getGreeting()},</p>
+            <h2 className="flex items-center gap-2.5 text-3xl sm:text-4xl font-serif text-on-dark-active leading-tight">
               {firstName}
-              <Sprout className="w-7 h-7 text-green-300 shrink-0" />
+              <Sprout className="w-7 h-7 text-on-dark shrink-0" />
             </h2>
           </div>
-          <p className="text-lg sm:text-xl font-bold text-green-200 leading-snug">
+          <p className="text-lg sm:text-xl font-medium text-on-dark leading-snug">
             ¡Gracias por hacer la diferencia!
           </p>
           <Link
@@ -113,9 +113,9 @@ export default function DashHero({ profile, onViewList }) {
         >
           <div className="flex items-center gap-1.5">
             <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)' }}>
-              <Eye className="w-3.5 h-3.5 text-green-200" />
+              <Eye className="w-3.5 h-3.5 text-on-dark" />
             </div>
-            <p className="text-[10px] font-semibold text-green-200/80 uppercase tracking-wide leading-tight">
+            <p className="text-[10px] font-semibold text-on-dark/80 uppercase tracking-wide leading-tight">
               Negocios<br />visitados
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function DashHero({ profile, onViewList }) {
             type="button"
             onClick={onViewList}
             disabled={visited.length === 0}
-            className="flex items-center gap-1 text-xs font-semibold text-green-300 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-auto"
+            className="flex items-center gap-1 text-xs font-semibold text-on-dark hover:text-on-dark-active transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-auto"
           >
             Ver lista
             <ChevronRight className="w-3.5 h-3.5" />

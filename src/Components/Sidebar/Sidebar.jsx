@@ -150,8 +150,8 @@ export default function Sidebar() {
       <div className="px-3 pb-3">
         <div className="rounded-2xl bg-primary-mid/25 border border-primary-light/30 px-4 py-4 space-y-2">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0">
-              <Leaf className="w-4 h-4 text-green-300" />
+            <div className="w-7 h-7 rounded-lg bg-primary-mid/20 flex items-center justify-center shrink-0">
+              <Leaf className="w-4 h-4 text-on-dark" />
             </div>
             <p className="text-sm font-semibold text-on-dark-active leading-tight">
               Gracias por hacer la diferencia

@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   Award,
   Building2,
   ChevronLeft,
@@ -32,7 +33,7 @@ const CAT_GRADIENTS = [
 ];
 
 const TAG_COLORS = [
-  'bg-green-100  text-green-700  border-green-200',
+  'bg-primary-softest text-primary-dark border-edge',
   'bg-amber-100  text-amber-700  border-amber-200',
   'bg-blue-100   text-blue-700   border-blue-200',
   'bg-teal-100   text-teal-700   border-teal-200',
@@ -115,7 +116,7 @@ export function BusinessCard({
         )}
 
         {hasCert && (
-          <span className="absolute top-2.5 left-2.5 flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/80 backdrop-blur-sm text-white">
+          <span className="absolute top-2.5 left-2.5 flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary-mid/80 backdrop-blur-sm text-white">
             <Award className="w-2.5 h-2.5" />
             Cert.
           </span>
@@ -173,7 +174,7 @@ export function HorizontalCarousel({
   titleBadge    = null,
   iconClassName = 'text-primary-mid',
   linkTo        = '/dashboard/explorar',
-  linkLabel     = 'Ver todos →',
+  linkLabel     = 'Ver todos',
   emptyMsg      = 'No hay negocios disponibles',
   autoplay      = false,
   autoplayDelay = 4000,
@@ -340,9 +341,10 @@ export function HorizontalCarousel({
           </button>
           <Link
             to={linkTo}
-            className="text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors ml-1"
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors ml-1"
           >
             {linkLabel}
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>

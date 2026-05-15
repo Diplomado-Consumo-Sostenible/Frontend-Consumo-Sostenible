@@ -28,7 +28,7 @@ export default function CreateBusiness() {
     <div className="flex flex-col max-w-2xl mx-auto py-8 relative [&_form]:max-w-full">
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 rounded-2xl">
-          <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-mid" />
         </div>
       )}
       <BusinessForm onNext={handleNext} onBack={() => navigate('/dashboardBusiness')} />

@@ -20,12 +20,12 @@ export default function Unauthorized() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white text-center px-4">
-      <h1 className="text-7xl md:text-8xl font-bold text-stone-800">403</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-app-bg text-center px-4">
+      <h1 className="text-7xl md:text-8xl font-bold font-serif text-heading">403</h1>
 
-      <h2 className="text-3xl md:text-4xl font-semibold text-stone-800 mt-4">Acceso no permitido</h2>
+      <h2 className="text-3xl md:text-4xl font-semibold font-serif text-heading mt-4">Acceso no permitido</h2>
 
-      <p className="text-stone-400 mt-3 max-w-md leading-relaxed">
+      <p className="text-muted mt-3 max-w-md leading-relaxed">
         No tienes permisos para acceder a esta página.
         <br />
         Serás redirigido a tu panel correspondiente.
@@ -33,10 +33,10 @@ export default function Unauthorized() {
 
       <button
         onClick={handleBack}
-        className="mt-8 flex items-center gap-2 px-6 py-3 rounded-xl 
-                bg-emerald-500 text-white font-medium
-                shadow-lg shadow-emerald-200
-                hover:bg-emerald-600 hover:shadow-xl hover:shadow-emerald-200
+        className="mt-8 flex items-center gap-2 px-6 py-3 rounded-xl
+                bg-primary-dark text-on-dark-active font-medium
+                shadow-warm
+                hover:bg-primary-darkest
                 transition-all duration-200"
       >
         <ArrowLeftToLine />

@@ -123,7 +123,7 @@ export default function Favoritos() {
             <Heart className="w-5 h-5 text-primary-dark" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-semibold text-heading">Negocios que sigo</h1>
+            <h1 className="text-lg sm:text-xl font-serif text-heading">Negocios que sigo</h1>
             <p className="text-xs sm:text-sm text-muted mt-0.5">
               {loading
                 ? 'Cargando…'

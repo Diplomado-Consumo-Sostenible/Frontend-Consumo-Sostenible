@@ -1,6 +1,7 @@
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowRight,
   Award,
   BarChart2,
   Building2,
@@ -98,7 +99,7 @@ function EmptyState() {
       </p>
       <button
         onClick={() => navigate('/dashboardBusiness/crear-negocio')}
-        className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors"
+        className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors"
       >
         <Plus className="w-4 h-4" />
         Crear negocio
@@ -467,8 +468,8 @@ function CertBadge() {
           </li>
         ))}
       </ul>
-      <Link to="/dashboardBusiness/certificaciones" className="block text-center text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors">
-        Ver todas →
+      <Link to="/dashboardBusiness/certificaciones" className="flex items-center justify-center gap-1 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors">
+        Ver todas <ArrowRight className="w-3.5 h-3.5" />
       </Link>
     </div>
   );
@@ -624,7 +625,7 @@ export default function DashboardBusiness() {
             <LayoutDashboard className="w-3 h-3 text-muted" />
             <span className="text-xs text-muted">Mi Negocio</span>
           </div>
-          <h1 className="text-lg sm:text-xl font-semibold text-heading leading-tight">Panel de mi negocio</h1>
+          <h1 className="text-lg sm:text-xl font-serif text-heading leading-tight">Panel de mi negocio</h1>
         </div>
       </div>
 

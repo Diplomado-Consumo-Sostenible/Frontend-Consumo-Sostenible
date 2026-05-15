@@ -33,7 +33,7 @@ function StarRating({ rating }) {
           className={`w-3.5 h-3.5 ${
             i <= rating
               ? 'fill-amber-400 text-amber-400'
-              : 'fill-gray-100 text-gray-200'
+              : 'fill-edge text-edge'
           }`}
         />
       ))}

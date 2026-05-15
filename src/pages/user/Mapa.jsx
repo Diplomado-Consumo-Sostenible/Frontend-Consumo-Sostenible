@@ -52,7 +52,7 @@ export default function Mapa() {
               <MapIcon className="w-5 h-5 text-primary-dark" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-semibold text-heading">Mapa de negocios</h1>
+              <h1 className="text-lg sm:text-xl font-serif text-heading">Mapa de negocios</h1>
               <p className="text-xs sm:text-sm text-muted mt-0.5">
                 Encuentra negocios sostenibles en tu área
               </p>
