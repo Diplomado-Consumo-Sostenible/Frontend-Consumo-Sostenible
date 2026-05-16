@@ -75,7 +75,7 @@ function ChartSection({ title, subtitle, data, color, periodLabel, loading }) {
 
 export default function BusinessStats() {
   const [period, setPeriod] = useState('30d');
-  const { business, chartData, rawFollowers, loading, chartLoading, error, retry } =
+  const { business, chartData, rawFollowers, loading, chartLoading, error, chartError, retry } =
     useBusinessStats(period);
   const { isRejected, isPending, rejectionReason, status } = useOwnerBusinessStatus();
 
@@ -83,6 +83,8 @@ export default function BusinessStats() {
   if (loading) return <LoadingState />;
   if (error) return <ErrorState onRetry={retry} />;
   if (!business) return null;
+
+  const hasChartError = Boolean(chartError);
 
   const metrics = [
     {
@@ -146,8 +148,8 @@ export default function BusinessStats() {
           ))}
         </div>
 
-        {/* Gráfica seguidores + lista de seguidores (contenedores separados) */}
-        <div className="flex gap-4 items-start">
+        {/* Gráfica seguidores + lista de seguidores */}
+        <div className="flex gap-4">
           {/* Gráfica */}
           <div className="flex-1 min-w-0 bg-card-bg rounded-2xl border border-edge p-5">
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -172,13 +174,18 @@ export default function BusinessStats() {
               <div className="h-40 flex items-center justify-center">
                 <Loader2 className="w-5 h-5 animate-spin text-primary-mid" />
               </div>
+            ) : hasChartError ? (
+              <div className="h-40 flex items-center justify-center gap-2 text-sm text-red-400">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{chartError}</span>
+              </div>
             ) : (
               <StatsLineChart data={chartData.followers} yKey="valor" height={160} />
             )}
           </div>
 
           {/* Lista de últimos seguidores */}
-          <div className="w-72 shrink-0 bg-card-bg rounded-2xl border border-edge p-5">
+          <div className="w-72 shrink-0 bg-card-bg rounded-2xl border border-edge p-5 flex flex-col overflow-hidden">
             <RecentFollowersList followers={rawFollowers} />
           </div>
         </div>

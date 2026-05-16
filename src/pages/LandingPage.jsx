@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import usePublicReviewsTotal from '../hooks/usePublicReviewsTotal';
 import BusinessDetailModal from '../Components/ui/BusinessDetailModal';
 import CTABanner from '../Components/landing/CTABanner';
-import FavoritesDrawer from '../Components/landing/FavoritesDrawer';
 import FavoritesFAB from '../Components/landing/FavoritesFAB';
 import HeroSection from '../Components/landing/HeroSection';
 import LandingFilterBar from '../Components/landing/LandingFilterBar';
@@ -21,8 +21,25 @@ const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const PAGE_LOAD_TIME = Date.now();
 
 export default function LandingPage() {
+  const { hash } = useLocation();
+
+  /* ── Scroll al hash cuando se navega desde otra ruta (éj. /#explorar) */
+  useEffect(() => {
+    if (!hash) return;
+    const id = hash.replace('#', '');
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // El DOM puede no estar listo aún; reintentamos una vez
+      const t = setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+      return () => clearTimeout(t);
+    }
+  }, [hash]);
+
   const [selectedBusiness, setSelectedBusiness] = useState(null);
-  const [isDrawerOpen, setIsDrawerOpen]         = useState(false);
   const resultsSectionRef                        = useRef(null);
 
   const [activeCategoryId, setActiveCategoryId] = useState(null);
@@ -190,16 +207,7 @@ export default function LandingPage() {
 
       <LandingFooter />
 
-      <FavoritesFAB
-        count={followedIds.size}
-        onOpen={() => setIsDrawerOpen(true)}
-      />
-      <FavoritesDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        followedBusinesses={followedBusinesses}
-        onRemoveFavorite={handleToggleFavorite}
-      />
+      <FavoritesFAB count={followedIds.size} />
 
       {selectedBusiness && (
         <BusinessDetailModal

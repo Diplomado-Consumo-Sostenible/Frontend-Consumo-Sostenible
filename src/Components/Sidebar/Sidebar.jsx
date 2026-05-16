@@ -3,20 +3,16 @@ import {
   BarChart2,
   Building2,
   Compass,
-  Heart,
   HelpCircle,
   LayoutDashboard,
   Leaf,
   Lock,
-  Map as MapIcon,
   Package,
   Store,
   User,
   Users,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getPublicBusinesses } from '../../services/business/explore.service';
 import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
 import { decodeToken } from '../../utils/jwt.utils';
 import { getToken } from '../../utils/storage';
@@ -28,16 +24,8 @@ const NAV_CONFIG = {
       { label: 'Gestionar Usuarios',  icon: Users,           to: '/adminDashboard/usuarios' },
       { label: 'Moderación Negocios', icon: Building2,       to: '/adminDashboard/negocios' },
     ],
-    account: [
-      { label: 'Mi perfil', icon: User, to: '/dashboard/profile' },
-    ],
-  },
-  user: {
-    menu: [
-      { label: 'Inicio',    icon: LayoutDashboard, to: '/dashboard'            },
-      { label: 'Explorar',  icon: Compass,         to: '/dashboard/explorar', showBizCount: true },
-      { label: 'Favoritos', icon: Heart,            to: '/dashboard/favoritos' },
-      { label: 'Mapa',      icon: MapIcon,          to: '/dashboard/mapa'      },
+    explore: [
+      { label: 'Explorar negocios', icon: Compass, to: '/' },
     ],
     account: [
       { label: 'Mi perfil', icon: User, to: '/dashboard/profile' },
@@ -45,11 +33,14 @@ const NAV_CONFIG = {
   },
   owner: {
     menu: [
-      { label: 'Dashboard',         icon: LayoutDashboard, to: '/dashboardBusiness',                  alwaysAccessible: true  },
-      { label: 'Perfil de Negocio', icon: Store,           to: '/dashboardBusiness/perfil',            alwaysAccessible: true  },
-      { label: 'Productos',         icon: Package,         to: '/dashboardBusiness/productos',         alwaysAccessible: false },
-      { label: 'Estadísticas',      icon: BarChart2,       to: '/dashboardBusiness/estadisticas',      alwaysAccessible: false },
-      { label: 'Certificaciones',   icon: Award,           to: '/dashboardBusiness/certificaciones',   alwaysAccessible: false },
+      { label: 'Dashboard',         icon: LayoutDashboard, to: '/dashboardBusiness',                 alwaysAccessible: true  },
+      { label: 'Perfil de Negocio', icon: Store,           to: '/dashboardBusiness/perfil',          alwaysAccessible: true  },
+      { label: 'Productos',         icon: Package,         to: '/dashboardBusiness/productos',       alwaysAccessible: false },
+      { label: 'Estadísticas',      icon: BarChart2,       to: '/dashboardBusiness/estadisticas',    alwaysAccessible: false },
+      { label: 'Certificaciones',   icon: Award,           to: '/dashboardBusiness/certificaciones', alwaysAccessible: false },
+    ],
+    explore: [
+      { label: 'Explorar negocios', icon: Compass, to: '/', alwaysAccessible: true },
     ],
     account: [
       { label: 'Mi perfil', icon: User, to: '/dashboard/profile' },
@@ -57,7 +48,7 @@ const NAV_CONFIG = {
   },
 };
 
-function NavItem({ item, active, bizCount, locked }) {
+function NavItem({ item, active, locked }) {
   if (locked) {
     return (
       <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium opacity-40 cursor-not-allowed select-none">
@@ -94,19 +85,11 @@ export default function Sidebar() {
   const location = useLocation();
   const token    = getToken();
   const decoded  = decodeToken(token);
-  const role     = decoded?.rol?.toLowerCase() || 'user';
-  const config   = NAV_CONFIG[role] || NAV_CONFIG.user;
+  const role   = decoded?.rol?.toLowerCase() || 'owner';
+  const config = NAV_CONFIG[role] ?? NAV_CONFIG.owner;
 
-  const [bizCount, setBizCount] = useState(null);
   const { isRejected, isPending } = useOwnerBusinessStatus();
   const isBlocked = isRejected || isPending;
-
-  useEffect(() => {
-    if (role !== 'user') return;
-    getPublicBusinesses()
-      .then((data) => setBizCount(Array.isArray(data) ? data.length : null))
-      .catch(() => setBizCount(null));
-  }, [role]);
 
   return (
     <aside className="w-60 h-screen sticky top-0 overflow-hidden bg-primary-darkest border-r border-primary-light/20 flex flex-col shrink-0">
@@ -131,11 +114,24 @@ export default function Sidebar() {
               key={item.to}
               item={item}
               active={location.pathname === item.to}
-              bizCount={bizCount}
               locked={isBlocked && item.alwaysAccessible === false}
             />
           ))}
         </div>
+
+        {config.explore?.length > 0 && (
+          <div className="space-y-0.5">
+            <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Explorar</p>
+            {config.explore.map((item) => (
+              <NavItem
+                key={item.to}
+                item={item}
+                active={location.pathname === item.to}
+                locked={false}
+              />
+            ))}
+          </div>
+        )}
 
         {config.account.length > 0 && (
           <div className="space-y-0.5">

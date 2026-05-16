@@ -15,7 +15,7 @@ const redirectByRole = (rol, navigate) => {
       return navigate('/dashboardBusiness');
     case 'user':
     default:
-      return navigate('/dashboard');
+      return navigate('/');
   }
 };
 

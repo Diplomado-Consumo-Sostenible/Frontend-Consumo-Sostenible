@@ -156,7 +156,7 @@ export default function FavoritesDrawer({
               </button>
               <button
                 type="button"
-                onClick={() => { onClose(); navigate('/dashboard/mapa'); }}
+                onClick={() => { onClose(); navigate('/#mapa'); }}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors"
               >
                 <Map className="w-4 h-4" />

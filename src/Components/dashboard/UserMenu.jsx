@@ -1,15 +1,9 @@
-import { ChevronDown, Heart, LogOut, Settings, User } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useToastContext } from '../../context/ToastContext';
 import { decodeToken } from '../../utils/jwt.utils';
 import { getToken, removeToken } from '../../utils/storage';
-
-const MENU_ITEMS = [
-  { label: 'Mi perfil',     Icon: User,     to: '/dashboard/profile'   },
-  { label: 'Favoritos',     Icon: Heart,    to: '/dashboard/favoritos' },
-  { label: 'Configuración', Icon: Settings, to: null, soon: true       },
-];
 
 export default function UserMenu({ profile }) {
   const [open, setOpen] = useState(false);
@@ -75,28 +69,6 @@ export default function UserMenu({ profile }) {
           </div>
 
           <div className="py-1.5">
-            {MENU_ITEMS.map(({ label, Icon, to, soon }) =>
-              soon ? (
-                <div key={label} className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted opacity-50 cursor-not-allowed select-none">
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span className="flex-1">{label}</span>
-                  <span className="text-[10px] italic">Próximamente</span>
-                </div>
-              ) : (
-                <Link
-                  key={label}
-                  to={to}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-body hover:bg-edge/60 hover:text-heading transition-colors"
-                >
-                  <Icon className="w-4 h-4 shrink-0 text-muted" />
-                  <span>{label}</span>
-                </Link>
-              ),
-            )}
-          </div>
-
-          <div className="border-t border-edge/50 py-1.5">
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-muted hover:text-red-500 hover:bg-red-50/60 transition-colors"

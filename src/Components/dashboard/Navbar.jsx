@@ -14,7 +14,7 @@ export default function Navbar() {
   const firstName = (profile?._profile?.nombre ?? profile?.nombre ?? '').split(' ')[0] || '';
 
   return (
-    <header className="sticky top-0 z-30 bg-card-bg/95 backdrop-blur-sm border-b border-edge/60 px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between shrink-0 shadow-sm">
+    <header className="sticky top-0 z-40 bg-card-bg/95 backdrop-blur-sm border-b border-edge/60 px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between shrink-0 shadow-sm">
       <div className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
           <Leaf className="w-4 h-4 text-primary-dark" />
