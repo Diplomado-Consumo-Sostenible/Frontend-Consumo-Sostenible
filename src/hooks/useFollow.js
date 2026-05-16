@@ -14,13 +14,10 @@ export default function useFollow(businessId) {
       return;
     }
     getMyFollowing()
-      .then(businesses => {
-        if (businesses) {
-          // Number() evita fallos si un endpoint serializa el id como string
-          setIsFollowing(
-            businesses.some(b => Number(b.id_business) === Number(businessId))
-          );
-        }
+      .then(({ businesses }) => {
+        setIsFollowing(
+          (businesses ?? []).some(b => Number(b.id_business) === Number(businessId))
+        );
       })
       .finally(() => setInitializing(false));
   }, [businessId, isAuthenticated]);

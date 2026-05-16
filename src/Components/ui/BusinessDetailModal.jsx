@@ -16,6 +16,7 @@ import {
 import { useEffect } from 'react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
+import { useNavigate } from 'react-router-dom';
 import { useToastContext } from '../../context/ToastContext';
 import useFollow from '../../hooks/useFollow';
 
@@ -32,6 +33,7 @@ const DAY_LABELS = {
 const tagName = (t) => t.name ?? t.tagName ?? t.tag ?? '';
 
 export default function BusinessDetailModal({ business, onClose, footerSlot }) {
+  const navigate = useNavigate();
   const { success, error: toastError } = useToastContext();
   const { isFollowing, toggle, loading, initializing, isAuthenticated } =
     useFollow(business.id_business);
@@ -263,8 +265,17 @@ export default function BusinessDetailModal({ business, onClose, footerSlot }) {
 
         </div>
 
-        {/* Footer: footerSlot o botón Seguir por defecto */}
-        <div className="px-5 py-4 border-t border-edge/40 shrink-0">
+        {/* Footer: footerSlot o botones por defecto */}
+        <div className="px-5 py-4 border-t border-edge/40 shrink-0 flex gap-2">
+          <button
+            onClick={() => {
+              onClose();
+              navigate(`/negocio/${business.id_business}`, { state: { business } });
+            }}
+            className="flex-1 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:border-primary-mid hover:text-primary-dark transition-colors"
+          >
+            Ver perfil completo
+          </button>
           {footerSlot ? footerSlot : (
             <button
               onClick={handleFollow}
