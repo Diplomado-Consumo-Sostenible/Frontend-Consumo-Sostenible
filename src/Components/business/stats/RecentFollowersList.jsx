@@ -37,7 +37,7 @@ export default function RecentFollowersList({ followers = [] }) {
 
   if (!recent.length) {
     return (
-      <div className="flex flex-col items-center gap-1.5 py-4 text-muted">
+      <div className="flex flex-col items-center justify-center flex-1 gap-1.5 py-4 text-muted">
         <Users className="w-7 h-7 opacity-30" />
         <p className="text-xs">Sin seguidores aún</p>
       </div>
@@ -45,11 +45,11 @@ export default function RecentFollowersList({ followers = [] }) {
   }
 
   return (
-    <div>
-      <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-3">
+    <div className="flex flex-col flex-1 min-h-0">
+      <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-3 shrink-0">
         Últimos seguidores
       </p>
-      <div className="space-y-3">
+      <div className="flex-1 overflow-y-auto space-y-3">
         {recent.map((follower, i) => {
           const name = follower.perfil?.nombre ?? 'Usuario EcoVida';
           return (

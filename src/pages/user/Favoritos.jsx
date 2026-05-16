@@ -1,11 +1,9 @@
 import {
   Award,
   Building2,
-  ChevronRight,
   Compass,
   Heart,
   HeartOff,
-  LayoutDashboard,
   MapPin,
   Star,
 } from 'lucide-react';
@@ -62,9 +60,9 @@ function FavoriteCard({ business, onUnfollow }) {
               <span className="truncate">{business.address}</span>
             </span>
           )}
-          <span className="flex items-center gap-1 ml-auto shrink-0 opacity-50" title="Valoración — Próximamente">
+          <span className="flex items-center gap-1 ml-auto shrink-0 opacity-50" title="Valoración">
             <Star className="w-3 h-3" />
-            <span>—</span>
+            <span>{business.average_rating ? Number(business.average_rating).toFixed(1) : '—'}</span>
           </span>
         </div>
       </div>
@@ -74,16 +72,16 @@ function FavoriteCard({ business, onUnfollow }) {
 
 function EmptyFavorites() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[320px] bg-card-bg rounded-2xl shadow p-8 text-center">
+    <div className="flex flex-col items-center justify-center min-h-[320px] bg-card-bg rounded-2xl border border-edge p-8 text-center">
       <div className="w-16 h-16 bg-primary-softest rounded-2xl flex items-center justify-center mb-4">
         <HeartOff className="w-8 h-8 text-muted" />
       </div>
-      <h2 className="text-base font-semibold text-body">Aún no sigues ningún negocio</h2>
+      <h2 className="text-base font-semibold text-heading">Aún no sigues ningún negocio</h2>
       <p className="text-sm text-muted mt-1.5 max-w-xs leading-relaxed">
         Explora negocios y toca el corazón para seguirlos.
       </p>
       <Link
-        to="/dashboard/explorar"
+        to="/"
         className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary-dark hover:text-primary-darkest transition-colors"
       >
         <Compass className="w-4 h-4" />
@@ -110,29 +108,24 @@ export default function Favoritos() {
   };
 
   return (
-    <div className="px-4 py-5 sm:px-6 sm:py-6 lg:pl-10 lg:pr-8 space-y-6">
-      <div className="space-y-3">
-        <div className="flex items-center gap-1.5 text-xs text-muted">
-          <LayoutDashboard className="w-3.5 h-3.5" />
-          <span className="text-body font-medium">Inicio</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-body font-medium">Siguiendo</span>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
+          <Heart className="w-5 h-5 text-primary-dark" />
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
-            <Heart className="w-5 h-5 text-primary-dark" />
-          </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-serif text-heading">Negocios que sigo</h1>
-            <p className="text-xs sm:text-sm text-muted mt-0.5">
-              {loading
-                ? 'Cargando…'
-                : `${followedBusinesses.length} negocio${followedBusinesses.length !== 1 ? 's' : ''} seguido${followedBusinesses.length !== 1 ? 's' : ''}`}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-serif text-heading">Negocios que sigo</h1>
+          <p className="text-xs text-muted mt-0.5">
+            {loading
+              ? 'Cargando…'
+              : `${followedBusinesses.length} negocio${followedBusinesses.length !== 1 ? 's' : ''} seguido${followedBusinesses.length !== 1 ? 's' : ''}`}
+          </p>
         </div>
       </div>
 
+      {/* Content */}
       {loading ? (
         <LoadingSkeleton />
       ) : followedBusinesses.length === 0 ? (
@@ -150,7 +143,7 @@ export default function Favoritos() {
           </div>
           <div className="flex justify-center pt-2">
             <Link
-              to="/dashboard/explorar"
+              to="/"
               className="inline-flex items-center gap-2 text-sm font-medium text-primary-dark hover:text-primary-darkest transition-colors"
             >
               <Compass className="w-4 h-4" />
