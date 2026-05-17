@@ -2,8 +2,22 @@ import { Clock, Leaf, Mail, Phone } from 'lucide-react';
 import { FaInstagram } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
+import { getToken } from '../../utils/storage';
+import { decodeToken } from '../../utils/jwt.utils';
+
+function getPanelLink() {
+  const token   = getToken();
+  const decoded = decodeToken(token);
+  const rol     = decoded?.rol?.toLowerCase();
+  if (rol === 'owner') return '/dashboardBusiness/perfil';
+  if (rol === 'admin') return '/adminDashboard';
+  if (rol === 'user')  return '/unauthorized';   // USER → página 403
+  return '/unauthorized';                        // sin sesión → página 403
+}
 
 export default function LandingFooter() {
+  const panelTo = getPanelLink();
+
   return (
     <footer className="bg-footer-bg border-t border-edge">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
@@ -56,7 +70,7 @@ export default function LandingFooter() {
             <p className="text-xs font-semibold text-heading uppercase tracking-wider">Negocios</p>
             <ul className="flex flex-col gap-2">
               <li>
-                <Link to="/dashboardBusiness/perfil" className="text-xs text-muted hover:text-body transition-colors">
+                <Link to={panelTo} className="text-xs text-muted hover:text-body transition-colors">
                   Panel de control
                 </Link>
               </li>

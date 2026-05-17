@@ -5,16 +5,7 @@ import {
 import { useState } from 'react';
 import useBusinessReviews from '../../hooks/useBusinessReviews';
 import { useToastContext } from '../../context/ToastContext';
-
-/* ── Constantes ──────────────────────────────────────────────── */
-const REPORT_REASONS = [
-  'Lenguaje inapropiado u ofensivo',
-  'Contenido falso o engañoso',
-  'Spam o publicidad no solicitada',
-  'Acoso o amenazas',
-  'Información personal expuesta',
-  'Otro motivo',
-];
+import ReportModal from '../reviews/ReportModal';
 
 const MAX_COMMENT_PREVIEW = 160;
 
@@ -109,68 +100,6 @@ function StarFilter({ active, onChange, counts }) {
   );
 }
 
-/* ── ReportModal ─────────────────────────────────────────────── */
-function ReportModal({ onConfirm, onCancel }) {
-  const [selected, setSelected] = useState('');
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-card-bg rounded-2xl border border-edge shadow-warm w-full max-w-sm p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-heading flex items-center gap-2">
-            <Flag className="w-4 h-4 text-red-500" />
-            Reportar reseña
-          </h3>
-          <button onClick={onCancel} className="text-muted hover:text-body transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <p className="text-xs text-muted">Selecciona el motivo del reporte:</p>
-
-        <div className="space-y-2">
-          {REPORT_REASONS.map((reason) => (
-            <label
-              key={reason}
-              className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-colors ${
-                selected === reason
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-edge hover:border-muted'
-              }`}
-            >
-              <input
-                type="radio"
-                name="report-reason"
-                value={reason}
-                checked={selected === reason}
-                onChange={() => setSelected(reason)}
-                className="accent-red-500"
-              />
-              <span className="text-sm text-body">{reason}</span>
-            </label>
-          ))}
-        </div>
-
-        <div className="flex gap-2 pt-1">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2 rounded-xl border border-edge text-sm text-muted hover:text-body transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            disabled={!selected}
-            onClick={() => onConfirm(selected)}
-            className="flex-1 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Enviar reporte
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── ReviewForm ──────────────────────────────────────────────── */
 function ReviewForm({ initial, onSubmit, onCancel, isEdit }) {
   const [rating,  setRating]  = useState(initial?.rating  ?? 0);
@@ -250,7 +179,18 @@ function ReviewForm({ initial, onSubmit, onCancel, isEdit }) {
 /* ── ReviewCard ──────────────────────────────────────────────── */
 function ReviewCard({ review, isOwn, onEdit, onReport, alreadyReported }) {
   const [showReport, setShowReport] = useState(false);
+  const [reporting,  setReporting]  = useState(false);
   const [expanded,   setExpanded]   = useState(false);
+
+  async function handleConfirm(reason) {
+    setReporting(true);
+    try {
+      await onReport(review.id_review, reason);
+      setShowReport(false);
+    } finally {
+      setReporting(false);
+    }
+  }
 
   const long    = (review.comment?.length ?? 0) > MAX_COMMENT_PREVIEW;
   const display = long && !expanded
@@ -261,7 +201,8 @@ function ReviewCard({ review, isOwn, onEdit, onReport, alreadyReported }) {
     <>
       {showReport && (
         <ReportModal
-          onConfirm={(reason) => { onReport(review.id_review, reason); setShowReport(false); }}
+          loading={reporting}
+          onConfirm={handleConfirm}
           onCancel={() => setShowReport(false)}
         />
       )}
@@ -496,7 +437,7 @@ export default function ReviewsSection({ businessId }) {
       {/* Lista */}
       <div className="space-y-3">
         {reviews.map((r) => {
-          const isOwn = currentUserId != null && r.id_usuario === currentUserId;
+          const isOwn = currentUserId != null && Number(r.id_usuario) === Number(currentUserId);
           return (
             <div key={r.id_review}>
               {isOwn && editing ? (

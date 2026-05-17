@@ -1,13 +1,14 @@
 import {
   AlertTriangle,
   Building2,
+  ChevronRight,
   Loader2,
   MessageSquare,
   RefreshCw,
   Star,
   Trash2,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useMyReviews from '../../hooks/useMyReviews';
 import { useToastContext } from '../../context/ToastContext';
 
@@ -36,35 +37,57 @@ function formatDate(iso) {
 
 /* ── Sub-components ──────────────────────────────────────────── */
 function ReviewCard({ review, onDelete }) {
+  const navigate   = useNavigate();
+  const businessId = review.negocio?.id_business ?? review.negocio?.id ?? null;
+
+  const handleCardClick = () => {
+    if (!businessId) return;
+    navigate(`/negocio/${businessId}`, { state: { scrollToReviews: true } });
+  };
+
   return (
-    <div className="bg-card-bg border border-edge rounded-2xl p-5 space-y-3 hover:border-primary-light transition-colors">
-      <div className="flex items-start justify-between gap-3">
+    <div className="bg-card-bg border border-edge rounded-2xl overflow-hidden hover:border-primary-light transition-colors">
+
+      {/* Área clickeable → detalle del negocio + scroll a reseñas */}
+      <button
+        type="button"
+        onClick={handleCardClick}
+        disabled={!businessId}
+        className="w-full text-left p-5 space-y-3 disabled:cursor-default group"
+      >
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
             <Building2 className="w-5 h-5 text-primary-dark" />
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-heading truncate">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-heading truncate group-hover:text-primary-dark transition-colors">
               {review.negocio?.nombre ?? '—'}
             </p>
             <p className="text-xs text-muted">{formatDate(review.fecha)}</p>
           </div>
+          {businessId && (
+            <ChevronRight className="w-4 h-4 text-muted shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+          )}
         </div>
 
+        <StarRating value={review.rating} />
+
+        {review.comment && (
+          <p className="text-sm text-body leading-relaxed text-left">{review.comment}</p>
+        )}
+      </button>
+
+      {/* Borrar reseña — fuera del área clickeable */}
+      <div className="px-5 pb-4 flex justify-end border-t border-edge/50">
         <button
           onClick={() => onDelete(review.id_review)}
           title="Eliminar reseña"
-          className="p-1.5 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+          className="mt-3 flex items-center gap-1.5 text-xs text-muted hover:text-red-500 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5" />
+          Eliminar
         </button>
       </div>
-
-      <StarRating value={review.rating} />
-
-      {review.comment && (
-        <p className="text-sm text-body leading-relaxed">{review.comment}</p>
-      )}
     </div>
   );
 }

@@ -10,6 +10,6 @@ import API from '../../api/api';
  */
 export const reportReview = async (reviewId, reason, details) => {
   const body = { reason, ...(details ? { details } : {}) };
-  const { data } = await API.post(`/reviews/${reviewId}/report`, body);
+  const { data } = await API.post(`/reviews/reports/${reviewId}`, body);
   return data;
 };

@@ -557,7 +557,7 @@ function TabInfo({ business, businessId, onViewProduct }) {
       )}
 
       {/* Reviews */}
-      <div className="space-y-4 border-t border-edge pt-8">
+      <div id="reviews-section" className="space-y-4 border-t border-edge pt-8">
         <div>
           <h2 className="font-serif text-2xl text-heading">Reseñas de la comunidad</h2>
           <p className="text-sm text-muted mt-0.5">
@@ -797,6 +797,15 @@ export default function NegocioDetalle() {
     fromState ? null : id,
   );
   const business = fromState ?? fetched;
+
+  // Scroll hacia las reseñas si viene desde "Mis reseñas"
+  useEffect(() => {
+    if (!location.state?.scrollToReviews) return;
+    const timer = setTimeout(() => {
+      document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [location.state?.scrollToReviews]);
 
   if (loading && !business) return <PageLoader />;
   if (error && !business) {

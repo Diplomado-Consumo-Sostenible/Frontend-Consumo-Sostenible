@@ -8,15 +8,15 @@ export default function Unauthorized() {
 
   const handleBack = () => {
     const token = getToken();
-    if (!token) return navigate('/login');
+    if (!token) return navigate('/');
 
     const decoded = decodeToken(token);
-    const rol = decoded?.rol;
+    const rol = decoded?.rol?.toLowerCase(); // normaliza a minúsculas
 
     if (rol === 'admin') return navigate('/adminDashboard');
     if (rol === 'owner') return navigate('/dashboardBusiness/perfil');
-    if (rol === 'user') return navigate('/dashboard');
-    navigate('/login');
+    if (rol === 'user')  return navigate('/');   // USER → landing page
+    navigate('/');
   };
 
   return (

@@ -15,57 +15,65 @@ function FavoriteCard({ business, onUnfollow }) {
   const hasCerts = business.certifications?.length > 0;
 
   return (
-    <div className="relative flex gap-4 p-4 sm:p-5 bg-card-bg rounded-2xl shadow border border-edge hover:border-primary-light hover:shadow-md transition-all">
+    <div className="relative bg-card-bg rounded-2xl shadow border border-edge hover:border-primary-light hover:shadow-md transition-all">
+
+      {/* Botón dejar de seguir — fuera del Link para no activar la navegación */}
       <button
         onClick={() => onUnfollow(business.id_business)}
         title="Dejar de seguir"
-        className="absolute top-3 right-3 p-1 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 transition-colors"
+        className="absolute top-3 right-3 z-10 p-1 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 transition-colors"
       >
         <Heart className="w-4 h-4 fill-red-400 text-red-400 hover:fill-none hover:text-red-500 transition-all" />
       </button>
 
-      <div className="w-14 h-14 rounded-xl shrink-0 overflow-hidden bg-primary-softest flex items-center justify-center">
-        {business.logo ? (
-          <img src={business.logo} alt={business.businessName} className="w-full h-full object-cover" />
-        ) : (
-          <Building2 className="w-7 h-7 text-muted" />
-        )}
-      </div>
-
-      <div className="flex-1 min-w-0 pr-6 space-y-1.5">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="text-sm font-semibold text-heading leading-tight">{business.businessName}</h3>
-          {hasCerts && (
-            <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-ok-bg border border-ok-text/30 rounded-full text-ok-text">
-              <Award className="w-3 h-3" />
-              Certificado
-            </span>
+      {/* Área clickeable → detalle del negocio */}
+      <Link
+        to={`/negocio/${business.id_business}`}
+        className="flex gap-4 p-4 sm:p-5 pr-10"
+      >
+        <div className="w-14 h-14 rounded-xl shrink-0 overflow-hidden bg-primary-softest flex items-center justify-center">
+          {business.logo ? (
+            <img src={business.logo} alt={business.businessName} className="w-full h-full object-cover" />
+          ) : (
+            <Building2 className="w-7 h-7 text-muted" />
           )}
         </div>
 
-        {business.category?.category && (
-          <span className="inline-block text-xs px-2 py-0.5 bg-primary-softest border border-edge rounded-full text-body">
-            {business.category.category}
-          </span>
-        )}
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm font-semibold text-heading leading-tight">{business.businessName}</h3>
+            {hasCerts && (
+              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-ok-bg border border-ok-text/30 rounded-full text-ok-text">
+                <Award className="w-3 h-3" />
+                Certificado
+              </span>
+            )}
+          </div>
 
-        {business.description && (
-          <p className="text-xs text-muted leading-snug line-clamp-2">{business.description}</p>
-        )}
-
-        <div className="flex items-center gap-3 text-xs text-muted pt-0.5">
-          {business.address && (
-            <span className="flex items-center gap-1 min-w-0">
-              <MapPin className="w-3 h-3 shrink-0" />
-              <span className="truncate">{business.address}</span>
+          {business.category?.category && (
+            <span className="inline-block text-xs px-2 py-0.5 bg-primary-softest border border-edge rounded-full text-body">
+              {business.category.category}
             </span>
           )}
-          <span className="flex items-center gap-1 ml-auto shrink-0 opacity-50" title="Valoración">
-            <Star className="w-3 h-3" />
-            <span>{business.average_rating ? Number(business.average_rating).toFixed(1) : '—'}</span>
-          </span>
+
+          {business.description && (
+            <p className="text-xs text-muted leading-snug line-clamp-2">{business.description}</p>
+          )}
+
+          <div className="flex items-center gap-3 text-xs text-muted pt-0.5">
+            {business.address && (
+              <span className="flex items-center gap-1 min-w-0">
+                <MapPin className="w-3 h-3 shrink-0" />
+                <span className="truncate">{business.address}</span>
+              </span>
+            )}
+            <span className="flex items-center gap-1 ml-auto shrink-0 opacity-50" title="Valoración">
+              <Star className="w-3 h-3" />
+              <span>{business.average_rating ? Number(business.average_rating).toFixed(1) : '—'}</span>
+            </span>
+          </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
