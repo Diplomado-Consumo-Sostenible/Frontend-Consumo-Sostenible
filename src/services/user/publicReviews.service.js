@@ -1,8 +1,10 @@
 import API from '../../api/api';
 
-export const getBusinessReviewsPublic = async (businessId, { page = 1, limit = 10, order = 'DESC' } = {}) => {
+export const getBusinessReviewsPublic = async (businessId, { page = 1, limit = 10, order = 'DESC', rating = null } = {}) => {
   try {
-    const { data } = await API.get(`/reviews/business/${businessId}`, { params: { page, limit, order } });
+    const params = { page, limit, order };
+    if (rating) params.rating = rating;
+    const { data } = await API.get(`/reviews/business/${businessId}`, { params });
     return data;
   } catch (error) {
     if (error?.response?.status === 404)

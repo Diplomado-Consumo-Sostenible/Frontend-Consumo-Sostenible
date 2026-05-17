@@ -79,13 +79,11 @@ export default function HeroSection({
             Descubre negocios{' '}
             <span className="italic text-primary-dark">que cuidan</span>{' '}
             <span className="relative inline-block">
-              <span className="relative z-10 text-white px-1">el planeta</span>
-              {/* Terracotta underlay — purely decorative */}
               <span
-                aria-hidden="true"
-                className="absolute inset-0 -mx-0.5 rounded"
-                style={{ backgroundColor: 'var(--color-terracotta)' }}
-              />
+                className="relative z-10  px-1"
+                style={{ color: 'var(--color-terracotta)' }}>
+                  el planeta
+              </span>
             </span>
           </h1>
 
