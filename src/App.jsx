@@ -21,6 +21,7 @@ import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './Routes/protectedRoute';
 import GoogleCallback from './pages/GoogleCallback';
+import NegocioDetalle from './pages/NegocioDetalle';
 import LandingPage from './pages/LandingPage';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
 
         {/* ── Públicas ──────────────────────────────────────────── */}
         <Route path="/"                element={<LandingPage />} />
+        <Route path="/negocio/:id"      element={<UserLayout><NegocioDetalle /></UserLayout>} />
         <Route path="/login"           element={<Login />} />
         <Route path="/register"        element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

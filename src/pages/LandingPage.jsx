@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import usePublicReviewsTotal from '../hooks/usePublicReviewsTotal';
-import BusinessDetailModal from '../Components/ui/BusinessDetailModal';
 import CTABanner from '../Components/landing/CTABanner';
 import FavoritesFAB from '../Components/landing/FavoritesFAB';
 import HeroSection from '../Components/landing/HeroSection';
@@ -22,6 +21,8 @@ const PAGE_LOAD_TIME = Date.now();
 
 export default function LandingPage() {
   const { hash } = useLocation();
+  const navigate  = useNavigate();
+  const resultsSectionRef = useRef(null);
 
   /* ── Scroll al hash cuando se navega desde otra ruta (éj. /#explorar) */
   useEffect(() => {
@@ -39,8 +40,10 @@ export default function LandingPage() {
     }
   }, [hash]);
 
-  const [selectedBusiness, setSelectedBusiness] = useState(null);
-  const resultsSectionRef                        = useRef(null);
+  /* ── Navegación directa a la página del negocio ───────────── */
+  const handleViewDetail = useCallback((business) => {
+    navigate(`/negocio/${business.id_business}`, { state: { business } });
+  }, [navigate]);
 
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeTagIds, setActiveTagIds]         = useState(() => new Set());
@@ -179,7 +182,7 @@ export default function LandingPage() {
             businesses={weeklyBusinesses}
             followedIds={followedIds}
             onToggleFavorite={handleToggleFavorite}
-            onViewDetail={setSelectedBusiness}
+            onViewDetail={handleViewDetail}
           />
         )}
 
@@ -193,13 +196,13 @@ export default function LandingPage() {
           onClear={handleClear}
           followedIds={followedIds}
           onToggleFavorite={handleToggleFavorite}
-          onViewDetail={setSelectedBusiness}
+          onViewDetail={handleViewDetail}
         />
 
         <MapSection
           businesses={allBusinesses.slice(0, 8)}
           communityFavorites={communityFavorites}
-          onViewDetail={setSelectedBusiness}
+          onViewDetail={handleViewDetail}
         />
 
         <CTABanner />
@@ -209,12 +212,6 @@ export default function LandingPage() {
 
       <FavoritesFAB count={followedIds.size} />
 
-      {selectedBusiness && (
-        <BusinessDetailModal
-          business={selectedBusiness}
-          onClose={() => setSelectedBusiness(null)}
-        />
-      )}
     </div>
   );
 }
