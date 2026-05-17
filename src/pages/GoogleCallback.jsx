@@ -6,7 +6,7 @@ import { saveToken } from '../utils/storage';
 const redirectByRole = (rol, navigate) => {
   switch (rol?.toLowerCase()) {
     case 'admin': return navigate('/adminDashboard', { replace: true });
-    case 'owner': return navigate('/dashboardBusiness', { replace: true });
+    case 'owner': return navigate('/dashboardBusiness/perfil', { replace: true });
     case 'user':
     default:      return navigate('/dashboard', { replace: true });
   }

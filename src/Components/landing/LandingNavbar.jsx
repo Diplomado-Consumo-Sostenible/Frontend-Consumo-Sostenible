@@ -52,7 +52,7 @@ export default function LandingNavbar() {
   const isAdmin  = role === 'admin';
   const isStaff  = isOwner || isAdmin;
 
-  const panelTo  = isAdmin ? '/adminDashboard' : '/dashboardBusiness';
+  const panelTo  = isAdmin ? '/adminDashboard' : '/dashboardBusiness/perfil';
 
   const { profile } = useUserProfile();
   
@@ -125,7 +125,7 @@ export default function LandingNavbar() {
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map((link) => renderNavLink(link))}
-          {isUser && (
+          {(isUser || isOwner) && (
             <>
               <Link
                 to="/favoritos"
@@ -228,14 +228,35 @@ export default function LandingNavbar() {
                     </p>
                     <p className="text-[11px] text-muted truncate">{decoded?.email ?? ''}</p>
                   </div>
+
+                  {/* Panel (siempre visible para staff) */}
                   <Link
                     to={panelTo}
                     onClick={() => setDropOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 hover:bg-primary-softest transition-colors text-sm font-medium text-body"
                   >
                     <LayoutDashboard className="w-4 h-4 text-primary-dark shrink-0" />
-                    Panel
+                    Panel de control
                   </Link>
+
+                  {/* Ítems de usuario: solo para owner */}
+                  {isOwner && (
+                    <>
+                      <div className="border-t border-edge my-1" />
+                      {USER_MENU_ITEMS.map((item) => (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setDropOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-primary-softest transition-colors text-sm font-medium text-body"
+                        >
+                          <item.icon className="w-4 h-4 text-primary-dark shrink-0" />
+                          {item.label}
+                        </Link>
+                      ))}
+                    </>
+                  )}
+
                   <div className="border-t border-edge mt-1 pt-1">
                     <button
                       onClick={handleLogout}
@@ -285,7 +306,7 @@ export default function LandingNavbar() {
         <div className="sm:hidden border-t border-edge bg-card-bg px-4 pb-5 pt-3 flex flex-col">
           <nav className="flex flex-col gap-0.5 mb-4">
             {NAV_LINKS.map((link) => renderNavLink(link, () => setMenuOpen(false)))}
-            {isUser && (
+            {(isUser || isOwner) && (
               <>
                 <Link
                   to="/favoritos"
@@ -355,8 +376,20 @@ export default function LandingNavbar() {
                   className="flex items-center gap-3 py-2.5 px-1 text-sm font-medium text-body hover:text-primary-dark transition-colors"
                 >
                   <LayoutDashboard className="w-4 h-4 text-primary-dark shrink-0" />
-                  Panel
+                  Panel de control
                 </Link>
+                {/* Ítems de usuario: solo para owner */}
+                {isOwner && USER_MENU_ITEMS.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 py-2.5 px-1 text-sm font-medium text-body hover:text-primary-dark transition-colors"
+                  >
+                    <item.icon className="w-4 h-4 text-primary-dark shrink-0" />
+                    {item.label}
+                  </Link>
+                ))}
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-3 py-2.5 px-1 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"

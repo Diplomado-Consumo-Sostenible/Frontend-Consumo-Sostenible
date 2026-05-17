@@ -90,7 +90,7 @@ export default function Register() {
                 saveToken(access_token);
                 await postBusiness(registerBusinessModel(mergedData));
                 toast.success(res?.message || '¡Negocio registrado exitosamente!');
-                navigate('/dashboardBusiness');
+                navigate('/dashboardBusiness/perfil');
               } catch (err) {
                 toast.error(err?.message || 'Error al registrar el negocio');
               }

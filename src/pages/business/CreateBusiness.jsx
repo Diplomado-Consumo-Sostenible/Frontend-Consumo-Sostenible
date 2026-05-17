@@ -16,7 +16,7 @@ export default function CreateBusiness() {
     try {
       await postBusiness(registerBusinessModel(data));
       success('¡Negocio registrado! Está pendiente de aprobación.');
-      navigate('/dashboardBusiness');
+      navigate('/dashboardBusiness/perfil');
     } catch (err) {
       error(err?.message || 'No se pudo registrar el negocio. Inténtalo de nuevo.');
     } finally {
@@ -31,7 +31,7 @@ export default function CreateBusiness() {
           <Loader2 className="w-8 h-8 animate-spin text-primary-mid" />
         </div>
       )}
-      <BusinessForm onNext={handleNext} onBack={() => navigate('/dashboardBusiness')} />
+      <BusinessForm onNext={handleNext} onBack={() => navigate('/dashboardBusiness/perfil')} />
     </div>
   );
 }

@@ -75,12 +75,15 @@ function ChartSection({ title, subtitle, data, color, periodLabel, loading }) {
 
 export default function BusinessStats() {
   const [period, setPeriod] = useState('30d');
-  const { business, chartData, rawFollowers, loading, chartLoading, error, chartError, retry } =
-    useBusinessStats(period);
-  const { isRejected, isPending, rejectionReason, status } = useOwnerBusinessStatus();
+  const { isRejected, isPending, rejectionReason, status, loading: statusLoading } = useOwnerBusinessStatus();
 
+  const skipStats = statusLoading || isRejected || isPending;
+
+  const { business, chartData, rawFollowers, loading, chartLoading, error, chartError, retry } =
+    useBusinessStats(period, { skip: skipStats });
+
+  if (statusLoading || loading) return <LoadingState />;
   if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
-  if (loading) return <LoadingState />;
   if (error) return <ErrorState onRetry={retry} />;
   if (!business) return null;
 

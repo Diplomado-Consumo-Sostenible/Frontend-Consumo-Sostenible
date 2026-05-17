@@ -45,3 +45,24 @@ export const uploadProfileImage = (file, options = {}) =>
 
 export const uploadGeneralImage = (file, options = {}) =>
   postImage('/upload/general', file, options);
+
+async function postDocument(endpoint, file, { onProgress, signal } = {}) {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const response = await API.post(endpoint, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      signal,
+      onUploadProgress: onProgress
+        ? ({ loaded, total }) => onProgress(Math.round((loaded / total) * 100))
+        : undefined,
+    });
+    return response.data;
+  } catch (error) {
+    if (isCanceled(error)) throw { canceled: true, message: 'Subida cancelada' };
+    throw error.response?.data || { message: 'Error al subir el documento' };
+  }
+}
+
+export const uploadDocument = (file, options = {}) =>
+  postDocument('/upload/upload-document', file, options);

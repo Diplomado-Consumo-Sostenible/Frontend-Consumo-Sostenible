@@ -6,23 +6,22 @@ import UserLayout from './layouts/UserLayout';
 import AdminDashboard from './pages/admin/admin_dashboard';
 import AdminBusinesses from './pages/admin/AdminBusinesses';
 import AdminUsers from './pages/admin/AdminUsers';
-import DashboardBusiness from './pages/business/dashboardBusiness';
-import BusinessProfile from './pages/business/BusinessProfile';
 import BusinessCertifications from './pages/business/BusinessCertifications';
 import BusinessProducts from './pages/business/BusinessProducts';
+import BusinessProfile from './pages/business/BusinessProfile';
 import BusinessStats from './pages/business/BusinessStats';
 import CreateBusiness from './pages/business/CreateBusiness';
-import Favoritos from './pages/user/Favoritos';
-import MisResenas from './pages/user/MisResenas';
 import ForgotPassword from './pages/ForgotPassword';
+import GoogleCallback from './pages/GoogleCallback';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+import NegocioDetalle from './pages/NegocioDetalle';
 import Profile from './pages/profile/Profile';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
+import Favoritos from './pages/user/Favoritos';
+import MisResenas from './pages/user/MisResenas';
 import ProtectedRoute from './Routes/protectedRoute';
-import GoogleCallback from './pages/GoogleCallback';
-import NegocioDetalle from './pages/NegocioDetalle';
-import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
@@ -32,6 +31,7 @@ function App() {
 
         {/* ── Públicas ──────────────────────────────────────────── */}
         <Route path="/"                element={<LandingPage />} />
+        <Route path="/LandingPage"      element={<LandingPage />} />
         <Route path="/negocio/:id"      element={<UserLayout><NegocioDetalle /></UserLayout>} />
         <Route path="/login"           element={<Login />} />
         <Route path="/register"        element={<Register />} />
@@ -43,7 +43,7 @@ function App() {
         <Route
           path="/favoritos"
           element={
-            <ProtectedRoute roles={['USER']}>
+            <ProtectedRoute roles={['USER', 'owner']}>
               <UserLayout><Favoritos /></UserLayout>
             </ProtectedRoute>
           }
@@ -51,7 +51,7 @@ function App() {
         <Route
           path="/perfil"
           element={
-            <ProtectedRoute roles={['USER']}>
+            <ProtectedRoute roles={['USER', 'owner']}>
               <UserLayout><Profile /></UserLayout>
             </ProtectedRoute>
           }
@@ -59,21 +59,14 @@ function App() {
         <Route
           path="/resenas"
           element={
-            <ProtectedRoute roles={['USER']}>
+            <ProtectedRoute roles={['USER', 'owner']}>
               <UserLayout><MisResenas /></UserLayout>
             </ProtectedRoute>
           }
         />
 
         {/* ── Owner (DashboardLayout: Sidebar + Navbar) ─────────── */}
-        <Route
-          path="/dashboardBusiness"
-          element={
-            <ProtectedRoute roles={['owner']}>
-              <DashboardLayout><DashboardBusiness /></DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboardBusiness" element={<Navigate to="/dashboardBusiness/perfil" replace />} />
         <Route
           path="/dashboardBusiness/estadisticas"
           element={

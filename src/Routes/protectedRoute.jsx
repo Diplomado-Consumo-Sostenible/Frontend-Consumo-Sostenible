@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { decodeToken } from '../utils/jwt.utils';
-import { getToken } from '../utils/storage';
+import { getToken, removeToken } from '../utils/storage';
 
 const ProtectedRoute = ({ children, roles = null }) => {
   const token = getToken();
@@ -10,12 +10,13 @@ const ProtectedRoute = ({ children, roles = null }) => {
   const decoded = decodeToken(token);
 
   if (!decoded) {
+    removeToken();
     return <Navigate to="/login" replace />;
   }
 
-  // eslint-disable-next-line react-hooks/purity
   const isExpired = decoded?.exp ? Number(decoded.exp) * 1000 < Date.now() : true;
   if (isExpired) {
+    removeToken(); // limpiar el token vencido para que el usuario quede como invitado
     return <Navigate to="/login" replace />;
   }
 

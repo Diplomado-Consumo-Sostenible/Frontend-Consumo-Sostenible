@@ -29,5 +29,3 @@ export const createReview   = async (businessId, payload) =>
 export const updateReview   = async (reviewId, payload) =>
   (await API.patch(`/reviews/${reviewId}`, payload)).data;
 
-export const reportReview   = async (reviewId, reason) =>
-  (await API.post(`/reviews/${reviewId}/report`, { reason })).data;
