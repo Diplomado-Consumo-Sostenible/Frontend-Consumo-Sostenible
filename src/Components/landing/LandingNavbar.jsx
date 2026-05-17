@@ -52,7 +52,7 @@ export default function LandingNavbar() {
   const isAdmin  = role === 'admin';
   const isStaff  = isOwner || isAdmin;
 
-  const panelTo  = isAdmin ? '/adminDashboard' : '/dashboardBusiness';
+  const panelTo  = isAdmin ? '/adminDashboard' : '/dashboardBusiness/perfil';
 
   const { profile } = useUserProfile();
   

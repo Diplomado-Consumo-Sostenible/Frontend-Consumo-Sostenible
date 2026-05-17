@@ -14,7 +14,7 @@ export default function Unauthorized() {
     const rol = decoded?.rol;
 
     if (rol === 'admin') return navigate('/adminDashboard');
-    if (rol === 'owner') return navigate('/dashboardBusiness');
+    if (rol === 'owner') return navigate('/dashboardBusiness/perfil');
     if (rol === 'user') return navigate('/dashboard');
     navigate('/login');
   };

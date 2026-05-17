@@ -1,6 +1,8 @@
 import { Loader2, MessageSquare, Star } from 'lucide-react';
+import { useState } from 'react';
 import ReviewCard from './ReviewCard';
 import useBusinessReviews from '../../../hooks/useBusinessReviews';
+import { useToastContext } from '../../../context/ToastContext';
 
 const FILTER_OPTIONS = [
   { label: 'Todas', value: null },
@@ -12,8 +14,25 @@ const FILTER_OPTIONS = [
 ];
 
 export default function ReviewsSection({ businessId }) {
-  const { reviews, meta, filter, setFilter, loadMore, hasMore, loading, error } =
-    useBusinessReviews(businessId);
+  const [filter, setFilter] = useState(null);
+  const { success, error: showError } = useToastContext();
+
+  const { reviews, meta, report, reported, loadMore, hasMore, loading, error } =
+    useBusinessReviews(businessId, { ratingFilter: filter, skipMyReview: true });
+
+  async function handleReport(reviewId, reason) {
+    try {
+      await report(reviewId, reason);
+      success('Reseña reportada. El equipo la revisará pronto.');
+    } catch (err) {
+      const msg = err?.response?.data?.message ?? err?.message ?? '';
+      if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('conflict') || err?.response?.status === 409) {
+        showError('Ya reportaste esta reseña anteriormente.');
+      } else {
+        showError(msg || 'No se pudo enviar el reporte. Intenta de nuevo.');
+      }
+    }
+  }
 
   return (
     <section className="bg-card-bg rounded-2xl border border-edge p-6">
@@ -60,7 +79,12 @@ export default function ReviewsSection({ businessId }) {
       {reviews.length > 0 && (
         <div className="space-y-3">
           {reviews.map(review => (
-            <ReviewCard key={review.id_review} review={review} />
+            <ReviewCard
+              key={review.id_review}
+              review={review}
+              onReport={handleReport}
+              isReported={reported.has(review.id_review)}
+            />
           ))}
         </div>
       )}

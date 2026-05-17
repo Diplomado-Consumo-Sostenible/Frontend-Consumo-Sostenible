@@ -6,10 +6,10 @@ import {
   getMyReviewForBusiness,
   createReview,
   updateReview,
-  reportReview,
 } from '../services/user/publicReviews.service';
+import { reportReview } from '../services/reviews/reviews-report.service';
 
-export default function useBusinessReviews(businessId, { ratingFilter = null } = {}) {
+export default function useBusinessReviews(businessId, { ratingFilter = null, skipMyReview = false } = {}) {
   const [reviews,    setReviews]    = useState([]);
   const [meta,       setMeta]       = useState(null);
   const [myReview,   setMyReview]   = useState(undefined); // undefined=cargando, null=sin reseña
@@ -44,7 +44,7 @@ export default function useBusinessReviews(businessId, { ratingFilter = null } =
   }, [businessId, ratingFilter]);
 
   const fetchMyReview = useCallback(async () => {
-    if (!isAuthenticated || !businessId) { setMyReview(null); return; }
+    if (skipMyReview || !isAuthenticated || !businessId) { setMyReview(null); return; }
     try {
       setMyReview(await getMyReviewForBusiness(businessId));
     } catch {
@@ -76,7 +76,7 @@ export default function useBusinessReviews(businessId, { ratingFilter = null } =
   return {
     reviews, meta, myReview, loading, error,
     isAuthenticated, currentUserId,
-    submitReview, report, loadMore, hasMore,
+    submitReview, report, reported, loadMore, hasMore,
     retry: () => fetchReviews(1),
   };
 }

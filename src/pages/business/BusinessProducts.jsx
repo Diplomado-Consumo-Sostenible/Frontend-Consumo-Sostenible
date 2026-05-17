@@ -1,4 +1,4 @@
-import { AlertTriangle, Clock, LayoutDashboard, Loader2, PackageOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Clock, Eye, LayoutDashboard, Loader2, PackageOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
@@ -11,10 +11,14 @@ import { uploadGeneralImage } from '../../services/upload/upload.service';
 
 // ─── ProductFormModal ─────────────────────────────────────────────────────────
 
-const emptyForm = { name: '', description: '', image: '' };
+const emptyForm = { name: '', description: '', price: '', image: '' };
 
 function ProductFormModal({ initial, onClose, onSave, loading }) {
-  const [form, setForm]     = useState(initial ?? emptyForm);
+  const [form, setForm]     = useState(
+    initial
+      ? { ...initial, price: initial.price != null ? String(initial.price) : '', image: initial.image ?? '' }
+      : emptyForm,
+  );
   const [errors, setErrors] = useState({});
   const uploaderRef         = useRef();
   const { error: showError } = useToastContext();
@@ -27,6 +31,8 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
     else if (form.name.trim().length < 2) e.name = 'Mínimo 2 caracteres.';
     if (!form.description.trim()) e.description = 'La descripción es requerida.';
     else if (form.description.trim().length < 5) e.description = 'Mínimo 5 caracteres.';
+    if (form.price === '' || form.price === null) e.price = 'El precio es requerido.';
+    else if (isNaN(Number(form.price)) || Number(form.price) < 0) e.price = 'Ingresa un precio válido.';
     return e;
   }
 
@@ -41,20 +47,19 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
 
     let imageUrl = form.image;
 
-    // Solo sube si el usuario seleccionó un archivo nuevo
     if (uploaderRef.current?.canUpload) {
       try {
         imageUrl = await uploaderRef.current.upload();
       } catch {
-        // ImageUploader ya actualizó su estado de error y llamó onError
         return;
       }
     }
 
     onSave({
-      name: form.name.trim(),
+      name:        form.name.trim(),
       description: form.description.trim(),
-      image: imageUrl || undefined,
+      price:       Number(form.price),
+      image:       imageUrl || undefined,
     });
   }
 
@@ -111,6 +116,35 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
             />
             {errors.name && (
               <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+            )}
+          </div>
+
+          {/* Precio */}
+          <div>
+            <label className="block text-sm font-medium text-body mb-1">
+              Precio (COP) <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-muted select-none">$</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.price}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, price: e.target.value }));
+                  setErrors((er) => ({ ...er, price: '' }));
+                }}
+                placeholder="0"
+                className={`w-full pl-7 pr-3.5 py-2.5 border rounded-xl text-sm outline-none transition-colors focus:ring-2 focus:ring-primary-mid/30 ${
+                  errors.price
+                    ? 'border-red-400 bg-red-50'
+                    : 'border-edge focus:border-primary-mid'
+                }`}
+              />
+            </div>
+            {errors.price && (
+              <p className="mt-1 text-xs text-red-500">{errors.price}</p>
             )}
           </div>
 
@@ -205,11 +239,75 @@ function DeleteConfirmModal({ product, onClose, onConfirm, loading }) {
   );
 }
 
+// ─── ProductDetailModal ───────────────────────────────────────────────────────
+
+function ProductDetailModal({ product, onClose, onEdit, onDelete }) {
+  const price = product.price != null
+    ? Number(product.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+    : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
+      <div
+        className="bg-card-bg rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative h-52 bg-app-bg">
+          {product.image ? (
+            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <PackageOpen className="w-14 h-14 text-muted/40" />
+            </div>
+          )}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center hover:bg-black/60 transition-colors"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-semibold text-heading text-base leading-tight">{product.name}</h3>
+            {price && <span className="shrink-0 text-sm font-bold text-primary-dark">{price}</span>}
+          </div>
+          {product.description && (
+            <p className="text-sm text-muted leading-relaxed">{product.description}</p>
+          )}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => { onClose(); onEdit(product); }}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg hover:border-primary-light transition-colors"
+            >
+              <Pencil className="w-4 h-4" />Editar
+            </button>
+            <button
+              onClick={() => { onClose(); onDelete(product); }}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-red-100 text-sm font-medium text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ProductCard ──────────────────────────────────────────────────────────────
 
-function ProductCard({ product, onEdit, onDelete }) {
+function ProductCard({ product, onEdit, onDelete, onView }) {
+  const price = product.price != null
+    ? Number(product.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+    : null;
+
   return (
-    <div className="bg-card-bg rounded-2xl shadow-warm-sm border border-edge overflow-hidden flex flex-col hover:shadow-warm transition-shadow">
+    <div
+      className="group bg-card-bg rounded-2xl shadow-warm-sm border border-edge overflow-hidden flex flex-col hover:shadow-warm hover:border-primary-light transition-all cursor-pointer"
+      onClick={() => onView(product)}
+    >
       <div className="h-44 bg-app-bg relative overflow-hidden">
         {product.image ? (
           <img
@@ -228,6 +326,12 @@ function ProductCard({ product, onEdit, onDelete }) {
         >
           <PackageOpen className="w-10 h-10 text-muted" />
         </div>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+            <Eye className="w-3.5 h-3.5 text-white" />
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 p-4 flex flex-col gap-2">
@@ -237,8 +341,11 @@ function ProductCard({ product, onEdit, onDelete }) {
         <p className="text-xs text-muted leading-relaxed line-clamp-3 flex-1">
           {product.description}
         </p>
+        {price && (
+          <p className="text-sm font-bold text-primary-dark">{price}</p>
+        )}
 
-        <div className="flex gap-2 mt-auto pt-2">
+        <div className="flex gap-2 mt-auto pt-2" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => onEdit(product)}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-edge text-xs font-medium text-body hover:bg-app-bg hover:border-primary-light transition-colors"
@@ -296,9 +403,10 @@ export default function BusinessProducts() {
   const [pageLoading, setPageLoading]   = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [showForm, setShowForm]             = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [showForm, setShowForm]               = useState(false);
+  const [editingProduct, setEditingProduct]   = useState(null);
   const [deletingProduct, setDeletingProduct] = useState(null);
+  const [viewingProduct, setViewingProduct]   = useState(null);
 
   async function loadProducts(biz) {
     const data = await getProductsByBusiness(biz.id_business);
@@ -429,7 +537,7 @@ export default function BusinessProducts() {
       <div className="space-y-3">
         <div className="flex items-center gap-1.5 text-xs text-muted">
           <LayoutDashboard className="w-3.5 h-3.5" />
-          <Link to="/dashboardBusiness" className="hover:text-body transition-colors">
+          <Link to="/dashboardBusiness/perfil" className="hover:text-body transition-colors">
             Mi Negocio
           </Link>
           <span>/</span>
@@ -472,6 +580,7 @@ export default function BusinessProducts() {
               product={p}
               onEdit={openEdit}
               onDelete={setDeletingProduct}
+              onView={setViewingProduct}
             />
           ))}
         </div>
@@ -484,6 +593,15 @@ export default function BusinessProducts() {
           onSave={handleSave}
           businessId={business.id_business}
           loading={actionLoading}
+        />
+      )}
+
+      {viewingProduct && (
+        <ProductDetailModal
+          product={viewingProduct}
+          onClose={() => setViewingProduct(null)}
+          onEdit={openEdit}
+          onDelete={setDeletingProduct}
         />
       )}
 

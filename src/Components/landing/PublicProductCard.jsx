@@ -10,8 +10,8 @@ export default function PublicProductCard({ product }) {
   return (
     <div className="bg-card-bg border border-edge rounded-2xl overflow-hidden hover:border-primary-light hover:shadow-sm transition-all flex flex-col">
       <div className="h-40 bg-primary-softest flex items-center justify-center shrink-0 overflow-hidden">
-        {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
         ) : (
           <ImageOff className="w-8 h-8 text-muted/40" />
         )}

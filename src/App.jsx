@@ -6,7 +6,6 @@ import UserLayout from './layouts/UserLayout';
 import AdminDashboard from './pages/admin/admin_dashboard';
 import AdminBusinesses from './pages/admin/AdminBusinesses';
 import AdminUsers from './pages/admin/AdminUsers';
-import DashboardBusiness from './pages/business/dashboardBusiness';
 import BusinessProfile from './pages/business/BusinessProfile';
 import BusinessCertifications from './pages/business/BusinessCertifications';
 import BusinessProducts from './pages/business/BusinessProducts';
@@ -66,14 +65,7 @@ function App() {
         />
 
         {/* ── Owner (DashboardLayout: Sidebar + Navbar) ─────────── */}
-        <Route
-          path="/dashboardBusiness"
-          element={
-            <ProtectedRoute roles={['owner']}>
-              <DashboardLayout><DashboardBusiness /></DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboardBusiness" element={<Navigate to="/dashboardBusiness/perfil" replace />} />
         <Route
           path="/dashboardBusiness/estadisticas"
           element={

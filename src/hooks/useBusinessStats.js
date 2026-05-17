@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import useBusinessProfile from './useBusinessProfile';
 import { fetchAllFollowers, fetchAllReviews, aggregateChartData } from '../services/stats/stats.service';
 
-export default function useBusinessStats(period) {
+export default function useBusinessStats(period, { skip = false } = {}) {
   const { business, loading, error, retry } = useBusinessProfile();
   const [rawData,      setRawData]      = useState({ followers: [], reviews: [] });
   const [chartLoading, setChartLoading] = useState(false);
   const [chartError,   setChartError]   = useState(null);
 
   useEffect(() => {
-    if (!business?.id_business) return;
+    if (!business?.id_business || skip) return;
 
     let cancelled = false;
     setChartLoading(true);
@@ -30,7 +30,7 @@ export default function useBusinessStats(period) {
       });
 
     return () => { cancelled = true; };
-  }, [business?.id_business]);
+  }, [business?.id_business, skip]);
 
   const chartData = useMemo(() => ({
     followers: aggregateChartData(rawData.followers, 'fecha_seguimiento', period),

@@ -33,7 +33,6 @@ const NAV_CONFIG = {
   },
   owner: {
     menu: [
-      { label: 'Dashboard',         icon: LayoutDashboard, to: '/dashboardBusiness',                 alwaysAccessible: true  },
       { label: 'Perfil de Negocio', icon: Store,           to: '/dashboardBusiness/perfil',          alwaysAccessible: true  },
       { label: 'Productos',         icon: Package,         to: '/dashboardBusiness/productos',       alwaysAccessible: false },
       { label: 'Estadísticas',      icon: BarChart2,       to: '/dashboardBusiness/estadisticas',    alwaysAccessible: false },

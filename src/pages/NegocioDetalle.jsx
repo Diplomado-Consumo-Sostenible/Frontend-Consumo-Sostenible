@@ -1,10 +1,10 @@
 import {
   AlertTriangle, Award, Building2, ChevronLeft, ChevronRight,
-  Clock, Compass, Globe, Leaf, Loader2, MapPin, Package,
+  Clock, Compass, Globe, Images, Leaf, Loader2, MapPin, Package,
   RefreshCw, Share2, ShieldCheck, Star,
-  UserCheck, UserPlus,
+  UserCheck, UserPlus, X,
 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PublicCertRow from '../Components/landing/PublicCertRow';
 import PublicProductCard from '../Components/landing/PublicProductCard';
@@ -86,32 +86,52 @@ function BusinessCover({ business }) {
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`
     : null;
 
+  const bannerSrc = business.banner_image ?? null;
+
   return (
     <div
       className="relative h-60 sm:h-80 rounded-3xl overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, var(--color-primary-mid) 0%, var(--color-primary-darkest) 100%)' }}
+      style={!bannerSrc ? { background: 'linear-gradient(160deg, var(--color-primary-mid) 0%, var(--color-primary-darkest) 100%)' } : undefined}
     >
-      {/* Radial texture */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 22% 30%, rgba(231,206,160,0.14) 0%, transparent 48%),' +
-            'radial-gradient(circle at 78% 68%, rgba(91,138,102,0.25) 0%, transparent 52%)',
-        }}
-      />
-      {/* Dot grid */}
-      <div
-        className="absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }}
-      />
+      {/* Imagen de banner */}
+      {bannerSrc && (
+        <img
+          src={bannerSrc}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+      )}
+
+      {/* Overlays decorativos */}
+      {bannerSrc ? (
+        <div className="absolute inset-0 bg-black/35" />
+      ) : (
+        <>
+          {/* Radial texture */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle at 22% 30%, rgba(231,206,160,0.14) 0%, transparent 48%),' +
+                'radial-gradient(circle at 78% 68%, rgba(91,138,102,0.25) 0%, transparent 52%)',
+            }}
+          />
+          {/* Dot grid */}
+          <div
+            className="absolute inset-0 opacity-[0.05]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }}
+          />
+        </>
+      )}
+
       {/* Decorative leaf */}
       <div className="absolute right-[-50px] top-[-50px] opacity-[0.07] pointer-events-none select-none text-white">
         <Leaf style={{ width: 380, height: 380 }} strokeWidth={0.4} />
       </div>
+
       {/* Chips */}
       <div className="absolute top-4 right-4 flex gap-2">
         {mapsUrl && (
@@ -268,42 +288,159 @@ function BusinessProfile({ business }) {
   );
 }
 
+/* ── Image lightbox ───────────────────────────────────────── */
+function ImageLightbox({ images, startIndex, onClose }) {
+  const [current, setCurrent] = useState(startIndex ?? 0);
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape')     onClose();
+      if (e.key === 'ArrowRight') setCurrent((c) => (c + 1) % images.length);
+      if (e.key === 'ArrowLeft')  setCurrent((c) => (c - 1 + images.length) % images.length);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [images.length, onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90" onClick={onClose}>
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+      >
+        <X className="w-5 h-5 text-white" />
+      </button>
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm">
+        <Images className="w-3.5 h-3.5 text-white/70" />
+        <span className="text-xs text-white/80">{current + 1} / {images.length}</span>
+      </div>
+      {images.length > 1 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c - 1 + images.length) % images.length); }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6 text-white" />
+        </button>
+      )}
+      <img
+        src={images[current]}
+        alt={`Foto ${current + 1}`}
+        className="max-h-[85vh] max-w-[90vw] object-contain rounded-xl shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      />
+      {images.length > 1 && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c + 1) % images.length); }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+        >
+          <ChevronRight className="w-6 h-6 text-white" />
+        </button>
+      )}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+              className={`w-10 h-10 rounded-lg overflow-hidden border-2 transition-all ${
+                i === current ? 'border-white scale-110' : 'border-white/30 opacity-60 hover:opacity-100'
+              }`}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Gallery mosaic ───────────────────────────────────────── */
 function GalleryMosaic({ images }) {
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   const items = images.slice(0, 5);
   if (!items.length) return null;
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1.4fr 1fr 1fr',
-        gridTemplateRows: '190px 190px',
-        gap: '8px',
-      }}
-    >
-      {items.map((src, i) => (
-        <div
-          key={i}
-          className="relative overflow-hidden bg-primary-softest"
-          style={{ gridRow: i === 0 ? '1 / 3' : 'auto' }}
-        >
-          <img src={src} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
-          {i === 4 && images.length > 5 && (
-            <div className="absolute inset-0 bg-primary-darkest/60 backdrop-blur-[2px] flex flex-col items-center justify-center text-white">
-              <span className="font-serif text-3xl leading-none">+{images.length - 4}</span>
-              <span className="text-xs text-white/80 mt-1">fotos</span>
+    <>
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1.4fr 1fr 1fr',
+          gridTemplateRows: '190px 190px',
+          gap: '8px',
+        }}
+      >
+        {items.map((src, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => setLightboxIndex(i)}
+            className="relative overflow-hidden bg-primary-softest group focus:outline-none"
+            style={{ gridRow: i === 0 ? '1 / 3' : 'auto' }}
+          >
+            <img src={src} alt={`Foto ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+            {i === 4 && images.length > 5 && (
+              <div className="absolute inset-0 bg-primary-darkest/60 backdrop-blur-[2px] flex flex-col items-center justify-center text-white">
+                <span className="font-serif text-3xl leading-none">+{images.length - 4}</span>
+                <span className="text-xs text-white/80 mt-1">fotos</span>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+      {lightboxIndex !== null && (
+        <ImageLightbox images={images} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
+      )}
+    </>
+  );
+}
+
+/* ── Public product detail modal ──────────────────────────── */
+function PublicProductDetailModal({ product, onClose }) {
+  const price = product.price != null
+    ? Number(product.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+    : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
+      <div
+        className="bg-card-bg rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative h-52 bg-primary-softest">
+          {product.image ? (
+            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Package className="w-14 h-14 text-muted/40" />
             </div>
           )}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center hover:bg-black/60 transition-colors"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
         </div>
-      ))}
+        <div className="p-5 space-y-2">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-semibold text-heading text-base leading-tight">{product.name}</h3>
+            {price && <span className="shrink-0 text-sm font-bold text-primary-dark">{price}</span>}
+          </div>
+          {product.description && (
+            <p className="text-sm text-muted leading-relaxed">{product.description}</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
 /* ── Products carousel ────────────────────────────────────── */
-function ProductsCarousel({ businessId }) {
+function ProductsCarousel({ businessId, onView }) {
   const { products, loading, error, retry } = usePublicProducts(businessId);
   const scrollRef = useRef(null);
 
@@ -343,9 +480,14 @@ function ProductsCarousel({ businessId }) {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {products.map((p, i) => (
-          <div key={p.id_product ?? i} className="shrink-0 w-52">
+          <button
+            key={p.id_product ?? i}
+            type="button"
+            onClick={() => onView?.(p)}
+            className="shrink-0 w-52 text-left focus:outline-none"
+          >
             <PublicProductCard product={p} />
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -353,7 +495,7 @@ function ProductsCarousel({ businessId }) {
 }
 
 /* ── Tab content components ───────────────────────────────── */
-function TabInfo({ business, businessId }) {
+function TabInfo({ business, businessId, onViewProduct }) {
   const reviewsCount = business.total_reviews ?? 0;
 
   return (
@@ -390,7 +532,7 @@ function TabInfo({ business, businessId }) {
           <h2 className="font-serif text-2xl text-heading">Productos</h2>
           <p className="text-sm text-muted mt-0.5">Lo más recomendado del negocio</p>
         </div>
-        <ProductsCarousel businessId={businessId} />
+        <ProductsCarousel businessId={businessId} onView={onViewProduct} />
       </div>
 
       {/* Tags */}
@@ -430,7 +572,7 @@ function TabInfo({ business, businessId }) {
   );
 }
 
-function TabProducts({ businessId }) {
+function TabProducts({ businessId, onViewProduct }) {
   const { products, loading, error, retry } = usePublicProducts(businessId);
   if (loading) return <SectionLoader />;
   if (error)   return <PageError message={error} onRetry={retry} />;
@@ -442,7 +584,16 @@ function TabProducts({ businessId }) {
         <p className="text-sm text-muted mt-0.5">{products.length} producto{products.length !== 1 ? 's' : ''} disponible{products.length !== 1 ? 's' : ''}</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map((p, i) => <PublicProductCard key={p.id_product ?? i} product={p} />)}
+        {products.map((p, i) => (
+          <button
+            key={p.id_product ?? i}
+            type="button"
+            onClick={() => onViewProduct?.(p)}
+            className="text-left focus:outline-none"
+          >
+            <PublicProductCard product={p} />
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -638,7 +789,8 @@ export default function NegocioDetalle() {
   const { id }   = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab,      setActiveTab]      = useState('info');
+  const [viewingProduct, setViewingProduct] = useState(null);
 
   const fromState = location.state?.business;
   const { business: fetched, loading, error, retry } = usePublicBusinessById(
@@ -725,14 +877,21 @@ export default function NegocioDetalle() {
 
         {/* Main */}
         <div>
-          {activeTab === 'info'  && <TabInfo business={business} businessId={businessId} />}
-          {activeTab === 'prods' && <TabProducts businessId={businessId} />}
+          {activeTab === 'info'  && <TabInfo business={business} businessId={businessId} onViewProduct={setViewingProduct} />}
+          {activeTab === 'prods' && <TabProducts businessId={businessId} onViewProduct={setViewingProduct} />}
           {activeTab === 'certs' && <TabCertifications businessId={businessId} />}
         </div>
 
         {/* Sidebar */}
         <Sidebar business={business} />
       </div>
+
+      {viewingProduct && (
+        <PublicProductDetailModal
+          product={viewingProduct}
+          onClose={() => setViewingProduct(null)}
+        />
+      )}
 
     </div>
   );

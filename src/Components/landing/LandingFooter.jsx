@@ -56,7 +56,7 @@ export default function LandingFooter() {
             <p className="text-xs font-semibold text-heading uppercase tracking-wider">Negocios</p>
             <ul className="flex flex-col gap-2">
               <li>
-                <Link to="/dashboardBusiness" className="text-xs text-muted hover:text-body transition-colors">
+                <Link to="/dashboardBusiness/perfil" className="text-xs text-muted hover:text-body transition-colors">
                   Panel de control
                 </Link>
               </li>

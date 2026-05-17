@@ -1,15 +1,98 @@
-import { Award, LayoutDashboard, Loader2, Plus, Trash2, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Award, FileText, LayoutDashboard, Loader2, Plus, Trash2, Upload, X } from 'lucide-react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CertCard from '../../Components/business/CertCard';
 import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
-import ImageUploader from '../../Components/ui/ImageUploader';
 import { useToastContext } from '../../context/ToastContext';
 import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
 import { createCertification, deleteCertification, getMyCertifications } from '../../services/certifications/certifications.service';
-import { uploadGeneralImage } from '../../services/upload/upload.service';
+import { uploadDocument } from '../../services/upload/upload.service';
 
 const emptyForm = { name: '', issuing_entity: '', verification_url: '' };
+
+// ─── PdfDropzone ──────────────────────────────────────────────────────────────
+const PdfDropzone = forwardRef(function PdfDropzone({ onError, onFileStaged }, ref) {
+  const [file,     setFile]     = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const inputRef = useRef();
+
+  useImperativeHandle(ref, () => ({
+    get canUpload() { return !!file; },
+    async upload() {
+      if (!file) throw new Error('No hay archivo seleccionado');
+      const result = await uploadDocument(file);
+      return result.url;
+    },
+  }));
+
+  function validateAndStage(f) {
+    if (f.type !== 'application/pdf') {
+      onError?.('Solo se permiten archivos PDF.');
+      return;
+    }
+    if (f.size > 5 * 1024 * 1024) {
+      onError?.('El archivo no puede superar los 5 MB.');
+      return;
+    }
+    setFile(f);
+    onFileStaged?.(f);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setDragging(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) validateAndStage(f);
+  }
+
+  function handleChange(e) {
+    const f = e.target.files?.[0];
+    if (f) validateAndStage(f);
+    e.target.value = '';
+  }
+
+  const sizeText = file ? `${(file.size / 1024).toFixed(0)} KB` : null;
+
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={handleDrop}
+      onClick={() => !file && inputRef.current?.click()}
+      className={`relative flex flex-col items-center justify-center gap-3 h-28 rounded-xl border-2 border-dashed transition-colors ${
+        file ? 'border-primary-mid bg-primary-softest/40 cursor-default' :
+        dragging ? 'border-primary-mid bg-primary-softest/60 cursor-copy' :
+        'border-edge hover:border-primary-mid hover:bg-primary-softest/30 cursor-pointer'
+      }`}
+    >
+      <input ref={inputRef} type="file" accept="application/pdf" className="hidden" onChange={handleChange} />
+      {file ? (
+        <div className="flex items-center gap-3 px-4 w-full">
+          <FileText className="w-8 h-8 text-primary-dark shrink-0" />
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-sm font-medium text-heading truncate">{file.name}</span>
+            <span className="text-xs text-muted">{sizeText}</span>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setFile(null); onFileStaged?.(null); }}
+            className="p-1 rounded-lg hover:bg-edge/40 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4 text-muted" />
+          </button>
+        </div>
+      ) : (
+        <>
+          <Upload className="w-6 h-6 text-muted" />
+          <div className="text-center">
+            <p className="text-sm font-medium text-body">Arrastra el PDF aquí</p>
+            <p className="text-xs text-muted mt-0.5">o haz clic para seleccionar · máx. 5 MB</p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+});
 
 const inputCls = (err) =>
   `w-full px-3.5 py-2.5 border rounded-xl text-sm outline-none transition-colors focus:ring-2 focus:ring-primary-mid/30 ${
@@ -38,7 +121,7 @@ function CertFormModal({ onClose, onSave, loading }) {
       catch { e.verification_url = 'Ingresa una URL válida.'; }
     }
     if (!uploaderRef.current?.canUpload) {
-      e.badge_url = 'La imagen del certificado es requerida.';
+      e.badge_url = 'El documento PDF es requerido.';
     }
     return e;
   }
@@ -84,11 +167,10 @@ function CertFormModal({ onClose, onSave, loading }) {
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-body mb-2">
-              Imagen del certificado <span className="text-red-500">*</span>
+              Documento PDF <span className="text-red-500">*</span>
             </label>
-            <ImageUploader
+            <PdfDropzone
               ref={uploaderRef}
-              uploadFn={uploadGeneralImage}
               onError={showError}
               onFileStaged={handleFileStaged}
             />
@@ -293,7 +375,7 @@ export default function BusinessCertifications() {
       <div className="space-y-3">
         <div className="flex items-center gap-1.5 text-xs text-muted">
           <LayoutDashboard className="w-3.5 h-3.5" />
-          <Link to="/dashboardBusiness" className="hover:text-body transition-colors">
+          <Link to="/dashboardBusiness/perfil" className="hover:text-body transition-colors">
             Mi Negocio
           </Link>
           <span>/</span>
