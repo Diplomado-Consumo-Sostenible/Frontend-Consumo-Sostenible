@@ -909,13 +909,10 @@ export default function AdminBusinesses() {
           business={detailBusiness}
           onClose={() => setDetailBusiness(null)}
           footerSlot={
-            <div className="flex gap-3">
+            <>
               {(detailBusiness.status === 'Pending' || detailBusiness.status === 'Rejected') && (
                 <button
-                  onClick={() => {
-                    handleApprove(detailBusiness);
-                    setDetailBusiness(null);
-                  }}
+                  onClick={() => { handleApprove(detailBusiness); setDetailBusiness(null); }}
                   disabled={actionLoading === detailBusiness.id_business}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary-dark text-on-dark-active text-sm font-semibold hover:bg-primary-darkest disabled:opacity-60 transition-colors"
                 >
@@ -925,13 +922,9 @@ export default function AdminBusinesses() {
                   {detailBusiness.status === 'Rejected' ? 'Revertir y aprobar' : 'Aprobar'}
                 </button>
               )}
-
               {(detailBusiness.status === 'Pending' || detailBusiness.status === 'Active') && (
                 <button
-                  onClick={() => {
-                    setRejectTarget(detailBusiness);
-                    setDetailBusiness(null);
-                  }}
+                  onClick={() => { setRejectTarget(detailBusiness); setDetailBusiness(null); }}
                   disabled={actionLoading === detailBusiness.id_business}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-50 text-red-600 border border-red-100 text-sm font-semibold hover:bg-red-100 disabled:opacity-60 transition-colors"
                 >
@@ -939,7 +932,7 @@ export default function AdminBusinesses() {
                   {detailBusiness.status === 'Active' ? 'Revocar' : 'Rechazar'}
                 </button>
               )}
-            </div>
+            </>
           }
         />
       )}

@@ -1,0 +1,273 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Hash, Plus, Search, Edit2, Trash2, X, AlertTriangle, Loader2, LayoutDashboard, ChevronRight } from 'lucide-react';
+import { getTags, createTag, updateTag, deleteTag } from '../../services/admin/tags.service';
+import { useToastContext } from '../../context/ToastContext';
+
+function Modal({ title, onClose, children }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
+          <h2 className="text-base font-semibold text-heading">{title}</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg text-muted hover:text-body hover:bg-app-bg transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="px-6 py-5">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmDialog({ item, onConfirm, onCancel, loading }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6">
+        <div className="flex flex-col items-center text-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-red-500" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-heading">Eliminar tag</h3>
+            <p className="text-sm text-muted mt-1">
+              ¿Eliminar <span className="font-medium text-body">"{item?.tag}"</span>? Esta acción no se puede deshacer.
+            </p>
+          </div>
+          <div className="flex gap-3 w-full mt-1">
+            <button onClick={onCancel} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors disabled:opacity-50">Cancelar</button>
+            <button onClick={onConfirm} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg';
+
+export default function AdminTags() {
+  const toast = useToastContext();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [deleteItem, setDeleteItem] = useState(null);
+  const [formValue, setFormValue] = useState('');
+  const [formError, setFormError] = useState('');
+  const [formLoading, setFormLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  const fetchAll = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getTags();
+      setItems(Array.isArray(data) ? data : []);
+    } catch {
+      toast.error('Error al cargar los tags');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const filtered = items.filter((i) => i.tag?.toLowerCase().includes(search.toLowerCase()));
+
+  const openCreate = () => { setFormValue(''); setFormError(''); setShowCreate(true); };
+  const openEdit = (item) => { setFormValue(item.tag); setFormError(''); setEditItem(item); };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!formValue.trim()) { setFormError('El nombre es requerido'); return; }
+    setFormLoading(true);
+    try {
+      await createTag(formValue.trim());
+      toast.success('Tag creado');
+      setShowCreate(false);
+      fetchAll();
+    } catch (err) {
+      setFormError(err?.response?.data?.message || 'Error al crear');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    if (!formValue.trim()) { setFormError('El nombre es requerido'); return; }
+    setFormLoading(true);
+    try {
+      await updateTag(editItem.id_tags, formValue.trim());
+      toast.success('Tag actualizado');
+      setEditItem(null);
+      fetchAll();
+    } catch (err) {
+      setFormError(err?.response?.data?.message || 'Error al actualizar');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setActionLoading('delete');
+    try {
+      await deleteTag(deleteItem.id_tags);
+      toast.success('Tag eliminado');
+      setDeleteItem(null);
+      fetchAll();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Error al eliminar');
+      setDeleteItem(null);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="space-y-3">
+        <div className="flex items-center gap-1.5 text-xs text-muted">
+          <LayoutDashboard className="w-3.5 h-3.5" />
+          <span>Administrador</span>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-body font-medium">Tags</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
+              <Hash className="w-5 h-5 text-teal-600" />
+            </div>
+            <div>
+              <h1 className="text-xl font-serif text-heading">Tags Sostenibles</h1>
+              <p className="text-sm text-muted mt-0.5">Etiquetas para clasificar prácticas sostenibles de los negocios</p>
+            </div>
+          </div>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary-dark text-on-dark-active text-sm font-medium rounded-xl hover:bg-primary-darkest transition-colors shadow-warm-sm shrink-0">
+            <Plus className="w-4 h-4" /> Nuevo Tag
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-card-bg rounded-xl px-5 py-4 border border-edge">
+          <p className="text-xs text-muted font-medium">Total tags</p>
+          <p className="text-2xl font-bold mt-1 text-heading">{items.length}</p>
+        </div>
+        <div className="bg-primary-softest rounded-xl px-5 py-4 border border-edge">
+          <p className="text-xs text-muted font-medium">Resultados</p>
+          <p className="text-2xl font-bold mt-1 text-primary-dark">{filtered.length}</p>
+        </div>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+        <input type="text" placeholder="Buscar tag..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg" />
+      </div>
+
+      <div className="bg-card-bg rounded-2xl border border-edge overflow-hidden shadow-warm-sm">
+        {loading ? (
+          <div className="flex items-center justify-center py-20 gap-3 text-muted">
+            <Loader2 className="w-5 h-5 animate-spin" /><span className="text-sm">Cargando...</span>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-muted gap-3">
+            <Hash className="w-10 h-10 opacity-30" />
+            <p className="text-sm">{search ? 'Sin resultados' : 'No hay tags registrados'}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-edge bg-app-bg/50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wide">#</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wide">Tag</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wide">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wide">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-edge/40">
+                {filtered.map((item, idx) => (
+                  <tr key={item.id_tags} className="hover:bg-app-bg/50 transition-colors">
+                    <td className="px-4 py-3.5 text-xs text-muted font-mono">{idx + 1}</td>
+                    <td className="px-4 py-3.5">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-body">
+                        <Hash className="w-3.5 h-3.5 text-teal-500 shrink-0" />{item.tag}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-muted font-mono">#{item.id_tags}</td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => openEdit(item)} className="p-1.5 rounded-lg text-muted hover:text-primary-dark hover:bg-primary-softest/50 transition-colors">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setDeleteItem(item)} className="p-1.5 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {!loading && filtered.length > 0 && (
+          <div className="px-4 py-3 border-t border-edge text-xs text-muted">
+            {filtered.length} de {items.length} tags
+          </div>
+        )}
+      </div>
+
+      {showCreate && (
+        <Modal title="Nuevo Tag" onClose={() => setShowCreate(false)}>
+          <form onSubmit={handleCreate} className="space-y-4">
+            {formError && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 rounded-xl text-sm text-red-600">
+                <AlertTriangle className="w-4 h-4 shrink-0" />{formError}
+              </div>
+            )}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-body">Nombre del tag</label>
+              <input type="text" placeholder="Ej: Empaques biodegradables, Productos locales..." value={formValue} onChange={(e) => setFormValue(e.target.value)} className={inputClass} autoFocus />
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={() => setShowCreate(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors">Cancelar</button>
+              <button type="submit" disabled={formLoading} className="flex-1 px-4 py-2.5 rounded-xl bg-primary-dark text-sm font-medium text-on-dark-active hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+                {formLoading && <Loader2 className="w-4 h-4 animate-spin" />}Crear
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {editItem && (
+        <Modal title={`Editar: ${editItem.tag}`} onClose={() => setEditItem(null)}>
+          <form onSubmit={handleEdit} className="space-y-4">
+            {formError && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 rounded-xl text-sm text-red-600">
+                <AlertTriangle className="w-4 h-4 shrink-0" />{formError}
+              </div>
+            )}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-body">Nombre del tag</label>
+              <input type="text" value={formValue} onChange={(e) => setFormValue(e.target.value)} className={inputClass} autoFocus />
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={() => setEditItem(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors">Cancelar</button>
+              <button type="submit" disabled={formLoading} className="flex-1 px-4 py-2.5 rounded-xl bg-primary-dark text-sm font-medium text-on-dark-active hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+                {formLoading && <Loader2 className="w-4 h-4 animate-spin" />}Guardar
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {deleteItem && <ConfirmDialog item={deleteItem} onConfirm={handleDelete} onCancel={() => setDeleteItem(null)} loading={actionLoading === 'delete'} />}
+    </div>
+  );
+}
