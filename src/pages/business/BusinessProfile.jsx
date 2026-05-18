@@ -1061,8 +1061,6 @@ function OwnerSidebar({ business, certifications, save }) {
         }
       </EditableSection>
 
-      {business.address && <MiniMapCard address={business.address} />}
-
       <BusinessCertificationsCard certifications={certifications} />
     </aside>
   );
@@ -1122,7 +1120,7 @@ export default function BusinessProfile() {
   const certsCount = certifications.length;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-8 py-6 space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted">
