@@ -8,7 +8,6 @@ import { getToken, removeToken } from '../../utils/storage';
 const NAV_LINKS = [
   { label: 'Explorar', type: 'scroll', id: 'explorar' },
   { label: 'Mapa',     type: 'scroll', id: 'mapa'     },
-  { label: 'Impacto',  type: 'scroll', id: 'hero'     },
 ];
 
 const USER_MENU_ITEMS = [

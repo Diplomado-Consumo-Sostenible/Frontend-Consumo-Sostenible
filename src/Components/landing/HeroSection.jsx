@@ -1,4 +1,4 @@
-import { Building2, Leaf, MapPin, Search, ShieldCheck, Star } from 'lucide-react';
+import { Building2, Leaf, Search, ShieldCheck, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,7 +38,6 @@ export default function HeroSection({
 }) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [location, setLocation] = useState('');
 
   const displayCount   = totalBusinesses > 0 ? totalBusinesses : 240;
   const displayWeek    = newThisWeek > 0 ? newThisWeek : 6;
@@ -109,26 +108,6 @@ export default function HeroSection({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Café, moda, artesanías…"
-                    className="text-sm text-heading placeholder-muted bg-transparent outline-none w-full"
-                  />
-                </div>
-              </label>
-
-              {/* Divider — hidden on xs */}
-              <div className="hidden sm:block w-px h-10 bg-edge shrink-0" />
-
-              {/* Cell 2 — Dónde (hidden on xs to keep the bar compact) */}
-              <label className="hidden sm:flex flex-1 items-center gap-3 px-4 py-4 min-w-0 cursor-text">
-                <MapPin className="w-4 h-4 text-muted shrink-0" />
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[10px] font-semibold text-muted uppercase tracking-widest mb-0.5">
-                    Dónde
-                  </span>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Ciudad o barrio"
                     className="text-sm text-heading placeholder-muted bg-transparent outline-none w-full"
                   />
                 </div>

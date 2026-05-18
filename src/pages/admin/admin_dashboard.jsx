@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -16,12 +16,29 @@ import {
   UserPlus,
   TrendingUp,
   CheckCircle2,
+  XCircle,
+  PowerOff,
   Clock,
+  RefreshCw,
 } from 'lucide-react';
 import { changeBusinessStatus } from '../../services/business/business.admin.service';
 import { useToastContext } from '../../context/ToastContext';
 import { buildCumulativeSeries, useAdminStats } from '../../hooks/useAdminStats';
 import UserLineChart from '../../Components/admin/UserLineChart';
+
+// ─── Hook: segundos desde la última actualización ────────────────────────────
+
+function useSecondsSince(date) {
+  const [secs, setSecs] = useState(0);
+  useEffect(() => {
+    if (!date) return;
+    const tick = () => setSecs(Math.floor((Date.now() - date.getTime()) / 1000));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [date]);
+  return secs;
+}
 
 // ─── Accesos rápidos ──────────────────────────────────────────────────────────
 
@@ -126,6 +143,26 @@ const ACTIVITY_CONFIG = {
     label: name => (
       <>
         <span className="font-semibold">&ldquo;{name}&rdquo;</span> solicitó registro como negocio
+      </>
+    ),
+  },
+  'biz-rejected': {
+    Icon: XCircle,
+    bg: 'bg-red-50',
+    color: 'text-red-600',
+    label: name => (
+      <>
+        <span className="font-semibold">&ldquo;{name}&rdquo;</span> fue rechazado por el administrador
+      </>
+    ),
+  },
+  'biz-revoked': {
+    Icon: PowerOff,
+    bg: 'bg-gray-100',
+    color: 'text-gray-500',
+    label: name => (
+      <>
+        <span className="font-semibold">&ldquo;{name}&rdquo;</span> fue revocado y desactivado
       </>
     ),
   },
@@ -320,7 +357,8 @@ function SkeletonCard() {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
-  const { stats, loading, reload } = useAdminStats();
+  const { stats, loading, refreshing, lastUpdated, reload } = useAdminStats();
+  const secondsSince = useSecondsSince(lastUpdated);
   const [period, setPeriod] = useState('30d');
   const [actionLoading, setActionLoading] = useState({});
   const toast = useToastContext();
@@ -592,9 +630,24 @@ export default function AdminDashboard() {
 
           {/* Activity feed */}
           <div className="bg-card-bg border border-edge rounded-2xl p-5">
-            <div className="mb-4">
-              <h3 className="font-serif text-xl text-heading">Actividad reciente</h3>
-              <p className="text-xs text-muted mt-1">Últimas acciones en la plataforma</p>
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h3 className="font-serif text-xl text-heading">Actividad reciente</h3>
+                <p className="text-xs text-muted mt-1">
+                  {lastUpdated
+                    ? `Actualizado hace ${secondsSince}s · se refresca cada 30s`
+                    : 'Cargando…'}
+                </p>
+              </div>
+              <button
+                onClick={reload}
+                disabled={loading || refreshing}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-edge text-xs font-medium text-muted hover:text-body hover:border-primary-light transition-colors disabled:opacity-40"
+                title="Actualizar ahora"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Actualizando…' : 'Actualizar'}
+              </button>
             </div>
 
             {loading ? (

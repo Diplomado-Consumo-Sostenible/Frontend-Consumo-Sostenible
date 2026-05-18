@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getBusinessesForAdmin } from '../services/business/business.admin.service';
 import { getAllProfiles, getMyProfile } from '../services/user/profile.service';
 import { getAllUsers } from '../services/user/user.service';
@@ -66,12 +66,21 @@ export function buildCumulativeSeries(items, period, filterFn) {
   );
 }
 
+const POLL_INTERVAL = 30_000; // 30 segundos
+
 export function useAdminStats() {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [stats,       setStats]       = useState(null);
+  const [loading,     setLoading]     = useState(true);
+  const [refreshing,  setRefreshing]  = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null); // Date
+  const isFirstLoad = useRef(true);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (isFirstLoad.current) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
     try {
       const [users, allBizRes, pendingBizRes, profile, profilesRes] = await Promise.all([
         getAllUsers(),
@@ -126,37 +135,65 @@ export function useAdminStats() {
         color: BIZ_PALETTE[b.id_business % BIZ_PALETTE.length],
       }));
 
-      // ── Activity feed: merge user registrations + approved + pending businesses
+      // ── Activity feed: registros de usuarios + estados de negocios
       const activityItems = [];
 
-      // New user registrations
-      users.forEach(u => {
-        if (!u.createdAt) return;
+      // Registros de usuarios — usar allProfiles porque GET /user no expone createdAt
+      allProfiles.forEach(p => {
+        if (!p.createdAt) return;
         activityItems.push({
-          id: `u-${u.id_usuario}`,
+          id: `u-${p.id_perfil ?? p.id_usuario}`,
           type: 'user-register',
-          text: u.perfil?.nombre || u.email,
-          meta: u.rol?.nombre || 'Usuario',
-          sortDate: new Date(u.createdAt),
-          time: formatRelativeTime(u.createdAt),
+          text: p.nombre ? `${p.nombre} ${p.apellido ?? ''}`.trim() : (p.email ?? 'Usuario'),
+          meta: p.rol?.nombre ?? 'Usuario',
+          sortDate: new Date(p.createdAt),
+          time: formatRelativeTime(p.createdAt),
         });
       });
 
-      // Approved businesses
+      // Negocios aprobados (usar updatedAt = momento real de aprobación)
       allBizList
-        .filter(b => b.status === 'Active')
+        .filter(b => b.status === 'Active' && b.isActive !== false)
         .forEach(b => {
           activityItems.push({
             id: `ba-${b.id_business}`,
             type: 'biz-approved',
             text: b.businessName,
             meta: b.category?.category || '',
-            sortDate: new Date(b.createdAt),
-            time: formatRelativeTime(b.createdAt),
+            sortDate: new Date(b.updatedAt ?? b.createdAt),
+            time: formatRelativeTime(b.updatedAt ?? b.createdAt),
           });
         });
 
-      // Pending businesses submitted
+      // Negocios rechazados
+      allBizList
+        .filter(b => b.status === 'Rejected')
+        .forEach(b => {
+          activityItems.push({
+            id: `br-${b.id_business}`,
+            type: 'biz-rejected',
+            text: b.businessName,
+            meta: b.category?.category || '',
+            sortDate: new Date(b.updatedAt ?? b.createdAt),
+            time: formatRelativeTime(b.updatedAt ?? b.createdAt),
+          });
+        });
+
+      // Negocios revocados (aprobados pero desactivados por el admin)
+      allBizList
+        .filter(b => b.status === 'Active' && b.isActive === false)
+        .forEach(b => {
+          activityItems.push({
+            id: `bv-${b.id_business}`,
+            type: 'biz-revoked',
+            text: b.businessName,
+            meta: b.category?.category || '',
+            sortDate: new Date(b.updatedAt ?? b.createdAt),
+            time: formatRelativeTime(b.updatedAt ?? b.createdAt),
+          });
+        });
+
+      // Negocios pendientes enviados
       pendingList.forEach(b => {
         activityItems.push({
           id: `bp-${b.id_business}`,
@@ -168,7 +205,7 @@ export function useAdminStats() {
         });
       });
 
-      // Sort by most recent and take top 7
+      // Ordenar por más reciente y tomar los 7 primeros
       activityItems.sort((a, b) => b.sortDate - a.sortDate);
       const activity = activityItems.slice(0, 7);
 
@@ -190,16 +227,26 @@ export function useAdminStats() {
         allProfiles,
         allBizList,
       });
+      setLastUpdated(new Date());
     } catch {
       // stats remains null, components handle empty state
     } finally {
+      isFirstLoad.current = false;
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
+  // Carga inicial
   useEffect(() => {
     load();
   }, [load]);
 
-  return { stats, loading, reload: load };
+  // Polling cada 30 segundos
+  useEffect(() => {
+    const id = setInterval(load, POLL_INTERVAL);
+    return () => clearInterval(id);
+  }, [load]);
+
+  return { stats, loading, refreshing, lastUpdated, reload: load };
 }
