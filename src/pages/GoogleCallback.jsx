@@ -8,7 +8,7 @@ const redirectByRole = (rol, navigate) => {
     case 'admin': return navigate('/adminDashboard', { replace: true });
     case 'owner': return navigate('/dashboardBusiness/perfil', { replace: true });
     case 'user':
-    default:      return navigate('/dashboard', { replace: true });
+    default:      return navigate('/', { replace: true });
   }
 };
 
@@ -26,6 +26,19 @@ export default function GoogleCallback() {
 
     try {
       saveToken(token);
+
+      const raw = sessionStorage.getItem('google_register_intent');
+      if (raw) {
+        sessionStorage.removeItem('google_register_intent');
+        const { roleId } = JSON.parse(raw);
+        if (Number(roleId) === 3) {
+          navigate('/register/business', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+        return;
+      }
+
       const payload = decodeToken(token);
       redirectByRole(payload?.rol, navigate);
     } catch {

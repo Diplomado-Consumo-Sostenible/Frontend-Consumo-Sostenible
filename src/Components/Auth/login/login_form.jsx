@@ -1,17 +1,28 @@
-import { Eye, EyeOff, Lock, LogIn, Mail, Store, User, X } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, Eye, EyeOff, Lock, LogIn, Mail, ShieldOff, Timer } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useToastContext } from "../../../context/ToastContext";
 import Button from "../../button";
 import InputField from "../../ui/InputField";
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+/* ── Login rate-limit helpers ─────────────────────────────── */
+const STORAGE_KEY   = 'login_security';
+const MAX_ATTEMPTS  = 5;
+const LOCKOUT_MS    = 30_000; // 30 s base lockout
 
-const GOOGLE_ROLES = [
-  { id: 2, label: 'Usuario', desc: 'Explora la plataforma',      icon: User  },
-  { id: 3, label: 'Negocio', desc: 'Gestiona tu establecimiento', icon: Store },
-];
+function readSecurity() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? { attempts: 0, lockedUntil: 0 }; }
+  catch { return { attempts: 0, lockedUntil: 0 }; }
+}
+function writeSecurity(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function clearSecurity() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
 
 function GoogleIcon() {
   return (
@@ -24,70 +35,69 @@ function GoogleIcon() {
   );
 }
 
-function GoogleRoleModal({ onClose, onSelect }) {
-  return (
-    <>
-      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6 border border-edge">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <GoogleIcon />
-              <h3 className="text-sm font-semibold text-heading">¿Cómo quieres entrar?</h3>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-lg hover:bg-app-bg transition-colors"
-            >
-              <X className="w-4 h-4 text-muted" />
-            </button>
-          </div>
-          <p className="text-xs text-muted mb-4">
-            Si ya tienes cuenta, selecciona el tipo con el que te registraste.
-          </p>
-          <div className="grid gap-3">
-            {GOOGLE_ROLES.map(({ id, label, desc, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => onSelect(id)}
-                className="flex items-center gap-3 p-3.5 rounded-xl border border-edge hover:border-primary-light hover:bg-primary-softest/30 transition-all text-left group bg-card-bg"
-              >
-                <div className="w-9 h-9 rounded-lg bg-primary-softest group-hover:bg-primary-softest/70 flex items-center justify-center shrink-0 transition-colors">
-                  <Icon className="w-4 h-4 text-primary-dark" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-heading">{label}</p>
-                  <p className="text-xs text-muted">{desc}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
 
 export default function LoginForm({ onLogin }) {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const [loading, setLoading]                 = useState(false);
-  const [showPass, setShowPass]               = useState(false);
-  const [showGoogleRoles, setShowGoogleRoles] = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [showPass,   setShowPass]   = useState(false);
   const toast = useToastContext();
 
+  /* ── Rate-limit state (seeded from localStorage) ─────────── */
+  const [attempts,    setAttempts]    = useState(() => readSecurity().attempts);
+  const [lockedUntil, setLockedUntil] = useState(() => readSecurity().lockedUntil);
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    const until = readSecurity().lockedUntil;
+    return until > Date.now() ? Math.ceil((until - Date.now()) / 1000) : 0;
+  });
+
+  const isLocked = secondsLeft > 0;
+
+  /* countdown ticker */
+  useEffect(() => {
+    if (!lockedUntil || lockedUntil <= Date.now()) return;
+    const tick = () => {
+      const left = Math.ceil((lockedUntil - Date.now()) / 1000);
+      if (left <= 0) {
+        setSecondsLeft(0);
+        setLockedUntil(0);
+        setAttempts(0);
+        clearSecurity();
+      } else {
+        setSecondsLeft(left);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [lockedUntil]);
+
   const onSubmit = async (data) => {
+    if (isLocked) return;
     setLoading(true);
     try {
       await onLogin(data);
+      clearSecurity();
     } catch (error) {
-      toast.error(error?.message || "Credenciales incorrectas. Verifica tu correo y contraseña.");
+      const newCount = attempts + 1;
+      if (newCount >= MAX_ATTEMPTS) {
+        const until = Date.now() + LOCKOUT_MS;
+        setLockedUntil(until);
+        setSecondsLeft(Math.ceil(LOCKOUT_MS / 1000));
+        setAttempts(newCount);
+        writeSecurity({ attempts: newCount, lockedUntil: until });
+        toast.error("Demasiados intentos fallidos. Espera 30 segundos antes de volver a intentarlo.");
+      } else {
+        setAttempts(newCount);
+        writeSecurity({ attempts: newCount, lockedUntil: 0 });
+        toast.error(error?.message || "Credenciales incorrectas. Verifica tu correo y contraseña.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSelect = (rolId) => {
-    window.location.href = `${API_BASE}/auth/google?rolId=${rolId}`;
+  const handleGoogle = () => {
+    window.location.href = `${API_BASE}/auth/google`;
   };
 
   return (
@@ -163,7 +173,38 @@ export default function LoginForm({ onLogin }) {
           />
         </div>
 
-        <Button type="submit" loading={loading} icon={LogIn} className="mt-2 shadow-warm-sm hover:shadow-warm">
+        {/* Intentos restantes */}
+        {!isLocked && attempts > 0 && attempts < MAX_ATTEMPTS && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <p className="text-xs font-medium">
+              {MAX_ATTEMPTS - attempts} intento{MAX_ATTEMPTS - attempts !== 1 ? 's' : ''} restante{MAX_ATTEMPTS - attempts !== 1 ? 's' : ''} antes de bloquear el acceso.
+            </p>
+          </div>
+        )}
+
+        {/* Bloqueo activo */}
+        {isLocked && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700">
+            <ShieldOff className="w-5 h-5 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Acceso bloqueado temporalmente</p>
+              <p className="text-xs mt-0.5 flex items-center gap-1">
+                <Timer className="w-3 h-3" />
+                Puedes volver a intentarlo en{' '}
+                <span className="font-bold tabular-nums">{secondsLeft}s</span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          loading={loading}
+          disabled={isLocked}
+          icon={LogIn}
+          className="mt-2 shadow-warm-sm hover:shadow-warm disabled:opacity-60 disabled:cursor-not-allowed"
+        >
           Iniciar sesión
         </Button>
 
@@ -177,7 +218,7 @@ export default function LoginForm({ onLogin }) {
         {/* Botón Google */}
         <button
           type="button"
-          onClick={() => setShowGoogleRoles(true)}
+          onClick={handleGoogle}
           className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-edge bg-card-bg hover:bg-app-bg hover:border-primary-light text-sm font-medium text-body transition-all shadow-warm-sm hover:shadow-warm active:scale-[0.98]"
         >
           <GoogleIcon />
@@ -195,12 +236,6 @@ export default function LoginForm({ onLogin }) {
         </p>
       </form>
 
-      {showGoogleRoles && (
-        <GoogleRoleModal
-          onClose={() => setShowGoogleRoles(false)}
-          onSelect={handleGoogleSelect}
-        />
-      )}
     </div>
   );
 }

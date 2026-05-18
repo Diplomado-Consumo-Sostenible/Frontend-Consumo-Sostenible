@@ -18,6 +18,7 @@ import Login from './pages/Login';
 import NegocioDetalle from './pages/NegocioDetalle';
 import Profile from './pages/profile/Profile';
 import Register from './pages/Register';
+import RegisterBusiness from './pages/RegisterBusiness';
 import Unauthorized from './pages/Unauthorized';
 import Favoritos from './pages/user/Favoritos';
 import MisResenas from './pages/user/MisResenas';
@@ -37,7 +38,8 @@ function App() {
         <Route path="/register"        element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized"    element={<Unauthorized />} />
-        <Route path="/auth/callback"   element={<GoogleCallback />} />
+        <Route path="/auth/callback"      element={<GoogleCallback />} />
+        <Route path="/register/business"  element={<RegisterBusiness />} />
 
         {/* ── Usuario consumidor (UserLayout: LandingNavbar + Footer) */}
         <Route

@@ -18,13 +18,9 @@ export const getMyBusinesses = async () => {
   }
 };
 
-export const postBusiness = async (businessData, token) => {
+export const postBusiness = async (businessData) => {
   try {
-    const response = await API.post('/business', businessData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await API.post('/business', businessData);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Error al registrar el negocio' };
