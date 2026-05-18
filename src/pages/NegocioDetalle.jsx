@@ -4,6 +4,7 @@ import {
   RefreshCw, Share2, ShieldCheck, Star,
   UserCheck, UserPlus, X,
 } from 'lucide-react';
+import SingleLocationMap from '../Components/map/SingleLocationMap';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PublicCertRow from '../Components/landing/PublicCertRow';
@@ -637,60 +638,46 @@ function SidebarCard({ title, icon, children }) {
 }
 
 function ScheduleCard({ schedule }) {
-  const status = calcOpenStatus(schedule);
+  const hasSchedule = schedule && Object.keys(schedule).length > 0;
+  const status = hasSchedule ? calcOpenStatus(schedule) : null;
   return (
     <SidebarCard title="Horario de atención" icon={Clock}>
-      {status && (
-        <span
-          className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full ${
-            status.open ? 'bg-ok-bg text-ok-text' : 'bg-edge text-muted'
-          }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${status.open ? 'bg-ok-text animate-pulse' : 'bg-muted'}`} />
-          {status.label}
-        </span>
-      )}
-      <ScheduleDisplay schedule={schedule} />
+      {!hasSchedule
+        ? <p className="text-sm text-muted">Sin horario registrado.</p>
+        : (
+          <>
+            {status && (
+              <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full ${
+                status.open ? 'bg-ok-bg text-ok-text' : 'bg-edge text-muted'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${status.open ? 'bg-ok-text animate-pulse' : 'bg-muted'}`} />
+                {status.label}
+              </span>
+            )}
+            <ScheduleDisplay schedule={schedule} />
+          </>
+        )
+      }
     </SidebarCard>
   );
 }
 
-function MiniMapCard({ address }) {
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+function MiniMapCard({ address, latitude, longitude }) {
+  const hasCoords = Boolean(latitude && longitude);
+  const mapsUrl = hasCoords
+    ? `https://www.google.com/maps?q=${latitude},${longitude}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
   return (
     <SidebarCard title="Ubicación" icon={MapPin}>
-      {/* Map placeholder */}
-      <div
-        className="relative h-40 rounded-xl overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #E8E1CB 0%, #DCD4B8 100%)' }}
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(31,61,43,0.06) 1px, transparent 1px),' +
-              'linear-gradient(90deg, rgba(31,61,43,0.06) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="absolute inset-0 w-full h-full opacity-40"
-        >
-          <path d="M 0 40 Q 40 30 70 50 T 100 60" stroke="rgba(31,61,43,0.2)" strokeWidth="0.8" fill="none" />
-          <path d="M 30 0 Q 35 40 50 60 T 60 100" stroke="rgba(31,61,43,0.2)" strokeWidth="0.8" fill="none" />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative">
-            <div className="absolute w-10 h-10 rounded-full bg-terracotta/20 animate-pulse" style={{ top: '-8px', left: '-8px' }} />
-            <div className="relative w-6 h-6 rounded-full bg-terracotta border-2 border-white shadow-warm-sm flex items-center justify-center">
-              <Leaf className="w-3 h-3 text-white" />
-            </div>
+      {hasCoords
+        ? <SingleLocationMap latitude={latitude} longitude={longitude} className="mb-1" />
+        : (
+          <div className="flex items-center justify-center h-32 rounded-xl bg-primary-softest border border-edge">
+            <p className="text-xs text-muted">Sin coordenadas registradas</p>
           </div>
-        </div>
-      </div>
+        )
+      }
       <a
         href={mapsUrl}
         target="_blank"
@@ -766,11 +753,15 @@ function Sidebar({ business }) {
         />
       </SidebarCard>
 
-      {business.schedule && Object.keys(business.schedule).length > 0 && (
-        <ScheduleCard schedule={business.schedule} />
-      )}
+      <ScheduleCard schedule={business.schedule} />
 
-      {business.address && <MiniMapCard address={business.address} />}
+      {(business.address || business.latitude) && (
+        <MiniMapCard
+          address={business.address}
+          latitude={business.latitude}
+          longitude={business.longitude}
+        />
+      )}
 
       <SimilarCard businesses={similar} loading={simLoading} />
     </aside>

@@ -1,5 +1,5 @@
-import { MapPin } from 'lucide-react';
-import MapView from '../../map/MapView';
+import { Compass, MapPin } from 'lucide-react';
+import SingleLocationMap from '../../map/SingleLocationMap';
 
 const inputCls =
   'w-full px-3.5 py-2.5 border border-edge rounded-xl text-sm text-body bg-card-bg outline-none focus:ring-2 focus:ring-green-400/30 focus:border-green-400 transition-colors';
@@ -13,12 +13,12 @@ export function LocationDisplay({ latitude, longitude }) {
 
   return (
     <div className="space-y-3">
-      <MapView compact />
+      <SingleLocationMap latitude={latitude} longitude={longitude} />
 
       <div className="flex items-center justify-between text-xs text-muted px-1">
         <span className="flex items-center gap-1.5">
           <MapPin className="w-3.5 h-3.5 text-primary-mid" />
-          Lat: {latitude} | Lon: {longitude}
+          Lat: {Number(latitude).toFixed(6)} | Lon: {Number(longitude).toFixed(6)}
         </span>
         <a
           href={mapsUrl}
@@ -29,6 +29,15 @@ export function LocationDisplay({ latitude, longitude }) {
           Ver en Maps →
         </a>
       </div>
+
+      <a
+        href={mapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-edge text-sm text-body hover:border-primary-mid hover:text-primary-dark transition-colors"
+      >
+        <Compass className="w-4 h-4" />Cómo llegar
+      </a>
     </div>
   );
 }
