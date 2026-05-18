@@ -25,6 +25,7 @@ import { updateMyBusiness } from '../../services/business/busienss.service';
 import { uploadDocument } from '../../services/upload/upload.service';
 import { getMyCertifications } from '../../services/certifications/certifications.service';
 import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
+import { getTags } from '../../services/types/tags.service';
 import { uploadGeneralImage } from '../../services/upload/upload.service';
 
 /* ── Helpers ──────────────────────────────────────────────── */
@@ -866,8 +867,47 @@ function ProductsCarousel({ businessId }) {
   );
 }
 
+/* ── TagsForm ─────────────────────────────────────────────── */
+function TagsForm({ selectedIds, onChange, allTags }) {
+  const toggle = (id) =>
+    onChange(
+      selectedIds.includes(id)
+        ? selectedIds.filter((x) => x !== id)
+        : [...selectedIds, id]
+    );
+
+  if (!allTags.length) return (
+    <p className="text-xs text-muted italic">Cargando etiquetas…</p>
+  );
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {allTags.map((t) => {
+        const id = t.id_tags ?? t.id;
+        const name = t.tagName ?? t.name ?? t.tag;
+        const active = selectedIds.includes(id);
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => toggle(id)}
+            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors ${
+              active
+                ? 'bg-primary-dark text-on-dark-active border-primary-dark'
+                : 'bg-card-bg text-body border-edge hover:border-primary-light hover:text-primary-dark'
+            }`}
+          >
+            <Leaf className="w-3 h-3" />
+            {name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── Tab: Información ─────────────────────────────────────── */
-function TabInfo({ business, save, basicSave, canManage }) {
+function TabInfo({ business, save, basicSave, canManage, allTags }) {
   return (
     <div className="space-y-10">
 
@@ -972,26 +1012,58 @@ function TabInfo({ business, save, basicSave, canManage }) {
         <ProductsCarousel businessId={business.id_business} />
       </div>
 
-      {/* Etiquetas */}
-      {business.tags?.length > 0 && (
-        <div className="space-y-4">
-          <div>
-            <h2 className="font-serif text-2xl text-heading">Etiquetas sostenibles</h2>
-            <p className="text-sm text-muted mt-0.5">Tipos de producto que ofrece tu negocio</p>
+      {/* Etiquetas sostenibles */}
+      <SectionEdit
+        initialValues={{ tagIds: (business.tags ?? []).map((t) => t.id_tags ?? t.id) }}
+        onSave={basicSave ? (v) => basicSave({ tagIds: v.tagIds }) : null}
+      >
+        {({ draft, setDraft, editing, setEditing, saving, canEdit, handleSave, handleCancel }) => (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-serif text-2xl text-heading">Etiquetas sostenibles</h2>
+                <p className="text-sm text-muted mt-0.5">
+                  {editing
+                    ? 'Selecciona las etiquetas que describen tu negocio'
+                    : 'Tipos de producto que ofrece tu negocio'}
+                </p>
+              </div>
+              {canEdit && (
+                <SectionEditButtons
+                  editing={editing} saving={saving}
+                  onEdit={() => setEditing(true)}
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                />
+              )}
+            </div>
+
+            {editing ? (
+              <TagsForm
+                selectedIds={draft.tagIds}
+                onChange={(ids) => setDraft({ tagIds: ids })}
+                allTags={allTags}
+              />
+            ) : (business.tags?.length ?? 0) > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {business.tags.map((t) => (
+                  <span
+                    key={t.id_tags ?? t.tagName}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-primary-softest text-primary-dark border border-primary-softest"
+                  >
+                    <Leaf className="w-3 h-3" />
+                    {t.tagName ?? t.name ?? t.tag}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted italic">
+                Sin etiquetas. {canEdit ? 'Haz clic en Editar para agregar.' : ''}
+              </p>
+            )}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {business.tags.map((t) => (
-              <span
-                key={t.id_tags ?? t.tagName}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-primary-softest text-primary-dark border border-primary-softest"
-              >
-                <Leaf className="w-3 h-3" />
-                {t.tagName ?? t.name ?? t.tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
+      </SectionEdit>
 
       <BusinessStatsBar
         followers={business.followers_count}
@@ -1244,6 +1316,7 @@ export default function BusinessProfile() {
   const { success: toastSuccess, error: toastError } = useToastContext();
   const [certifications, setCertifications] = useState([]);
   const [categories,     setCategories]     = useState([]);
+  const [allTags,        setAllTags]        = useState([]);
   const [activeTab,      setActiveTab]      = useState('info');
   const [localDraft,     setLocalDraft]     = useState({});
   const [submitting,     setSubmitting]     = useState(false);
@@ -1251,6 +1324,7 @@ export default function BusinessProfile() {
   useEffect(() => {
     getMyCertifications().then((d) => setCertifications(Array.isArray(d) ? d : [])).catch(() => {});
     getTiposNegocio().then((d) => setCategories(Array.isArray(d) ? d : [])).catch(() => {});
+    getTags().then((d) => setAllTags(Array.isArray(d) ? d : [])).catch(() => {});
   }, []);
 
   if (loading) {
@@ -1395,7 +1469,7 @@ export default function BusinessProfile() {
       {/* Contenido principal + sidebar */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-10">
         <div>
-          {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} />}
+          {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} allTags={allTags} />}
           {activeTab === 'prods' && <TabProducts businessId={id} canManage={canManage} />}
           {activeTab === 'certs' && <TabCertifications certifications={certifications} />}
         </div>

@@ -79,7 +79,7 @@ export default function MapSection({ communityFavorites = [], onViewDetail }) {
   const podiumRanks = communityFavorites[1] ? [2, 1, 3] : communityFavorites[0] ? [1] : [];
 
   return (
-    <section id="mapa" style={{ backgroundColor: '#e8e1d5' }} className="py-14 scroll-mt-20">
+    <section id="mapa" style={{ backgroundColor: '#e8e1d5' }} className="py-14 scroll-mt-20 isolate">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">

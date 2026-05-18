@@ -1,6 +1,7 @@
 import L from 'leaflet';
-import { Building2, ChevronLeft, ChevronRight, List, Loader2, MapPin, Navigation, Star } from 'lucide-react';
+import { ArrowRight, Building2, ChevronLeft, ChevronRight, List, Loader2, MapPin, Navigation, Star } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { getPublicBusinesses } from '../../services/business/explore.service';
 import { formatDistance, haversine } from './haversine';
@@ -93,14 +94,14 @@ function InfoCard({ biz }) {
       {biz.logo && (
         <img src={biz.logo} alt={biz.businessName} className="w-full h-14 object-cover rounded-lg" />
       )}
-      <p className="font-semibold text-sm text-gray-800 leading-tight">{biz.businessName}</p>
+      <p className="font-semibold text-sm text-heading leading-tight">{biz.businessName}</p>
       {biz.category?.category && (
-        <span className="inline-block w-fit px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[10px] font-medium border border-green-200">
+        <span className="inline-block w-fit px-2 py-0.5 rounded-full bg-primary-softest text-primary-dark text-[10px] font-medium border border-primary-light/40">
           {biz.category.category}
         </span>
       )}
       {biz.address && (
-        <p className="flex items-start gap-1 text-[11px] text-gray-500">
+        <p className="flex items-start gap-1 text-[11px] text-muted">
           <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
           {biz.address}
         </p>
@@ -109,18 +110,25 @@ function InfoCard({ biz }) {
         {rating > 0 && (
           <div className="flex items-center gap-0.5">
             {[1,2,3,4,5].map((n) => (
-              <Star key={n} className={`w-3 h-3 ${n <= Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}`} />
+              <Star key={n} className={`w-3 h-3 ${n <= Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-edge fill-edge'}`} />
             ))}
-            <span className="text-[10px] text-gray-500 ml-0.5">{rating.toFixed(1)}</span>
+            <span className="text-[10px] text-muted ml-0.5">{rating.toFixed(1)}</span>
           </div>
         )}
         {biz.distance !== null && (
-          <span className="flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-primary-dark bg-primary-softest px-2 py-0.5 rounded-full">
             <Navigation className="w-2.5 h-2.5" />
             {formatDistance(biz.distance)}
           </span>
         )}
       </div>
+      <Link
+        to={`/negocio/${biz.id_business}`}
+        onClick={() => window.scrollTo(0, 0)}
+        className="mt-1 flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg bg-primary-dark hover:bg-primary-darkest text-on-dark-active text-[11px] font-semibold transition-colors"
+      >
+        Ver detalles <ArrowRight className="w-3 h-3" />
+      </Link>
     </div>
   );
 }
@@ -178,6 +186,14 @@ function BizListItem({ biz, isSelected, hasCoords, onClick }) {
             </span>
           )}
         </div>
+
+        <Link
+          to={`/negocio/${biz.id_business}`}
+          onClick={(e) => { e.stopPropagation(); window.scrollTo(0, 0); }}
+          className="mt-1.5 flex items-center justify-center gap-1 w-full py-1.5 rounded-lg border border-primary-light text-primary-dark text-[10px] font-semibold hover:bg-primary-softest transition-colors"
+        >
+          Ver detalles <ArrowRight className="w-3 h-3" />
+        </Link>
       </div>
     </button>
   );
