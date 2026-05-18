@@ -1,5 +1,5 @@
-import { Check, Leaf, Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Check, FileText, Leaf, Plus, UploadCloud, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getTags } from '../../../services/types/tags.service';
 import { getTiposNegocio } from '../../../services/types/tiposNegocio.service';
@@ -21,9 +21,12 @@ export default function BusinessForm({ onNext, onBack }) {
     formState: { errors },
   } = useForm();
 
-  const [tipos, setTipos]             = useState([]);
-  const [tags, setTags]               = useState([]);
+  const [tipos, setTipos]               = useState([]);
+  const [tags, setTags]                 = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [camaraFile, setCamaraFile]     = useState(null);
+  const [dragActive, setDragActive]     = useState(false);
+  const fileInputRef                    = useRef(null);
 
   const toggleTag = (id) => {
     setSelectedTags((prev) => {
@@ -46,6 +49,35 @@ export default function BusinessForm({ onNext, onBack }) {
     };
     fetchData();
   }, []);
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
+  };
+
+  const applyFile = (file) => {
+    if (!file) return;
+    if (file.type !== 'application/pdf') return;
+    setCamaraFile(file);
+    setValue('camaraComercio', file, { shouldValidate: true });
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    applyFile(e.dataTransfer.files?.[0]);
+  };
+
+  const handleFileInput = (e) => applyFile(e.target.files?.[0]);
+
+  const removeFile = () => {
+    setCamaraFile(null);
+    setValue('camaraComercio', null, { shouldValidate: true });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const onSubmit = (data) => onNext(data);
 
@@ -231,6 +263,71 @@ export default function BusinessForm({ onNext, onBack }) {
             {errors.tags && (
               <p className="text-red-400 text-xs flex items-center gap-1">
                 <span>&#9888;</span> {errors.tags.message}
+              </p>
+            )}
+          </div>
+
+          {/* Cámara de comercio */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-body">
+              Documento Cámara de Comercio
+              <span className="ml-1 text-red-400">*</span>
+            </label>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={handleFileInput}
+            />
+            <input
+              type="hidden"
+              {...register('camaraComercio', { required: 'El documento de Cámara de Comercio es obligatorio' })}
+            />
+
+            {camaraFile ? (
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-edge bg-card-bg">
+                <FileText className="w-8 h-8 shrink-0 text-primary-dark" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-body truncate">{camaraFile.name}</p>
+                  <p className="text-xs text-muted">{(camaraFile.size / 1024).toFixed(1)} KB · PDF</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  className="shrink-0 p-1 rounded-full hover:bg-red-50 text-muted hover:text-red-400 transition-colors"
+                  aria-label="Eliminar archivo"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div
+                onDragEnter={handleDrag}
+                onDragOver={handleDrag}
+                onDragLeave={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl border-2 border-dashed cursor-pointer transition-all
+                  ${errors.camaraComercio
+                    ? 'border-red-300 bg-red-50/40'
+                    : dragActive
+                      ? 'border-primary-dark bg-primary-dark/5 scale-[1.01]'
+                      : 'border-edge bg-card-bg hover:border-primary-light hover:bg-primary-dark/5'
+                  }`}
+              >
+                <UploadCloud className={`w-8 h-8 transition-colors ${dragActive ? 'text-primary-dark' : 'text-muted'}`} />
+                <p className="text-sm font-medium text-body text-center">
+                  {dragActive ? 'Suelta el archivo aquí' : 'Arrastra y suelta tu documento aquí'}
+                </p>
+                <p className="text-xs text-muted text-center">o haz clic para seleccionar · Solo archivos PDF</p>
+              </div>
+            )}
+
+            {errors.camaraComercio && (
+              <p className="text-red-400 text-xs flex items-center gap-1 pl-1">
+                <span>&#9888;</span> {errors.camaraComercio.message}
               </p>
             )}
           </div>
