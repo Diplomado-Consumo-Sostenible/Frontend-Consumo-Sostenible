@@ -1,8 +1,9 @@
 import {
   AlertTriangle, ChevronDown, ChevronUp,
-  Edit3, Flag, Loader2, MessageSquare, Send, Star, X,
+  Edit3, Flag, Loader2, LogIn, MessageSquare, Send, Star, X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import useBusinessReviews from '../../hooks/useBusinessReviews';
 import { useToastContext } from '../../context/ToastContext';
 import ReportModal from '../reviews/ReportModal';
@@ -284,7 +285,7 @@ function ReviewCard({ review, isOwn, onEdit, onReport, alreadyReported }) {
 
 /* ── ReviewsSummary ──────────────────────────────────────────── */
 function ReviewsSummary({ reviews, total, onFilterChange, activeFilter }) {
-  if (!total) return null;
+  if (!total && activeFilter === null) return null;
   const avg = reviews.length
     ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : 0;
   const counts = {};
@@ -329,7 +330,7 @@ export default function ReviewsSection({ businessId }) {
   const [ratingFilter, setRatingFilter] = useState(null);
 
   const {
-    reviews, meta, myReview, loading, error,
+    reviews, meta, ratingCounts, myReview, loading, error,
     isAuthenticated, currentUserId,
     submitReview, report, loadMore, hasMore, retry,
   } = useBusinessReviews(businessId, { ratingFilter });
@@ -372,19 +373,17 @@ export default function ReviewsSection({ businessId }) {
       </div>
 
       {/* Resumen */}
-      {reviews.length > 0 && (
+      {(reviews.length > 0 || ratingFilter !== null) && (
         <ReviewsSummary reviews={reviews} total={total}
           onFilterChange={setRatingFilter} activeFilter={ratingFilter} />
       )}
 
       {/* Filtros */}
-      {total > 0 && (
+      {(total > 0 || ratingFilter !== null) && (
         <StarFilter
           active={ratingFilter}
           onChange={setRatingFilter}
-          counts={Object.fromEntries(
-            [1, 2, 3, 4, 5].map((s) => [s, reviews.filter((r) => r.rating === s).length])
-          )}
+          counts={ratingCounts}
         />
       )}
 
@@ -398,10 +397,23 @@ export default function ReviewsSection({ businessId }) {
       {isAuthenticated && myReview === null && showForm && (
         <ReviewForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} isEdit={false} />
       )}
-      {!isAuthenticated && total > 0 && (
-        <p className="text-xs text-muted">
-          <span className="font-medium text-primary-dark">Inicia sesión</span> para dejar tu reseña.
-        </p>
+      {!isAuthenticated && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary-softest/30 border border-primary-softest">
+          <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
+            <Star className="w-5 h-5 text-primary-dark" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-heading">¿Visitaste este negocio?</p>
+            <p className="text-xs text-muted mt-0.5">Inicia sesión para compartir tu experiencia con la comunidad</p>
+          </div>
+          <Link
+            to="/login"
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-dark text-white text-xs font-semibold hover:bg-primary-darkest transition-colors whitespace-nowrap"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            Iniciar sesión
+          </Link>
+        </div>
       )}
 
       {/* Estados */}

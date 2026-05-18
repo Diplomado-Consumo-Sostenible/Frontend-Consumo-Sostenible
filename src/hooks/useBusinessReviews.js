@@ -28,12 +28,13 @@ function saveReported(userId, set) {
 }
 
 export default function useBusinessReviews(businessId, { ratingFilter = null, skipMyReview = false } = {}) {
-  const [reviews,    setReviews]    = useState([]);
-  const [meta,       setMeta]       = useState(null);
-  const [myReview,   setMyReview]   = useState(undefined); // undefined=cargando, null=sin reseña
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState(null);
-  const [page,       setPage]       = useState(1);
+  const [reviews,      setReviews]      = useState([]);
+  const [meta,         setMeta]         = useState(null);
+  const [ratingCounts, setRatingCounts] = useState({});
+  const [myReview,     setMyReview]     = useState(undefined); // undefined=cargando, null=sin reseña
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState(null);
+  const [page,         setPage]         = useState(1);
 
   const token     = getToken();
   const decoded   = decodeToken(token);
@@ -72,8 +73,27 @@ export default function useBusinessReviews(businessId, { ratingFilter = null, sk
     }
   }, [businessId, isAuthenticated]);
 
+  const fetchRatingCounts = useCallback(async () => {
+    if (!businessId) return;
+    try {
+      const results = await Promise.all(
+        [1, 2, 3, 4, 5].map((s) =>
+          getBusinessReviewsPublic(businessId, { page: 1, limit: 1, rating: s })
+        )
+      );
+      const counts = {};
+      [1, 2, 3, 4, 5].forEach((s, i) => {
+        counts[s] = results[i]?.meta?.totalItems ?? 0;
+      });
+      setRatingCounts(counts);
+    } catch {
+      // leave counts empty — not critical
+    }
+  }, [businessId]);
+
   useEffect(() => { fetchReviews(1); }, [fetchReviews]);
   useEffect(() => { fetchMyReview(); }, [fetchMyReview]);
+  useEffect(() => { fetchRatingCounts(); }, [fetchRatingCounts]);
 
   const submitReview = useCallback(async (payload) => {
     const res = myReview
@@ -98,7 +118,7 @@ export default function useBusinessReviews(businessId, { ratingFilter = null, sk
   const hasMore = meta ? meta.currentPage < meta.totalPages : false;
 
   return {
-    reviews, meta, myReview, loading, error,
+    reviews, meta, ratingCounts, myReview, loading, error,
     isAuthenticated, currentUserId,
     submitReview, report, reported, loadMore, hasMore,
     retry: () => fetchReviews(1),
