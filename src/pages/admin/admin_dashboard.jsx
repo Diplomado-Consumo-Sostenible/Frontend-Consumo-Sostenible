@@ -71,36 +71,36 @@ const QUICK_ACCESS = [
     title: 'Certificaciones',
     desc: 'Administrar las verificaciones y certificados sostenibles.',
     icon: Award,
+    to: '/adminDashboard/certificaciones',
     iconBg: 'bg-amber-50',
     iconColor: 'text-amber-700',
-    soon: true,
   },
   {
     id: 'cat',
     title: 'Categorías',
     desc: 'Definir tipos de negocio: Restaurante, Finca, Confecciones...',
     icon: LayoutGrid,
+    to: '/adminDashboard/categorias',
     iconBg: 'bg-terracotta-soft',
     iconColor: 'text-terracotta',
-    soon: true,
   },
   {
     id: 'tags',
     title: 'Tags sostenibles',
     desc: 'Etiquetas: empaques biodegradables, productos locales, orgánicos...',
     icon: Tag,
+    to: '/adminDashboard/tags',
     iconBg: 'bg-purple-50',
     iconColor: 'text-purple-700',
-    soon: true,
   },
   {
     id: 'gender',
     title: 'Géneros e identidades',
     desc: 'Configurar las opciones de identidad de género del registro.',
     icon: Compass,
+    to: '/adminDashboard/generos',
     iconBg: 'bg-primary-softest',
     iconColor: 'text-primary-mid',
-    soon: true,
   },
 ];
 
@@ -177,11 +177,7 @@ function QuickCard({ item, stats }) {
 
   const inner = (
     <div
-      className={`bg-card-bg border border-edge rounded-2xl p-5 flex flex-col gap-3 text-left transition-all duration-200 h-full ${
-        item.soon
-          ? 'opacity-60 cursor-not-allowed'
-          : 'hover:-translate-y-0.5 hover:shadow-warm hover:border-primary-softest cursor-pointer'
-      }`}
+      className="bg-card-bg border border-edge rounded-2xl p-5 flex flex-col gap-3 text-left transition-all duration-200 h-full hover:-translate-y-0.5 hover:shadow-warm hover:border-primary-softest cursor-pointer"
     >
       <div className="flex items-start justify-between gap-3">
         <span
@@ -200,11 +196,7 @@ function QuickCard({ item, stats }) {
       </div>
 
       <div className="flex items-center gap-2 pt-3 mt-auto border-t border-edge text-xs text-muted">
-        {item.soon ? (
-          <span className="px-2 py-0.5 rounded-full bg-app-bg text-muted text-[10px] font-medium tracking-wide uppercase">
-            Próximamente
-          </span>
-        ) : (
+        {item.statKey ? (
           <>
             <span className="font-semibold text-sm text-heading">
               {typeof statValue === 'number' ? statValue.toLocaleString('es-CO') : statValue}
@@ -216,12 +208,14 @@ function QuickCard({ item, stats }) {
               </span>
             )}
           </>
+        ) : (
+          <span className="text-primary-mid font-medium">Gestionar →</span>
         )}
       </div>
     </div>
   );
 
-  if (item.soon || !item.to) return <div>{inner}</div>;
+  if (!item.to) return <div>{inner}</div>;
   return (
     <Link to={item.to} className="group block">
       {inner}

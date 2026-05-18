@@ -6,6 +6,11 @@ import UserLayout from './layouts/UserLayout';
 import AdminDashboard from './pages/admin/admin_dashboard';
 import AdminBusinesses from './pages/admin/AdminBusinesses';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminGeneros from './pages/admin/AdminGeneros';
+import AdminCategorias from './pages/admin/AdminCategorias';
+import AdminTags from './pages/admin/AdminTags';
+import AdminCertifications from './pages/admin/AdminCertifications';
+import AdminReviewsReports from './pages/admin/AdminReviewsReports';
 import BusinessCertifications from './pages/business/BusinessCertifications';
 import BusinessProducts from './pages/business/BusinessProducts';
 import BusinessProfile from './pages/business/BusinessProfile';
@@ -132,6 +137,46 @@ function App() {
           element={
             <ProtectedRoute roles={['ADMIN']}>
               <DashboardLayout><AdminBusinesses /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/adminDashboard/generos"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <DashboardLayout><AdminGeneros /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/adminDashboard/categorias"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <DashboardLayout><AdminCategorias /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/adminDashboard/tags"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <DashboardLayout><AdminTags /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/adminDashboard/certificaciones"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <DashboardLayout><AdminCertifications /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/adminDashboard/reportes"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <DashboardLayout><AdminReviewsReports /></DashboardLayout>
             </ProtectedRoute>
           }
         />

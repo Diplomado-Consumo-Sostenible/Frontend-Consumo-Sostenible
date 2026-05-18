@@ -3,14 +3,18 @@ import {
   BarChart2,
   Building2,
   Compass,
+  Flag,
+  Hash,
   HelpCircle,
   LayoutDashboard,
   Leaf,
   Lock,
   Package,
   Store,
+  Tag,
   User,
   Users,
+  VenetianMask,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
@@ -20,9 +24,14 @@ import { getToken } from '../../utils/storage';
 const NAV_CONFIG = {
   admin: {
     menu: [
-      { label: 'Dashboard',           icon: LayoutDashboard, to: '/adminDashboard'          },
-      { label: 'Gestionar Usuarios',  icon: Users,           to: '/adminDashboard/usuarios' },
-      { label: 'Moderación Negocios', icon: Building2,       to: '/adminDashboard/negocios' },
+      { label: 'Dashboard',           icon: LayoutDashboard, to: '/adminDashboard'                  },
+      { label: 'Gestionar Usuarios',  icon: Users,           to: '/adminDashboard/usuarios'         },
+      { label: 'Moderación Negocios', icon: Building2,       to: '/adminDashboard/negocios'         },
+      { label: 'Certificaciones',     icon: Award,           to: '/adminDashboard/certificaciones'  },
+      { label: 'Categorías',          icon: Tag,             to: '/adminDashboard/categorias'       },
+      { label: 'Tags',                icon: Hash,            to: '/adminDashboard/tags'             },
+      { label: 'Géneros',             icon: VenetianMask,    to: '/adminDashboard/generos'          },
+      { label: 'Reportes Reseñas',    icon: Flag,            to: '/adminDashboard/reportes'         },
     ],
     explore: [
       { label: 'Explorar negocios', icon: Compass, to: '/' },

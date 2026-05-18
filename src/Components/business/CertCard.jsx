@@ -1,4 +1,4 @@
-import { Award, ExternalLink, Trash2 } from 'lucide-react';
+import { Award, Download, ExternalLink, FileText, Trash2 } from 'lucide-react';
 
 export const STATUS_MAP = {
   Active:   { label: 'Aprobada',    cls: 'bg-ok-bg text-ok-text border-ok-text/30' },
@@ -6,29 +6,46 @@ export const STATUS_MAP = {
   Rejected: { label: 'Rechazada',   cls: 'bg-red-50 text-red-700 border-red-200' },
 };
 
+async function downloadFile(url, filename) {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = filename || 'documento.pdf';
+  a.click();
+  URL.revokeObjectURL(blobUrl);
+}
+
 export default function CertCard({ cert, onDelete }) {
   const status = STATUS_MAP[cert.status] ?? STATUS_MAP.Pending;
 
   return (
     <div className="bg-card-bg rounded-2xl border border-edge shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-      <div className="h-36 bg-primary-softest flex items-center justify-center overflow-hidden">
-        {cert.badge_url ? (
-          <img
-            src={cert.badge_url}
-            alt={cert.name}
-            className="w-full h-full object-contain p-4"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.nextSibling.style.display = 'flex';
-            }}
-          />
-        ) : null}
-        <div
-          className="w-full h-full flex items-center justify-center"
-          style={{ display: cert.badge_url ? 'none' : 'flex' }}
-        >
-          <Award className="w-10 h-10 text-primary-mid/40" />
+      {/* Documento */}
+      <div className="h-28 bg-primary-softest flex flex-col items-center justify-center gap-2 border-b border-edge/40 px-4">
+        <div className="w-10 h-10 rounded-xl bg-card-bg border border-edge flex items-center justify-center shrink-0">
+          {cert.badge_url ? <FileText className="w-5 h-5 text-primary-mid" /> : <Award className="w-5 h-5 text-primary-mid/40" />}
         </div>
+        {cert.badge_url && (
+          <div className="flex items-center gap-2">
+            <a
+              href={cert.badge_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-primary-mid hover:text-primary-dark transition-colors"
+            >
+              <ExternalLink className="w-3 h-3" />Ver
+            </a>
+            <span className="text-edge">·</span>
+            <button
+              onClick={() => downloadFile(cert.badge_url, `${cert.name}.pdf`)}
+              className="flex items-center gap-1 text-xs text-primary-mid hover:text-primary-dark transition-colors"
+            >
+              <Download className="w-3 h-3" />Descargar
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 p-4 flex flex-col gap-2">

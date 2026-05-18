@@ -312,8 +312,6 @@ export default function BusinessCertifications() {
   const { isRejected, isPending, rejectionReason, status } = useOwnerBusinessStatus();
   const { success: showSuccess, error: showError } = useToastContext();
 
-  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
-
   const [certs, setCerts]                 = useState([]);
   const [pageLoading, setPageLoading]     = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -326,10 +324,13 @@ export default function BusinessCertifications() {
   }
 
   useEffect(() => {
+    if (isRejected || isPending) { setPageLoading(false); return; }
     loadCerts()
       .catch(() => showError('No se pudieron cargar las certificaciones.'))
       .finally(() => setPageLoading(false));
-  }, []);
+  }, [isRejected, isPending]);
+
+  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
 
   async function handleSave(formData) {
     setActionLoading(true);

@@ -2,6 +2,12 @@ import { Navigate } from 'react-router-dom';
 import { decodeToken } from '../utils/jwt.utils';
 import { getToken, removeToken } from '../utils/storage';
 
+const ROLE_HOME = {
+  ADMIN:  '/adminDashboard',
+  owner:  '/dashboardBusiness/perfil',
+  USER:   '/',
+};
+
 const ProtectedRoute = ({ children, roles = null }) => {
   const token = getToken();
 
@@ -16,7 +22,7 @@ const ProtectedRoute = ({ children, roles = null }) => {
 
   const isExpired = decoded?.exp ? Number(decoded.exp) * 1000 < Date.now() : true;
   if (isExpired) {
-    removeToken(); // limpiar el token vencido para que el usuario quede como invitado
+    removeToken();
     return <Navigate to="/login" replace />;
   }
 
@@ -25,7 +31,8 @@ const ProtectedRoute = ({ children, roles = null }) => {
   if (roles) {
     const allowed = Array.isArray(roles) ? roles : [roles];
     if (!allowed.includes(userRole)) {
-      return <Navigate to="/unauthorized" replace />;
+      const home = ROLE_HOME[userRole] ?? '/';
+      return <Navigate to={home} replace />;
     }
   }
 
