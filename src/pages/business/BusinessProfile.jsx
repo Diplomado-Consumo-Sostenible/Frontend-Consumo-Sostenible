@@ -1,11 +1,11 @@
 import {
-  Award, Building2, Camera, Check, ChevronLeft, ChevronRight,
-  Clock, Compass, Globe, Images, Info, LayoutDashboard,
-  Leaf, Loader2, MapPin, Package, Pencil, Share2,
+  AlertTriangle, Award, Building2, Camera, Check, ChevronLeft, ChevronRight,
+  Clock, Compass, FileText, Globe, Images, Info, LayoutDashboard,
+  Leaf, Loader2, MapPin, Package, Pencil, Plus, Send, Share2,
   ShieldCheck, Star, Trash2, Users, X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useToastContext } from '../../context/ToastContext';
 import EditableSection from '../../Components/business/profile/EditableSection';
 import { HeaderForm } from '../../Components/business/profile/BusinessProfileHeader';
@@ -22,6 +22,7 @@ import PublicCertRow from '../../Components/landing/PublicCertRow';
 import useBusinessProfile from '../../hooks/useBusinessProfile';
 import { usePublicProducts } from '../../hooks/usePublicBusinessContent';
 import { updateMyBusiness } from '../../services/business/busienss.service';
+import { uploadDocument } from '../../services/upload/upload.service';
 import { getMyCertifications } from '../../services/certifications/certifications.service';
 import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
 import { uploadGeneralImage } from '../../services/upload/upload.service';
@@ -48,6 +49,7 @@ const ALLOWED_IMG = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 
 /* renderProps: gestiona estado edición + guardado sin imponer estilo visual */
 function SectionEdit({ initialValues, onSave, children }) {
+  const canEdit = typeof onSave === 'function';
   const [editing, setEditing] = useState(false);
   const [saving,  setSaving]  = useState(false);
   const [draft,   setDraft]   = useState(initialValues);
@@ -69,7 +71,7 @@ function SectionEdit({ initialValues, onSave, children }) {
   }
 
   return children({
-    draft, setDraft, editing, setEditing, saving,
+    draft, setDraft, editing, setEditing, saving, canEdit,
     handleSave,
     handleCancel: () => { setDraft(initialValues); setEditing(false); },
   });
@@ -104,6 +106,37 @@ function SectionEditButtons({ editing, saving, onEdit, onSave, onCancel }) {
         {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
         {saving ? 'Guardando…' : 'Guardar'}
       </button>
+    </div>
+  );
+}
+
+/* ── StatusBanner ─────────────────────────────────────────── */
+function StatusBanner({ status, rejectionReason }) {
+  if (status === 'Active') return null;
+  const isPending = status === 'Pending';
+  return (
+    <div className={`flex items-start gap-3 px-4 py-3.5 rounded-xl border text-sm ${
+      isPending
+        ? 'bg-amber-50 border-amber-200 text-amber-800'
+        : 'bg-red-50 border-red-200 text-red-700'
+    }`}>
+      {isPending
+        ? <Clock className="w-4 h-4 shrink-0 mt-0.5" />
+        : <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+      }
+      <div>
+        <p className="font-semibold">
+          {isPending ? 'Negocio en revisión' : 'Negocio rechazado'}
+        </p>
+        <p className="text-xs mt-0.5 opacity-80">
+          {isPending
+            ? 'Tu negocio está siendo revisado. La edición de galería y gestión de productos están bloqueadas.'
+            : rejectionReason
+              ? `Motivo: ${rejectionReason}. Actualiza tu información básica y el documento de cámara de comercio para volver a revisión.`
+              : 'Actualiza tu información básica y el documento de cámara de comercio para volver a enviar a revisión.'
+          }
+        </p>
+      </div>
     </div>
   );
 }
@@ -280,6 +313,11 @@ function OwnerProfileHeader({ business, categories, onSave }) {
     categoryId:   business.category?.id_category ?? null,
   });
 
+  const docInputRef                     = useRef(null);
+  const [docUploading, setDocUploading] = useState(false);
+  const [docProgress,  setDocProgress]  = useState(0);
+  const [docError,     setDocError]     = useState(null);
+
   useEffect(() => {
     if (!editing) setDraft({ businessName: business.businessName, categoryId: business.category?.id_category ?? null });
   }, [business, editing]);
@@ -317,6 +355,27 @@ function OwnerProfileHeader({ business, categories, onSave }) {
       showError(err?.message || 'Error al eliminar el logo.');
     } finally {
       setLogoLoading(false);
+    }
+  }
+
+  async function handleDocUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    if (file.type !== 'application/pdf') { setDocError('Solo se permiten archivos PDF.'); return; }
+    if (file.size > 5 * 1024 * 1024)    { setDocError('El archivo no puede superar los 5 MB.'); return; }
+    setDocError(null);
+    setDocUploading(true);
+    setDocProgress(0);
+    try {
+      const result = await uploadDocument(file, { onProgress: setDocProgress });
+      await onSave({ legal_document_url: result.url });
+      success('Documento actualizado correctamente.');
+    } catch (err) {
+      setDocError(err?.message || 'No se pudo subir el documento.');
+    } finally {
+      setDocUploading(false);
+      setDocProgress(0);
     }
   }
 
@@ -469,27 +528,54 @@ function OwnerProfileHeader({ business, categories, onSave }) {
             >
               <Share2 className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setEditing(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5" />Editar información
-            </button>
+            {typeof onSave === 'function' && (
+              <button
+                onClick={() => setEditing(true)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />Editar información
+              </button>
+            )}
           </div>
         ) : (
           <div className="pt-1 space-y-4">
             <HeaderForm values={draft} onChange={setDraft} categories={categories} />
+
+            {/* Actualizar cámara de comercio */}
+            <div className="pt-3 border-t border-edge space-y-2">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wide">Cámara de comercio</p>
+              <input
+                ref={docInputRef}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handleDocUpload}
+              />
+              <button
+                type="button"
+                onClick={() => docInputRef.current?.click()}
+                disabled={docUploading || saving}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-edge hover:border-primary-light text-xs font-medium text-muted hover:text-body transition-colors disabled:opacity-50 disabled:cursor-wait"
+              >
+                {docUploading
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Subiendo… {docProgress}%</>
+                  : <><FileText className="w-3.5 h-3.5" />Actualizar cámara de comercio</>
+                }
+              </button>
+              {docError && <p className="text-red-400 text-xs">{docError}</p>}
+            </div>
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => { setDraft({ businessName: business.businessName, categoryId: business.category?.id_category ?? null }); setEditing(false); }}
-                disabled={saving}
+                disabled={saving || docUploading}
                 className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-body px-3 py-2 rounded-lg border border-edge hover:bg-edge/40 transition-colors disabled:opacity-50"
               >
                 <X className="w-3.5 h-3.5" />Cancelar
               </button>
               <button
                 onClick={handleInfoSave}
-                disabled={saving}
+                disabled={saving || docUploading}
                 className="flex items-center gap-1.5 text-xs font-medium text-white bg-primary-dark hover:bg-primary-darkest px-4 py-2 rounded-lg transition-colors disabled:opacity-70"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
@@ -720,27 +806,29 @@ function ProductsCarousel({ businessId }) {
 }
 
 /* ── Tab: Información ─────────────────────────────────────── */
-function TabInfo({ business, save }) {
+function TabInfo({ business, save, basicSave, canManage }) {
   return (
     <div className="space-y-10">
 
       {/* Sobre el negocio */}
       <SectionEdit
         initialValues={{ description: business.description ?? '' }}
-        onSave={(v) => save({ description: v.description })}
+        onSave={basicSave ? (v) => basicSave({ description: v.description }) : null}
       >
-        {({ draft, setDraft, editing, setEditing, saving, handleSave, handleCancel }) => (
+        {({ draft, setDraft, editing, setEditing, saving, canEdit, handleSave, handleCancel }) => (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-[11px] font-semibold text-primary-mid uppercase tracking-wider flex items-center gap-2">
                 <Leaf className="w-3.5 h-3.5" />Sobre el negocio
               </p>
-              <SectionEditButtons
-                editing={editing} saving={saving}
-                onEdit={() => setEditing(true)}
-                onSave={handleSave}
-                onCancel={handleCancel}
-              />
+              {canEdit && (
+                <SectionEditButtons
+                  editing={editing} saving={saving}
+                  onEdit={() => setEditing(true)}
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                />
+              )}
             </div>
             {editing ? (
               <textarea
@@ -769,9 +857,9 @@ function TabInfo({ business, save }) {
       {/* Galería */}
       <SectionEdit
         initialValues={{ images: business.images ?? [] }}
-        onSave={(v) => save({ images: v.images })}
+        onSave={canManage ? (v) => save({ images: v.images }) : null}
       >
-        {({ draft, setDraft, editing, setEditing, saving, handleSave, handleCancel }) => (
+        {({ draft, setDraft, editing, setEditing, saving, canEdit, handleSave, handleCancel }) => (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -780,12 +868,14 @@ function TabInfo({ business, save }) {
                   {(draft.images?.length ?? 0)} foto{draft.images?.length !== 1 ? 's' : ''} del espacio
                 </p>
               </div>
-              <SectionEditButtons
-                editing={editing} saving={saving}
-                onEdit={() => setEditing(true)}
-                onSave={handleSave}
-                onCancel={handleCancel}
-              />
+              {canEdit && (
+                <SectionEditButtons
+                  editing={editing} saving={saving}
+                  onEdit={() => setEditing(true)}
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                />
+              )}
             </div>
             {editing ? (
               <GalleryForm values={draft} onChange={setDraft} />
@@ -805,12 +895,18 @@ function TabInfo({ business, save }) {
             <h2 className="font-serif text-2xl text-heading">Productos</h2>
             <p className="text-sm text-muted mt-0.5">Lo que ofrece tu negocio</p>
           </div>
-          <Link
-            to="/dashboardBusiness/productos"
-            className="flex items-center gap-1.5 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors"
-          >
-            <Package className="w-3.5 h-3.5" />Gestionar
-          </Link>
+          {canManage ? (
+            <Link
+              to="/dashboardBusiness/productos"
+              className="flex items-center gap-1.5 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors"
+            >
+              <Package className="w-3.5 h-3.5" />Gestionar
+            </Link>
+          ) : (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted opacity-40 cursor-not-allowed select-none">
+              <Package className="w-3.5 h-3.5" />Gestionar
+            </span>
+          )}
         </div>
         <ProductsCarousel businessId={business.id_business} />
       </div>
@@ -851,7 +947,7 @@ function TabInfo({ business, save }) {
 }
 
 /* ── Tab: Productos ───────────────────────────────────────── */
-function TabProducts({ businessId }) {
+function TabProducts({ businessId, canManage }) {
   const { products, loading, error, retry } = usePublicProducts(businessId);
   const [viewingProduct, setViewingProduct] = useState(null);
 
@@ -873,12 +969,18 @@ function TabProducts({ businessId }) {
               {products.length} producto{products.length !== 1 ? 's' : ''} publicado{products.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <Link
-            to="/dashboardBusiness/productos"
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
-          >
-            <Package className="w-4 h-4" />Gestionar
-          </Link>
+          {canManage ? (
+            <Link
+              to="/dashboardBusiness/productos"
+              className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
+            >
+              <Package className="w-4 h-4" />Gestionar
+            </Link>
+          ) : (
+            <span className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-edge text-muted opacity-50 cursor-not-allowed select-none">
+              <Package className="w-4 h-4" />Gestionar
+            </span>
+          )}
         </div>
         {products.length === 0 ? (
           <Empty icon={Package} message="Aún no tienes productos publicados. Ve a Gestionar para agregar." />
@@ -947,7 +1049,7 @@ function ScheduleCard({ business, save }) {
       title="Horario de atención"
       icon={Clock}
       initialValues={{ schedule: business.schedule ?? {} }}
-      onSave={(v) => save({ schedule: v.schedule })}
+      onSave={save ? (v) => save({ schedule: v.schedule }) : null}
     >
       {({ values, setValues, editing }) => (
         <>
@@ -1005,7 +1107,7 @@ function MiniMapCard({ address }) {
   );
 }
 
-function OwnerSidebar({ business, certifications, save }) {
+function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage }) {
   return (
     <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
 
@@ -1021,7 +1123,7 @@ function OwnerSidebar({ business, certifications, save }) {
           facebookUrl:   business.facebookUrl,
           xUrl:          business.xUrl,
         }}
-        onSave={(v) => save({
+        onSave={basicSave ? (v) => basicSave({
           address:       v.address,
           phone:         v.phone,
           emailBusiness: v.emailBusiness,
@@ -1029,7 +1131,7 @@ function OwnerSidebar({ business, certifications, save }) {
           instagramUrl:  v.instagramUrl,
           facebookUrl:   v.facebookUrl,
           xUrl:          v.xUrl,
-        })}
+        }) : null}
       >
         {({ values, setValues, editing }) =>
           editing
@@ -1046,13 +1148,13 @@ function OwnerSidebar({ business, certifications, save }) {
         }
       </EditableSection>
 
-      <ScheduleCard business={business} save={save} />
+      <ScheduleCard business={business} save={fullSave} />
 
       <EditableSection
         title="Ubicación geográfica"
         icon={MapPin}
         initialValues={{ latitude: business.latitude, longitude: business.longitude }}
-        onSave={(v) => save({ latitude: v.latitude, longitude: v.longitude })}
+        onSave={fullSave ? (v) => fullSave({ latitude: v.latitude, longitude: v.longitude }) : null}
       >
         {({ values, setValues, editing }) =>
           editing
@@ -1061,7 +1163,7 @@ function OwnerSidebar({ business, certifications, save }) {
         }
       </EditableSection>
 
-      <BusinessCertificationsCard certifications={certifications} />
+      <BusinessCertificationsCard certifications={certifications} canManage={canManage} />
     </aside>
   );
 }
@@ -1076,9 +1178,13 @@ const TABS = [
 /* ── Main ─────────────────────────────────────────────────── */
 export default function BusinessProfile() {
   const { business, loading, error, retry } = useBusinessProfile();
+  const navigate = useNavigate();
+  const { success: toastSuccess, error: toastError } = useToastContext();
   const [certifications, setCertifications] = useState([]);
   const [categories,     setCategories]     = useState([]);
   const [activeTab,      setActiveTab]      = useState('info');
+  const [localDraft,     setLocalDraft]     = useState({});
+  const [submitting,     setSubmitting]     = useState(false);
 
   useEffect(() => {
     getMyCertifications().then((d) => setCertifications(Array.isArray(d) ? d : [])).catch(() => {});
@@ -1095,27 +1201,60 @@ export default function BusinessProfile() {
 
   if (!business) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4 text-center px-6">
-        <div className="w-16 h-16 rounded-2xl bg-primary-softest flex items-center justify-center">
-          <Building2 className="w-8 h-8 text-muted" />
+      <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-primary-softest border border-edge flex items-center justify-center mb-4">
+          <Building2 className="w-7 h-7 text-primary-mid" />
         </div>
-        <div>
-          <p className="text-base font-semibold text-heading">No tienes un negocio registrado</p>
-          <p className="text-sm text-muted mt-1">
-            {error ? 'No se pudo cargar la información. Intenta de nuevo.' : 'Crea tu negocio para comenzar a gestionar tu perfil.'}
-          </p>
-        </div>
+        <h3 className="text-base font-semibold text-body mb-1">
+          {error ? 'No se pudo cargar la información' : 'Sin negocio registrado'}
+        </h3>
+        <p className="text-sm text-muted max-w-xs mb-5">
+          {error ? 'Intenta de nuevo o crea tu negocio si aún no tienes uno.' : 'Crea tu negocio para comenzar a gestionar tu perfil.'}
+        </p>
         {error && (
-          <button onClick={retry} className="text-sm font-medium text-primary-mid hover:text-primary-dark underline transition-colors">
+          <button onClick={retry} className="text-sm font-medium text-primary-mid hover:text-primary-dark underline transition-colors mb-3">
             Reintentar
           </button>
         )}
+        <button
+          onClick={() => navigate('/dashboardBusiness/crear-negocio')}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Crear negocio
+        </button>
       </div>
     );
   }
 
-  const id = business.id_business;
+  const id         = business.id_business;
+  const isActive   = business.status === 'Active';
+  const isRejected = business.status === 'Rejected';
+
   async function save(fields) { await updateMyBusiness(id, fields); retry(); }
+
+  // Rejected: acumula cambios localmente hasta que el owner pulse "Enviar petición"
+  const localSave = (fields) => setLocalDraft((prev) => ({ ...prev, ...fields }));
+
+  const hasPendingChanges = isRejected && Object.keys(localDraft).length > 0;
+
+  const handleSubmitPetition = async () => {
+    setSubmitting(true);
+    try {
+      await save(localDraft);   // PATCH → backend cambia status a Pending
+      setLocalDraft({});
+      toastSuccess('Petición enviada. Tu negocio está en revisión nuevamente.');
+    } catch (err) {
+      toastError(err?.message || 'No se pudo enviar la petición.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const basicSave     = isActive ? save : (isRejected ? localSave : null);
+  const fullSave      = isActive ? save : null;
+  const canManage     = isActive;
+  const displayBusiness = isRejected ? { ...business, ...localDraft } : business;
 
   const certsCount = certifications.length;
 
@@ -1130,11 +1269,38 @@ export default function BusinessProfile() {
         <span className="text-body font-medium">Perfil</span>
       </nav>
 
+      {/* Banner de estado */}
+      <StatusBanner status={business.status} rejectionReason={business.rejectionReason} />
+
+      {/* Panel de reenvío — solo visible cuando está rechazado */}
+      {isRejected && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl bg-card-bg border border-edge">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-body">¿Listo para reenviar tu negocio a revisión?</p>
+            <p className="text-xs text-muted mt-0.5">
+              {hasPendingChanges
+                ? 'Tienes cambios pendientes. Edita todo lo necesario antes de enviar.'
+                : 'Edita la información necesaria y luego pulsa "Enviar petición".'}
+            </p>
+          </div>
+          <button
+            onClick={handleSubmitPetition}
+            disabled={submitting}
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors disabled:opacity-70"
+          >
+            {submitting
+              ? <><Loader2 className="w-4 h-4 animate-spin" />Enviando…</>
+              : <><Send className="w-4 h-4" />Enviar petición</>
+            }
+          </button>
+        </div>
+      )}
+
       {/* Cover */}
-      <BusinessCover business={business} onSave={save} />
+      <BusinessCover business={displayBusiness} onSave={fullSave} />
 
       {/* Header con logo solapando el cover */}
-      <OwnerProfileHeader business={business} categories={categories} onSave={save} />
+      <OwnerProfileHeader business={displayBusiness} categories={categories} onSave={basicSave} />
 
       {/* Tabs */}
       <div className="flex items-center gap-0.5 border-b border-edge overflow-hidden">
@@ -1167,11 +1333,11 @@ export default function BusinessProfile() {
       {/* Contenido principal + sidebar */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-10">
         <div>
-          {activeTab === 'info'  && <TabInfo business={business} save={save} />}
-          {activeTab === 'prods' && <TabProducts businessId={id} />}
+          {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} />}
+          {activeTab === 'prods' && <TabProducts businessId={id} canManage={canManage} />}
           {activeTab === 'certs' && <TabCertifications certifications={certifications} />}
         </div>
-        <OwnerSidebar business={business} certifications={certifications} save={save} />
+        <OwnerSidebar business={displayBusiness} certifications={certifications} basicSave={basicSave} fullSave={fullSave} canManage={canManage} />
       </div>
 
     </div>

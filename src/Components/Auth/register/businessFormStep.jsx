@@ -1,8 +1,10 @@
-import { Check, FileText, Leaf, Plus, UploadCloud, X } from 'lucide-react';
+import { Check, FileText, Leaf, Loader2, Plus, UploadCloud, X } from 'lucide-react';
+
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getTags } from '../../../services/types/tags.service';
 import { getTiposNegocio } from '../../../services/types/tiposNegocio.service';
+import { uploadDocument } from '../../../services/upload/upload.service';
 import BackButton from '../../backButton';
 import Button from '../../button';
 
@@ -24,9 +26,12 @@ export default function BusinessForm({ onNext, onBack }) {
   const [tipos, setTipos]               = useState([]);
   const [tags, setTags]                 = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [camaraFile, setCamaraFile]     = useState(null);
-  const [dragActive, setDragActive]     = useState(false);
-  const fileInputRef                    = useRef(null);
+  const [camaraFile, setCamaraFile]       = useState(null);
+  const [dragActive, setDragActive]       = useState(false);
+  const [uploading, setUploading]         = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError]     = useState(null);
+  const fileInputRef                      = useRef(null);
 
   const toggleTag = (id) => {
     setSelectedTags((prev) => {
@@ -79,7 +84,23 @@ export default function BusinessForm({ onNext, onBack }) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const onSubmit = (data) => onNext(data);
+  const onSubmit = async (data) => {
+    if (!camaraFile) return;
+    setUploadError(null);
+    setUploading(true);
+    setUploadProgress(0);
+    try {
+      const result = await uploadDocument(camaraFile, {
+        onProgress: setUploadProgress,
+      });
+      onNext({ ...data, legal_document_url: result.url });
+    } catch (err) {
+      setUploadError(err?.message || 'No se pudo subir el documento. Inténtalo de nuevo.');
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
 
   return (
     <div className="flex-1 bg-card-bg flex flex-col justify-center px-10 py-10">
@@ -187,7 +208,7 @@ export default function BusinessForm({ onNext, onBack }) {
 
           {/* Email negocio */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-body">Email del negocio</label>
+            <label className="text-sm font-medium text-body">Email de contacto</label>
             <div className="relative group">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-primary-dark transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
@@ -287,20 +308,41 @@ export default function BusinessForm({ onNext, onBack }) {
             />
 
             {camaraFile ? (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-edge bg-card-bg">
-                <FileText className="w-8 h-8 shrink-0 text-primary-dark" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-body truncate">{camaraFile.name}</p>
-                  <p className="text-xs text-muted">{(camaraFile.size / 1024).toFixed(1)} KB · PDF</p>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-edge bg-card-bg">
+                  <FileText className="w-8 h-8 shrink-0 text-primary-dark" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-body truncate">{camaraFile.name}</p>
+                    <p className="text-xs text-muted">{(camaraFile.size / 1024).toFixed(1)} KB · PDF</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeFile}
+                    disabled={uploading}
+                    className="shrink-0 p-1 rounded-full hover:bg-red-50 text-muted hover:text-red-400 transition-colors disabled:opacity-40"
+                    aria-label="Eliminar archivo"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={removeFile}
-                  className="shrink-0 p-1 rounded-full hover:bg-red-50 text-muted hover:text-red-400 transition-colors"
-                  aria-label="Eliminar archivo"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+
+                {uploading && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs text-muted">
+                      <span className="flex items-center gap-1.5">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Subiendo documento…
+                      </span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-edge overflow-hidden">
+                      <div
+                        className="h-full bg-primary-dark rounded-full transition-all duration-200"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div
@@ -330,9 +372,14 @@ export default function BusinessForm({ onNext, onBack }) {
                 <span>&#9888;</span> {errors.camaraComercio.message}
               </p>
             )}
+            {uploadError && (
+              <p className="text-red-400 text-xs flex items-center gap-1 pl-1">
+                <span>&#9888;</span> {uploadError}
+              </p>
+            )}
           </div>
 
-          <Button type="submit" icon={Leaf}>
+          <Button type="submit" icon={Leaf} loading={uploading}>
             Registrar negocio
           </Button>
         </form>
