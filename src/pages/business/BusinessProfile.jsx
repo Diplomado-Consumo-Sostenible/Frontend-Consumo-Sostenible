@@ -1,5 +1,5 @@
 import {
-  AlertTriangle, Award, Building2, Camera, Check, ChevronLeft, ChevronRight,
+  AlertTriangle, Award, Building2, Camera, Check, CheckCircle2, ChevronLeft, ChevronRight,
   Clock, Compass, FileText, Globe, Images, Info, LayoutDashboard,
   Leaf, Loader2, MapPin, Package, Pencil, Plus, Send, Share2,
   ShieldCheck, Star, Trash2, Users, X,
@@ -314,9 +314,11 @@ function OwnerProfileHeader({ business, categories, onSave }) {
   });
 
   const docInputRef                     = useRef(null);
+  const [pendingDoc,   setPendingDoc]   = useState(null);   // File seleccionado aún no subido
   const [docUploading, setDocUploading] = useState(false);
   const [docProgress,  setDocProgress]  = useState(0);
   const [docError,     setDocError]     = useState(null);
+  const [docSuccess,   setDocSuccess]   = useState(false);
 
   useEffect(() => {
     if (!editing) setDraft({ businessName: business.businessName, categoryId: business.category?.id_category ?? null });
@@ -358,33 +360,45 @@ function OwnerProfileHeader({ business, categories, onSave }) {
     }
   }
 
-  async function handleDocUpload(e) {
+  function handleDocSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
     if (file.type !== 'application/pdf') { setDocError('Solo se permiten archivos PDF.'); return; }
     if (file.size > 5 * 1024 * 1024)    { setDocError('El archivo no puede superar los 5 MB.'); return; }
     setDocError(null);
-    setDocUploading(true);
-    setDocProgress(0);
-    try {
-      const result = await uploadDocument(file, { onProgress: setDocProgress });
-      await onSave({ legal_document_url: result.url });
-      success('Documento actualizado correctamente.');
-    } catch (err) {
-      setDocError(err?.message || 'No se pudo subir el documento.');
-    } finally {
-      setDocUploading(false);
-      setDocProgress(0);
-    }
+    setDocSuccess(false);
+    setPendingDoc(file);
   }
 
   async function handleInfoSave() {
     setSaving(true);
     try {
-      await onSave({ businessName: draft.businessName, categoryId: draft.categoryId });
+      const payload = { businessName: draft.businessName, categoryId: draft.categoryId };
+
+      if (pendingDoc) {
+        setDocUploading(true);
+        setDocProgress(0);
+        try {
+          const result = await uploadDocument(pendingDoc, { onProgress: setDocProgress });
+          payload.legal_document_url = result.url;
+          setDocSuccess(true);
+          setPendingDoc(null);
+        } catch (err) {
+          setDocError(err?.message || 'No se pudo subir el documento.');
+          setDocUploading(false);
+          setDocProgress(0);
+          setSaving(false);
+          return;
+        } finally {
+          setDocUploading(false);
+          setDocProgress(0);
+        }
+      }
+
+      await onSave(payload);
       setEditing(false);
-      success('Información actualizada correctamente.');
+      success('Cambios guardados correctamente.');
     } catch (err) {
       showError(err?.message || 'Error al guardar.');
     } finally {
@@ -549,25 +563,71 @@ function OwnerProfileHeader({ business, categories, onSave }) {
                 type="file"
                 accept="application/pdf"
                 className="hidden"
-                onChange={handleDocUpload}
+                onChange={handleDocSelect}
               />
-              <button
-                type="button"
-                onClick={() => docInputRef.current?.click()}
-                disabled={docUploading || saving}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-edge hover:border-primary-light text-xs font-medium text-muted hover:text-body transition-colors disabled:opacity-50 disabled:cursor-wait"
-              >
-                {docUploading
-                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Subiendo… {docProgress}%</>
-                  : <><FileText className="w-3.5 h-3.5" />Actualizar cámara de comercio</>
-                }
-              </button>
-              {docError && <p className="text-red-400 text-xs">{docError}</p>}
+
+              {docSuccess ? (
+                <div className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-ok-bg border border-ok-text/10">
+                  <span className="flex items-center gap-2 text-xs font-medium text-ok-text">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    Documento subido correctamente
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setDocSuccess(false); docInputRef.current?.click(); }}
+                    disabled={saving}
+                    className="text-xs text-ok-text/70 hover:text-ok-text underline underline-offset-2 transition-colors whitespace-nowrap disabled:opacity-50"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              ) : pendingDoc ? (
+                <div className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-primary-softest border border-primary-light/40">
+                  <span className="flex items-center gap-2 text-xs font-medium text-heading min-w-0">
+                    <FileText className="w-4 h-4 shrink-0 text-primary-dark" />
+                    <span className="truncate">{pendingDoc.name}</span>
+                    <span className="shrink-0 text-muted">({(pendingDoc.size / 1024).toFixed(0)} KB)</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setPendingDoc(null); setDocError(null); }}
+                    disabled={saving || docUploading}
+                    className="text-xs text-muted hover:text-red-500 transition-colors shrink-0 disabled:opacity-50"
+                    aria-label="Quitar documento"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => docInputRef.current?.click()}
+                  disabled={docUploading || saving}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-edge hover:border-primary-light text-xs font-medium text-muted hover:text-body transition-colors disabled:opacity-50 disabled:cursor-wait"
+                >
+                  <FileText className="w-3.5 h-3.5" />Seleccionar documento PDF
+                </button>
+              )}
+
+              {/* Barra de progreso visible mientras sube (al guardar) */}
+              {docUploading && (
+                <div className="space-y-1">
+                  <div className="relative h-1.5 bg-edge rounded-full overflow-hidden">
+                    <div
+                      className="absolute inset-y-0 left-0 bg-primary-dark rounded-full transition-all duration-150"
+                      style={{ width: `${docProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted text-right">Subiendo… {docProgress}%</p>
+                </div>
+              )}
+
+              {docError && <p className="text-xs text-red-500">{docError}</p>}
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => { setDraft({ businessName: business.businessName, categoryId: business.category?.id_category ?? null }); setEditing(false); }}
+                onClick={() => { setDraft({ businessName: business.businessName, categoryId: business.category?.id_category ?? null }); setPendingDoc(null); setDocError(null); setDocSuccess(false); setEditing(false); }}
                 disabled={saving || docUploading}
                 className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-body px-3 py-2 rounded-lg border border-edge hover:bg-edge/40 transition-colors disabled:opacity-50"
               >
@@ -727,11 +787,12 @@ function SectionLoader() {
   );
 }
 
-function Empty({ icon: Icon, message }) {
+function Empty({ icon, message }) {
+  const EmptyIcon = icon;
   return (
     <div className="flex flex-col items-center gap-3 py-14 text-center">
       <div className="w-12 h-12 bg-primary-softest rounded-2xl flex items-center justify-center">
-        <Icon className="w-6 h-6 text-muted" />
+        <EmptyIcon className="w-6 h-6 text-muted" />
       </div>
       <p className="text-sm text-muted max-w-xs">{message}</p>
     </div>
@@ -1031,11 +1092,12 @@ function TabCertifications({ certifications }) {
 }
 
 /* ── Sidebar ──────────────────────────────────────────────── */
-function SidebarCard({ title, icon: Icon, children }) {
+function SidebarCard({ title, icon, children }) {
+  const SidebarIcon = icon;
   return (
     <div className="bg-card-bg border border-edge rounded-2xl p-5 space-y-4">
       <h4 className="flex items-center gap-2 text-[11px] font-semibold text-muted uppercase tracking-wider">
-        <Icon className="w-3.5 h-3.5" />{title}
+        <SidebarIcon className="w-3.5 h-3.5" />{title}
       </h4>
       {children}
     </div>
