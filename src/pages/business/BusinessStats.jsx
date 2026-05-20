@@ -9,6 +9,7 @@ import RecentFollowersList from '../../Components/business/stats/RecentFollowers
 import ReviewsSection from '../../Components/business/stats/ReviewsSection';
 import RecentReviewsPanel from '../../Components/business/stats/RecentReviewsPanel';
 import OptimizationCard from '../../Components/business/stats/OptimizationCard';
+import AiInsightsCard from '../../Components/business/stats/AiInsightsCard';
 
 const PERIODS = [
   { label: '7 días', value: '7d' },
@@ -213,6 +214,7 @@ export default function BusinessStats() {
           businessId={business.id_business}
           total={business.total_reviews}
         />
+        <AiInsightsCard businessId={business.id_business} />
         <OptimizationCard />
       </aside>
     </div>

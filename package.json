@@ -21,6 +21,7 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.14.0",
     "recharts": "^3.8.1",
+    "socket.io-client": "^4.8.3",
     "swiper": "^12.1.4"
   },
   "devDependencies": {

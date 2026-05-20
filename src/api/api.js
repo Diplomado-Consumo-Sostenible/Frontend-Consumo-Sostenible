@@ -58,7 +58,13 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      clearSession();
+      // Solo cerrar sesión si el token local ya no es válido.
+      // Un 401 con token vigente indica falta de permisos en ese endpoint
+      // (ej. operación de admin llamada por un owner), no sesión expirada.
+      const token = getToken();
+      if (!token || isTokenExpired(token)) {
+        clearSession();
+      }
     }
     return Promise.reject(error);
   },

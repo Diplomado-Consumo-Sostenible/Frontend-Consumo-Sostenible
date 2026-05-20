@@ -1,5 +1,6 @@
 import { Leaf } from 'lucide-react';
 import useUserProfile from '../../hooks/useUserProfile';
+import NotificationBell from './NotificationBell';
 import UserMenu from './UserMenu';
 
 function getGreeting() {
@@ -26,7 +27,10 @@ export default function Navbar() {
           </p>
         </div>
       </div>
-      <UserMenu profile={profile} />
+      <div className="flex items-center gap-1">
+        <NotificationBell />
+        <UserMenu profile={profile} />
+      </div>
     </header>
   );
 }
