@@ -10,6 +10,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PublicCertRow from '../Components/landing/PublicCertRow';
 import PublicProductCard from '../Components/landing/PublicProductCard';
 import ReviewsSection from '../Components/landing/ReviewsSection';
+import AiReviewSummary from '../Components/landing/AiReviewSummary';
 import { ContactDisplay } from '../Components/business/profile/BusinessContactCard';
 import { ScheduleDisplay } from '../Components/business/profile/BusinessScheduleCard';
 import usePublicBusinessById from '../hooks/usePublicBusinessById';
@@ -556,6 +557,9 @@ function TabInfo({ business, businessId, onViewProduct }) {
           </div>
         </div>
       )}
+
+      {/* Reseña general IA — visible para todos los usuarios */}
+      <AiReviewSummary businessId={businessId} />
 
       {/* Reviews */}
       <div id="reviews-section" className="space-y-4 border-t border-edge pt-8">

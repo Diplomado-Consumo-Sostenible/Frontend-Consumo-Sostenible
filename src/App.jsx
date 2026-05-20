@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { ToastProvider } from './context/ToastContext';
+import { NotificationsProvider } from './context/NotificationsContext';
 import DashboardLayout from './layouts/DashboardLayout';
 import UserLayout from './layouts/UserLayout';
 import AdminDashboard from './pages/admin/admin_dashboard';
@@ -33,6 +34,7 @@ function App() {
   return (
     <BrowserRouter>
     <ToastProvider>
+      <NotificationsProvider>
       <Routes>
 
         {/* ── Públicas ──────────────────────────────────────────── */}
@@ -201,6 +203,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
+      </NotificationsProvider>
     </ToastProvider>
     </BrowserRouter>
   );
