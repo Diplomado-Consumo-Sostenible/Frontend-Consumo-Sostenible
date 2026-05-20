@@ -1,6 +1,7 @@
-import { ChevronDown, Heart, LayoutDashboard, LogOut, Menu, Star, User, X } from 'lucide-react';
+import { Bell, ChevronDown, Heart, LayoutDashboard, LogOut, Menu, Star, User, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import NotificationBell from '../dashboard/NotificationBell';
 import useUserProfile from '../../hooks/useUserProfile';
 import { decodeToken } from '../../utils/jwt.utils';
 import { getToken, removeToken } from '../../utils/storage';
@@ -42,7 +43,7 @@ export default function LandingNavbar() {
   const [menuOpen,     setMenuOpen]     = useState(false);
   const [dropOpen,     setDropOpen]     = useState(false);
 
-  /* ── Auth state ─────────────────────────────────────── */
+
   const token    = getToken();
   const decoded  = decodeToken(token);
   const role     = decoded?.rol?.toLowerCase();
@@ -144,7 +145,8 @@ export default function LandingNavbar() {
 
         {/* Desktop right side */}
         {isUser ? (
-          <div className="hidden sm:flex items-center relative">
+          <div className="hidden sm:flex items-center gap-2 relative">
+            <NotificationBell />
             <button
               onClick={() => setDropOpen((v) => !v)}
               className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-app-bg transition-colors"
@@ -203,7 +205,8 @@ export default function LandingNavbar() {
             )}
           </div>
         ) : isStaff ? (
-          <div className="hidden sm:flex items-center relative">
+          <div className="hidden sm:flex items-center gap-2 relative">
+            <NotificationBell />
             <button
               onClick={() => setDropOpen((v) => !v)}
               className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-app-bg transition-colors"
@@ -349,6 +352,14 @@ export default function LandingNavbar() {
                     {item.label}
                   </Link>
                 ))}
+                <Link
+                  to="/notificaciones"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 py-2.5 px-1 text-sm font-medium text-body hover:text-primary-dark transition-colors"
+                >
+                  <Bell className="w-4 h-4 text-primary-dark shrink-0" />
+                  Notificaciones
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-3 py-2.5 px-1 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"

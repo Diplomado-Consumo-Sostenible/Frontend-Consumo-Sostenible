@@ -1,4 +1,4 @@
-import { Award, Download, ExternalLink, FileText, Trash2 } from 'lucide-react';
+import { Award, Download, ExternalLink, FileText, Pencil, Trash2 } from 'lucide-react';
 
 export const STATUS_MAP = {
   Active:   { label: 'Aprobada',    cls: 'bg-ok-bg text-ok-text border-ok-text/30' },
@@ -17,7 +17,7 @@ async function downloadFile(url, filename) {
   URL.revokeObjectURL(blobUrl);
 }
 
-export default function CertCard({ cert, onDelete }) {
+export default function CertCard({ cert, onDelete, onEdit }) {
   const status = STATUS_MAP[cert.status] ?? STATUS_MAP.Pending;
 
   return (
@@ -68,15 +68,26 @@ export default function CertCard({ cert, onDelete }) {
             <ExternalLink className="w-3.5 h-3.5" />
             Verificar
           </a>
-          {onDelete && (
-            <button
-              onClick={() => onDelete(cert)}
-              className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600 transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Eliminar
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {onEdit && cert.status === 'Rejected' && (
+              <button
+                onClick={() => onEdit(cert)}
+                className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Editar
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(cert)}
+                className="flex items-center gap-1 text-xs text-red-400 hover:text-red-600 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Eliminar
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

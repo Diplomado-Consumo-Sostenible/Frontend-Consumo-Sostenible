@@ -793,7 +793,6 @@ export default function NegocioDetalle() {
   );
   const business = fromState ?? fetched;
 
-  // Scroll hacia las reseñas si viene desde "Mis reseñas"
   useEffect(() => {
     if (!location.state?.scrollToReviews) return;
     const timer = setTimeout(() => {

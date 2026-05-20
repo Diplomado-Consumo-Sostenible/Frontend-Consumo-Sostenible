@@ -1,6 +1,7 @@
 import {
   Award,
   BarChart2,
+  Bell,
   Building2,
   Compass,
   Flag,
@@ -51,7 +52,8 @@ const NAV_CONFIG = {
       { label: 'Explorar negocios', icon: Compass, to: '/', alwaysAccessible: true },
     ],
     account: [
-      { label: 'Mi perfil', icon: User, to: '/dashboard/profile' },
+      { label: 'Mi perfil',        icon: User, to: '/dashboard/profile'                    },
+      { label: 'Notificaciones',   icon: Bell, to: '/dashboardBusiness/notificaciones', alwaysAccessible: true },
     ],
   },
 };

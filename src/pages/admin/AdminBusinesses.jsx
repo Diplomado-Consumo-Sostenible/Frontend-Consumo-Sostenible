@@ -569,7 +569,7 @@ export default function AdminBusinesses() {
       if (tab) filters.status = tab;
       const res = await getBusinessesForAdmin(filters);
       setBusinesses(res.data || []);
-      setTotal(res.total || 0);
+      setTotal(res.meta?.totalItems ?? res.total ?? 0);
     } catch (err) {
       toast.error(err?.message || 'Error al cargar los negocios');
     } finally {
@@ -596,7 +596,7 @@ export default function AdminBusinesses() {
     return b.businessName?.toLowerCase().includes(q) || b.user?.email?.toLowerCase().includes(q) || b.category?.category?.toLowerCase().includes(q);
   });
 
-  const totalPages = Math.ceil(total / LIMIT);
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   const openCreate = () => {
     setEditTarget(null);
@@ -829,23 +829,32 @@ export default function AdminBusinesses() {
           )}
 
           {!loading && filtered.length > 0 && (
-            <div className="px-4 py-3 border-t border-edge flex items-center justify-between">
-              <p className="text-xs text-muted">
-                Mostrando {filtered.length} de {total} negocios
-              </p>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="text-sm text-body font-medium px-1">
-                    {page} / {totalPages}
-                  </span>
-                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+            <div className="px-5 py-3 border-t border-edge flex items-center justify-between">
+              <span className="text-xs text-muted">
+                <span className="font-semibold text-body">{total}</span> negocio{total !== 1 ? 's' : ''} en total
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Página anterior"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs text-muted px-1">
+                  Página <span className="font-semibold text-body">{page}</span> de{' '}
+                  <span className="font-semibold text-body">{totalPages}</span>
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  aria-label="Página siguiente"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -877,19 +886,30 @@ export default function AdminBusinesses() {
             </div>
           )}
 
-          {!loading && filtered.length > 0 && totalPages > 1 && (
+          {!loading && filtered.length > 0 && (
             <div className="flex items-center justify-between pt-2">
-              <p className="text-xs text-muted">
-                Mostrando {filtered.length} de {total} negocios
-              </p>
+              <span className="text-xs text-muted">
+                <span className="font-semibold text-body">{total}</span> negocio{total !== 1 ? 's' : ''} en total
+              </span>
               <div className="flex items-center gap-2">
-                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Página anterior"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="text-sm text-body font-medium px-1">
-                  {page} / {totalPages}
+                <span className="text-xs text-muted px-1">
+                  Página <span className="font-semibold text-body">{page}</span> de{' '}
+                  <span className="font-semibold text-body">{totalPages}</span>
                 </span>
-                <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-edge text-muted hover:bg-app-bg disabled:opacity-40 transition-colors">
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  aria-label="Página siguiente"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

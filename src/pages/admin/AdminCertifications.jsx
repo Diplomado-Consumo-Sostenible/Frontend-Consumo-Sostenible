@@ -64,7 +64,7 @@ function ConfirmDialog({ title, message, onConfirm, onCancel, loading, confirmLa
 export default function AdminCertifications() {
   const toast = useToastContext();
   const [items, setItems] = useState([]);
-  const [meta, setMeta] = useState({ total: 0, page: 1, totalPages: 1 });
+  const [meta, setMeta] = useState({ total: 0, page: 1, totalPages: 1, totalGlobal: 0, totalPending: 0, totalApproved: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('Pending');
@@ -77,7 +77,14 @@ export default function AdminCertifications() {
       setLoading(true);
       const data = await getAdminCertifications({ page: p, limit: 15, status: status || undefined });
       setItems(Array.isArray(data?.data) ? data.data : []);
-      if (data?.meta) setMeta(data.meta);
+      if (data?.meta) setMeta({
+        total:         data.meta.totalItems   ?? data.meta.total        ?? 0,
+        page:          data.meta.currentPage  ?? data.meta.page         ?? 1,
+        totalPages:    data.meta.totalPages   ?? 1,
+        totalGlobal:   data.meta.totalGlobal  ?? 0,
+        totalPending:  data.meta.totalPending ?? 0,
+        totalApproved: data.meta.totalApproved ?? 0,
+      });
     } catch {
       toast.error('Error al cargar las certificaciones');
     } finally {
@@ -128,8 +135,6 @@ export default function AdminCertifications() {
     !search || i.name?.toLowerCase().includes(search.toLowerCase()) || i.issuing_entity?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const pendingCount = items.filter((i) => i.status === 'Pending').length;
-
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-3">
@@ -153,15 +158,18 @@ export default function AdminCertifications() {
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-yellow-50 rounded-xl px-5 py-4 border border-yellow-100">
           <p className="text-xs text-yellow-700 font-medium">Pendientes</p>
-          <p className="text-2xl font-bold mt-1 text-yellow-800">{pendingCount}</p>
+          <p className="text-2xl font-bold mt-1 text-yellow-800">{meta.totalPending}</p>
+          <p className="text-[11px] text-yellow-600 mt-0.5">En todos los negocios</p>
         </div>
         <div className="bg-green-50 rounded-xl px-5 py-4 border border-green-100">
-          <p className="text-xs text-green-700 font-medium">Total página</p>
-          <p className="text-2xl font-bold mt-1 text-green-800">{items.length}</p>
+          <p className="text-xs text-green-700 font-medium">Total aprobadas</p>
+          <p className="text-2xl font-bold mt-1 text-green-800">{meta.totalApproved}</p>
+          <p className="text-[11px] text-green-600 mt-0.5">Certificaciones activas</p>
         </div>
         <div className="bg-card-bg rounded-xl px-5 py-4 border border-edge">
           <p className="text-xs text-muted font-medium">Total global</p>
-          <p className="text-2xl font-bold mt-1 text-heading">{meta.total}</p>
+          <p className="text-2xl font-bold mt-1 text-heading">{meta.totalGlobal}</p>
+          <p className="text-[11px] text-muted mt-0.5">Todas las certificaciones</p>
         </div>
       </div>
 
@@ -249,14 +257,20 @@ export default function AdminCertifications() {
             ))}
           </div>
         )}
-        {!loading && meta.totalPages > 1 && (
+        {!loading && items.length > 0 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-edge">
-            <span className="text-xs text-muted">Página {meta.page} de {meta.totalPages} · {meta.total} total</span>
-            <div className="flex items-center gap-1">
-              <button onClick={() => handlePageChange(page - 1)} disabled={page <= 1} className="p-1.5 rounded-lg text-muted hover:text-body hover:bg-app-bg transition-colors disabled:opacity-40">
+            <span className="text-xs text-muted">
+              <span className="font-semibold text-body">{meta.total}</span> certificación{meta.total !== 1 ? 'es' : ''} {statusFilter ? `· filtro activo` : ''}
+            </span>
+            <div className="flex items-center gap-2">
+              <button onClick={() => handlePageChange(page - 1)} disabled={page <= 1} aria-label="Página anterior" className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => handlePageChange(page + 1)} disabled={page >= meta.totalPages} className="p-1.5 rounded-lg text-muted hover:text-body hover:bg-app-bg transition-colors disabled:opacity-40">
+              <span className="text-xs text-muted px-1">
+                Página <span className="font-semibold text-body">{meta.page}</span> de{' '}
+                <span className="font-semibold text-body">{meta.totalPages}</span>
+              </span>
+              <button onClick={() => handlePageChange(page + 1)} disabled={page >= meta.totalPages} aria-label="Página siguiente" className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
             </div>

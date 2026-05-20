@@ -1,11 +1,11 @@
-import { Award, FileText, LayoutDashboard, Loader2, Plus, Trash2, Upload, X } from 'lucide-react';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { Award, ChevronLeft, ChevronRight, FileText, LayoutDashboard, Loader2, Plus, Trash2, Upload, X } from 'lucide-react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CertCard from '../../Components/business/CertCard';
 import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
 import { useToastContext } from '../../context/ToastContext';
 import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
-import { createCertification, deleteCertification, getMyCertifications } from '../../services/certifications/certifications.service';
+import { createCertification, deleteCertification, getMyCertifications, updateCertification } from '../../services/certifications/certifications.service';
 import { uploadDocument } from '../../services/upload/upload.service';
 
 const emptyForm = { name: '', issuing_entity: '', verification_url: '' };
@@ -99,8 +99,9 @@ const inputCls = (err) =>
     err ? 'border-red-400 bg-red-50' : 'border-edge focus:border-primary-mid'
   }`;
 
-function CertFormModal({ onClose, onSave, loading }) {
-  const [form, setForm]     = useState(emptyForm);
+function CertFormModal({ onClose, onSave, loading, editingCert = null }) {
+  const isEdit = !!editingCert;
+  const [form, setForm]     = useState(isEdit ? { name: editingCert.name, issuing_entity: editingCert.issuing_entity, verification_url: editingCert.verification_url } : emptyForm);
   const [errors, setErrors] = useState({});
   const uploaderRef         = useRef();
   const { error: showError } = useToastContext();
@@ -120,7 +121,8 @@ function CertFormModal({ onClose, onSave, loading }) {
       try { new URL(form.verification_url.trim()); }
       catch { e.verification_url = 'Ingresa una URL válida.'; }
     }
-    if (!uploaderRef.current?.canUpload) {
+    // En edición el PDF es opcional (puede reusar el existente)
+    if (!isEdit && !uploaderRef.current?.canUpload) {
       e.badge_url = 'El documento PDF es requerido.';
     }
     return e;
@@ -135,11 +137,13 @@ function CertFormModal({ onClose, onSave, loading }) {
       return;
     }
 
-    let badgeUrl;
-    try {
-      badgeUrl = await uploaderRef.current.upload();
-    } catch {
-      return;
+    let badgeUrl = editingCert?.badge_url ?? '';
+    if (uploaderRef.current?.canUpload) {
+      try {
+        badgeUrl = await uploaderRef.current.upload();
+      } catch {
+        return;
+      }
     }
 
     onSave({
@@ -158,7 +162,7 @@ function CertFormModal({ onClose, onSave, loading }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <div className="bg-card-bg rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
-          <h2 className="text-lg font-semibold text-heading">Nueva certificación</h2>
+          <h2 className="text-lg font-semibold text-heading">{isEdit ? 'Editar y reenviar certificación' : 'Nueva certificación'}</h2>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-app-bg transition-colors">
             <X className="w-5 h-5 text-muted" />
           </button>
@@ -239,7 +243,7 @@ function CertFormModal({ onClose, onSave, loading }) {
               className="flex-1 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest disabled:opacity-50 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? 'Enviando…' : 'Enviar certificación'}
+              {loading ? 'Enviando…' : isEdit ? 'Guardar y reenviar' : 'Enviar certificación'}
             </button>
           </div>
         </form>
@@ -313,32 +317,49 @@ export default function BusinessCertifications() {
   const { success: showSuccess, error: showError } = useToastContext();
 
   const [certs, setCerts]                 = useState([]);
+  const [meta, setMeta]                   = useState({ totalItems: 0, totalPages: 1, currentPage: 1, totalPending: 0, totalApproved: 0 });
+  const [page, setPage]                   = useState(1);
   const [pageLoading, setPageLoading]     = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showForm, setShowForm]           = useState(false);
+  const [editingCert, setEditingCert]     = useState(null);
   const [deletingCert, setDeletingCert]   = useState(null);
 
-  async function loadCerts() {
-    const data = await getMyCertifications();
-    setCerts(Array.isArray(data) ? data : []);
-  }
+  const loadCerts = useCallback(async (p = 1) => {
+    try {
+      const data = await getMyCertifications({ page: p, limit: 9 });
+      setCerts(Array.isArray(data?.data) ? data.data : []);
+      if (data?.meta) setMeta(data.meta);
+    } catch {
+      showError('No se pudieron cargar las certificaciones.');
+    }
+  }, [showError]);
 
   useEffect(() => {
     if (isRejected || isPending) { setPageLoading(false); return; }
-    loadCerts()
-      .catch(() => showError('No se pudieron cargar las certificaciones.'))
-      .finally(() => setPageLoading(false));
-  }, [isRejected, isPending]);
+    loadCerts(1).finally(() => setPageLoading(false));
+  }, [isRejected, isPending, loadCerts]);
 
   if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
+
+  const handlePageChange = (p) => {
+    setPage(p);
+    loadCerts(p);
+  };
 
   async function handleSave(formData) {
     setActionLoading(true);
     try {
-      await createCertification(formData);
-      showSuccess('Certificación enviada. Quedará pendiente de aprobación.');
-      await loadCerts();
-      setShowForm(false);
+      if (editingCert) {
+        await updateCertification(editingCert.id_certification, formData);
+        showSuccess('Certificación actualizada y enviada a revisión nuevamente.');
+        setEditingCert(null);
+      } else {
+        await createCertification(formData);
+        showSuccess('Certificación enviada. Quedará pendiente de aprobación.');
+        setShowForm(false);
+      }
+      await loadCerts(page);
     } catch (err) {
       showError(err?.message || 'No se pudo enviar la certificación.');
     } finally {
@@ -352,9 +373,9 @@ export default function BusinessCertifications() {
     try {
       await deleteCertification(deletingCert.id_certification);
       showSuccess('Certificación eliminada.');
-      setCerts((prev) =>
-        prev.filter((c) => c.id_certification !== deletingCert.id_certification),
-      );
+      const newPage = certs.length === 1 && page > 1 ? page - 1 : page;
+      setPage(newPage);
+      await loadCerts(newPage);
       setDeletingCert(null);
     } catch (err) {
       showError(err?.message || 'No se pudo eliminar la certificación.');
@@ -391,11 +412,11 @@ export default function BusinessCertifications() {
             <div>
               <h1 className="text-xl font-serif text-heading">Certificaciones</h1>
               <p className="text-sm text-muted mt-0.5">
-                {certs.length} certificación{certs.length !== 1 ? 'es' : ''} · cada envío pasa por revisión
+                {meta.totalItems} certificación{meta.totalItems !== 1 ? 'es' : ''} · cada envío pasa por revisión
               </p>
             </div>
           </div>
-          {certs.length > 0 && (
+          {meta.totalItems > 0 && (
             <button
               onClick={() => setShowForm(true)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors"
@@ -407,25 +428,73 @@ export default function BusinessCertifications() {
         </div>
       </div>
 
-      {certs.length === 0 ? (
-        <EmptyCertifications onAdd={() => setShowForm(true)} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {certs.map((cert) => (
-            <CertCard
-              key={cert.id_certification}
-              cert={cert}
-              onDelete={setDeletingCert}
-            />
-          ))}
+      {/* Stat cards */}
+      {meta.totalItems > 0 && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-yellow-50 rounded-xl px-4 py-3 border border-yellow-100">
+            <p className="text-xs text-yellow-700 font-medium">Pendientes</p>
+            <p className="text-2xl font-bold mt-0.5 text-yellow-800">{meta.totalPending}</p>
+          </div>
+          <div className="bg-green-50 rounded-xl px-4 py-3 border border-green-100">
+            <p className="text-xs text-green-700 font-medium">Aprobadas</p>
+            <p className="text-2xl font-bold mt-0.5 text-green-800">{meta.totalApproved}</p>
+          </div>
+          <div className="bg-card-bg rounded-xl px-4 py-3 border border-edge">
+            <p className="text-xs text-muted font-medium">Total</p>
+            <p className="text-2xl font-bold mt-0.5 text-heading">{meta.totalItems}</p>
+          </div>
         </div>
       )}
 
-      {showForm && (
+      {certs.length === 0 && meta.totalItems === 0 ? (
+        <EmptyCertifications onAdd={() => setShowForm(true)} />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {certs.map((cert) => (
+              <CertCard
+                key={cert.id_certification}
+                cert={cert}
+                onDelete={setDeletingCert}
+                onEdit={setEditingCert}
+              />
+            ))}
+          </div>
+
+          {/* Paginador */}
+          {meta.totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+                aria-label="Página anterior"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-edge/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="text-sm text-muted">
+                Página <span className="font-semibold text-heading">{page}</span> de{' '}
+                <span className="font-semibold text-heading">{meta.totalPages}</span>
+              </span>
+              <button
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= meta.totalPages}
+                aria-label="Página siguiente"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-edge/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {(showForm || editingCert) && (
         <CertFormModal
-          onClose={() => setShowForm(false)}
+          onClose={() => { setShowForm(false); setEditingCert(null); }}
           onSave={handleSave}
           loading={actionLoading}
+          editingCert={editingCert}
         />
       )}
 

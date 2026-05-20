@@ -7,7 +7,7 @@ export const getAdminCertifications = async ({ page = 1, limit = 15, status } = 
     const res = await API.get(`/certifications/admin/list?${params}`);
     return res.data;
   } catch (err) {
-    if (err.response?.status === 404) return { data: [], meta: { total: 0, page: 1, totalPages: 1 } };
+    if (err.response?.status === 404) return { data: [], meta: { total: 0, page: 1, totalPages: 1, totalGlobal: 0, totalPending: 0, totalApproved: 0 } };
     throw err;
   }
 };

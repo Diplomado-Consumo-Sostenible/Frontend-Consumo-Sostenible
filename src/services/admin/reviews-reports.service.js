@@ -7,7 +7,7 @@ export const getReportedReviews = async ({ page = 1, limit = 15, reason } = {}) 
     const res = await API.get(`/reviews/reports/reported/admin-queue?${params}`);
     return res.data;
   } catch (err) {
-    if (err.response?.status === 404) return { data: [], meta: { total: 0, page: 1, totalPages: 1 } };
+    if (err.response?.status === 404) return { data: [], meta: { total: 0, totalGlobal: 0, page: 1, totalPages: 1 } };
     throw err;
   }
 };
