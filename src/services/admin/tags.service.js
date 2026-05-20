@@ -1,11 +1,13 @@
 import API from '../../api/api';
 
-export const getTags = async () => {
+export const getTags = async ({ page = 1, limit = 15 } = {}) => {
   try {
-    const res = await API.get('/tags');
+    const params = new URLSearchParams({ page, limit });
+    const res = await API.get(`/tags/admin?${params}`);
     return res.data;
   } catch (err) {
-    if (err.response?.status === 404) return [];
+    if (err.response?.status === 404)
+      return { data: [], meta: { totalItems: 0, totalPages: 1, currentPage: 1 } };
     throw err;
   }
 };

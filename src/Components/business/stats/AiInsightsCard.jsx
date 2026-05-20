@@ -33,7 +33,6 @@ export default function AiInsightsCard({ businessId }) {
         hasAiSummary: true,
       }));
     } catch {
-      // Error silencioso: el endpoint requiere rol ADMIN
     } finally {
       setRegenerating(false);
     }

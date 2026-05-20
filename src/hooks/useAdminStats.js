@@ -209,8 +209,10 @@ export function useAdminStats() {
       activityItems.sort((a, b) => b.sortDate - a.sortDate);
       const activity = activityItems.slice(0, 7);
 
-      const totalUsers = users.length;
-      const activeUsers = users.filter(u => u.isActive).length;
+      // getAllUsers ahora devuelve { data, meta } — compatibilidad con forma anterior (array)
+      const usersData   = Array.isArray(users) ? users : (users?.data ?? []);
+      const totalUsers  = Array.isArray(users) ? users.length  : (users?.meta?.totalItems  ?? 0);
+      const activeUsers = Array.isArray(users) ? users.filter(u => u.isActive).length : (users?.meta?.totalActive ?? 0);
 
       setStats({
         totalUsers,
@@ -223,7 +225,7 @@ export function useAdminStats() {
         pendingQueue,
         activity,
         adminName: profile?.nombre?.split(' ')[0] || 'Administrador',
-        allUsers: users,
+        allUsers: usersData,
         allProfiles,
         allBizList,
       });

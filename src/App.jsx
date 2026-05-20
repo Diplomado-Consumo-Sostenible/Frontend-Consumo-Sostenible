@@ -17,6 +17,8 @@ import BusinessProducts from './pages/business/BusinessProducts';
 import BusinessProfile from './pages/business/BusinessProfile';
 import BusinessStats from './pages/business/BusinessStats';
 import CreateBusiness from './pages/business/CreateBusiness';
+import NotificationHistory from './pages/business/NotificationHistory';
+import UserNotificationHistory from './pages/user/UserNotificationHistory';
 import ForgotPassword from './pages/ForgotPassword';
 import GoogleCallback from './pages/GoogleCallback';
 import LandingPage from './pages/LandingPage';
@@ -37,7 +39,7 @@ function App() {
       <NotificationsProvider>
       <Routes>
 
-        {/* ── Públicas ──────────────────────────────────────────── */}
+        {/* ── Públicas ───*/}
         <Route path="/"                element={<LandingPage />} />
         <Route path="/LandingPage"      element={<LandingPage />} />
         <Route path="/negocio/:id"      element={<UserLayout><NegocioDetalle /></UserLayout>} />
@@ -48,7 +50,7 @@ function App() {
         <Route path="/auth/callback"      element={<GoogleCallback />} />
         <Route path="/register/business"  element={<RegisterBusiness />} />
 
-        {/* ── Usuario consumidor (UserLayout: LandingNavbar + Footer) */}
+        {/* ── Usuario (LandingNavbar + Footer) */}
         <Route
           path="/favoritos"
           element={
@@ -70,6 +72,14 @@ function App() {
           element={
             <ProtectedRoute roles={['USER', 'owner']}>
               <UserLayout><MisResenas /></UserLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notificaciones"
+          element={
+            <ProtectedRoute roles={['USER']}>
+              <UserLayout><UserNotificationHistory /></UserLayout>
             </ProtectedRoute>
           }
         />
@@ -117,7 +127,16 @@ function App() {
           }
         />
 
-        {/* ── Admin (DashboardLayout) ────────────────────────────── */}
+        <Route
+          path="/dashboardBusiness/notificaciones"
+          element={
+            <ProtectedRoute roles={['owner']}>
+              <DashboardLayout><NotificationHistory /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ── Admin (DashboardLayout) ──── */}
         <Route
           path="/adminDashboard"
           element={
@@ -183,7 +202,7 @@ function App() {
           }
         />
 
-        {/* ── Perfil: owner y admin con DashboardLayout ──────────── */}
+        {/* ── Perfil: owner y admin con DashboardLayout ─── */}
         <Route
           path="/dashboard/profile"
           element={
@@ -193,13 +212,13 @@ function App() {
           }
         />
 
-        {/* ── Redirects de rutas antiguas del USER ───────────────── */}
+        {/* ── Redirects de rutas  USER ─── */}
         <Route path="/dashboard"           element={<Navigate to="/"          replace />} />
         <Route path="/dashboard/favoritos" element={<Navigate to="/favoritos" replace />} />
         <Route path="/dashboard/mapa"      element={<Navigate to="/"          replace />} />
         <Route path="/dashboard/explorar"  element={<Navigate to="/"          replace />} />
 
-        {/* ── Catch-all ──────────────────────────────────────────── */}
+        {/* ── Catch-all ── */}
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>

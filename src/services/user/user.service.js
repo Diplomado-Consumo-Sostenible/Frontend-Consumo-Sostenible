@@ -7,9 +7,13 @@ const extractError = (error) => {
   return { message: msg || 'Error inesperado' };
 };
 
-export const getAllUsers = async () => {
+export const getAllUsers = async ({ page = 1, limit = 15, rol, sortBy, order } = {}) => {
   try {
-    const response = await API.get('/user');
+    const params = new URLSearchParams({ page, limit });
+    if (rol)    params.set('rol',    rol);
+    if (sortBy) params.set('sortBy', sortBy);
+    if (order)  params.set('order',  order);
+    const response = await API.get(`/user?${params}`);
     return response.data;
   } catch (error) {
     throw extractError(error);

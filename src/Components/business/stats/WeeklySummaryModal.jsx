@@ -22,7 +22,6 @@ export default function WeeklySummaryModal({ summary, onClose }) {
 
   const trend  = TREND_MAP[stats.trend] ?? TREND_MAP.stable;
 
-  // Convierte **texto** en <strong>texto</strong> para el insight de Gemini
   const formattedSummary = aiSummary
     ? aiSummary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>')
     : '';

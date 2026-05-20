@@ -1,4 +1,18 @@
-import { AlertTriangle, Clock, Eye, LayoutDashboard, Loader2, PackageOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  LayoutDashboard,
+  Loader2,
+  PackageOpen,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
@@ -8,6 +22,10 @@ import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
 import { getMyBusinesses } from '../../services/business/busienss.service';
 import { createProduct, deleteProduct, getProductsByBusiness, updateProduct } from '../../services/product/product.service';
 import { uploadGeneralImage } from '../../services/upload/upload.service';
+
+// ─── Constantes ───────────────────────────────────────────────────────────────
+
+const LIMIT = 12;
 
 // ─── ProductFormModal ─────────────────────────────────────────────────────────
 
@@ -82,7 +100,7 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
 
-          {/* Imagen — el uploader gestiona todo su estado internamente */}
+          {/* Imagen */}
           <div>
             <label className="block text-sm font-medium text-body mb-2">
               Imagen del producto
@@ -398,9 +416,15 @@ export default function BusinessProducts() {
 
   if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
 
-  const [business, setBusiness]         = useState(null);
-  const [products, setProducts]         = useState([]);
-  const [pageLoading, setPageLoading]   = useState(true);
+  // ── Estado ────────────────────────────────────────────────────────────────
+  const [business, setBusiness]           = useState(null);
+  const [products, setProducts]           = useState([]);
+  const [meta, setMeta]                   = useState({ totalItems: 0, totalPages: 1, currentPage: 1 });
+  const [page, setPage]                   = useState(1);
+  const [search, setSearch]               = useState('');
+  const [sortBy, setSortBy]               = useState('createdAt_DESC');
+  const [pageLoading, setPageLoading]     = useState(true);
+  const [listLoading, setListLoading]     = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
   const [showForm, setShowForm]               = useState(false);
@@ -408,9 +432,36 @@ export default function BusinessProducts() {
   const [deletingProduct, setDeletingProduct] = useState(null);
   const [viewingProduct, setViewingProduct]   = useState(null);
 
-  async function loadProducts(biz) {
-    const data = await getProductsByBusiness(biz.id_business);
-    setProducts(data?.data ?? data ?? []);
+  const businessRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  // ── Carga de productos ────────────────────────────────────────────────────
+
+  async function doLoad(biz, p, q, s) {
+    const [field, dir] = (s || 'createdAt_DESC').split('_');
+    setListLoading(true);
+    try {
+      const data = await getProductsByBusiness(biz.id_business, {
+        page:   p,
+        limit:  LIMIT,
+        search: q || undefined,
+        sortBy: field,
+        order:  dir,
+      });
+      const list = data?.data ?? (Array.isArray(data) ? data : []);
+      const m    = data?.meta ?? {};
+      setProducts(list);
+      setMeta({
+        totalItems:  m.totalItems  ?? 0,
+        totalPages:  Math.max(1, m.totalPages  ?? 1),
+        currentPage: m.currentPage ?? p,
+      });
+    } catch {
+      setProducts([]);
+      setMeta({ totalItems: 0, totalPages: 1, currentPage: 1 });
+    } finally {
+      setListLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -420,7 +471,8 @@ export default function BusinessProducts() {
         if (!businesses?.length) { setPageLoading(false); return; }
         const biz = businesses[0];
         setBusiness(biz);
-        await loadProducts(biz);
+        businessRef.current = biz;
+        await doLoad(biz, 1, '', 'createdAt_DESC');
       } catch {
         showError('No se pudieron cargar los productos.');
       } finally {
@@ -430,18 +482,48 @@ export default function BusinessProducts() {
     init();
   }, []);
 
+  // ── Handlers de filtros ───────────────────────────────────────────────────
+
+  function handleSearchChange(e) {
+    const q = e.target.value;
+    setSearch(q);
+    if (!businessRef.current) return;
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setPage(1);
+      doLoad(businessRef.current, 1, q, sortBy);
+    }, 350);
+  }
+
+  function handleSortChange(e) {
+    const s = e.target.value;
+    setSortBy(s);
+    if (!businessRef.current) return;
+    setPage(1);
+    doLoad(businessRef.current, 1, search, s);
+  }
+
+  function handlePageChange(p) {
+    if (!businessRef.current) return;
+    setPage(p);
+    doLoad(businessRef.current, p, search, sortBy);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Handlers de CRUD ──────────────────────────────────────────────────────
+
   async function handleSave(formData) {
-    if (!business) return;
+    if (!businessRef.current) return;
     setActionLoading(true);
     try {
       if (editingProduct) {
         await updateProduct(editingProduct.id_product, formData);
         showSuccess('Producto actualizado.');
       } else {
-        await createProduct(business.id_business, formData);
+        await createProduct(businessRef.current.id_business, formData);
         showSuccess('Producto creado.');
       }
-      await loadProducts(business);
+      await doLoad(businessRef.current, page, search, sortBy);
       closeForm();
     } catch (err) {
       showError(err?.message || 'Ocurrió un error. Inténtalo de nuevo.');
@@ -451,15 +533,16 @@ export default function BusinessProducts() {
   }
 
   async function handleDelete() {
-    if (!deletingProduct) return;
+    if (!deletingProduct || !businessRef.current) return;
     setActionLoading(true);
     try {
       await deleteProduct(deletingProduct.id_product);
-      setProducts((prev) =>
-        prev.filter((p) => p.id_product !== deletingProduct.id_product),
-      );
       showSuccess('Producto eliminado.');
       setDeletingProduct(null);
+      // Si era el último de la página y no es la primera, retrocede una página
+      const targetPage = products.length === 1 && page > 1 ? page - 1 : page;
+      setPage(targetPage);
+      await doLoad(businessRef.current, targetPage, search, sortBy);
     } catch (err) {
       showError(err?.message || 'No se pudo eliminar el producto.');
     } finally {
@@ -467,11 +550,11 @@ export default function BusinessProducts() {
     }
   }
 
-  function openCreate() { setEditingProduct(null); setShowForm(true); }
-  function openEdit(product) { setEditingProduct(product); setShowForm(true); }
-  function closeForm() { setShowForm(false); setEditingProduct(null); }
+  function openCreate()           { setEditingProduct(null); setShowForm(true); }
+  function openEdit(product)      { setEditingProduct(product); setShowForm(true); }
+  function closeForm()            { setShowForm(false); setEditingProduct(null); }
 
-  // ── Estados de carga / negocio inactivo ──────────────────────────────────
+  // ── Estados de bloqueo / carga inicial ───────────────────────────────────
 
   if (pageLoading) {
     return (
@@ -482,26 +565,22 @@ export default function BusinessProducts() {
   }
 
   if (business && business.status !== 'Active') {
-    const isPending = business.status === 'Pending';
+    const isPendingBiz = business.status === 'Pending';
     return (
       <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-        <div
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${
-            isPending
-              ? 'bg-yellow-50 border border-yellow-100'
-              : 'bg-red-50 border border-red-100'
-          }`}
-        >
-          {isPending
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${
+          isPendingBiz ? 'bg-yellow-50 border border-yellow-100' : 'bg-red-50 border border-red-100'
+        }`}>
+          {isPendingBiz
             ? <Clock className="w-7 h-7 text-yellow-400" />
             : <AlertTriangle className="w-7 h-7 text-red-400" />
           }
         </div>
         <h3 className="text-base font-semibold text-body mb-1">
-          {isPending ? 'Negocio pendiente de aprobación' : 'Negocio rechazado'}
+          {isPendingBiz ? 'Negocio pendiente de aprobación' : 'Negocio rechazado'}
         </h3>
         <p className="text-sm text-muted max-w-xs">
-          {isPending
+          {isPendingBiz
             ? 'Podrás gestionar tus productos una vez que el administrador apruebe tu negocio.'
             : 'Tu negocio fue rechazado. Contacta al administrador para más información.'}
         </p>
@@ -532,8 +611,13 @@ export default function BusinessProducts() {
 
   // ── Vista principal ───────────────────────────────────────────────────────
 
+  const totalPages  = meta.totalPages;
+  const hasProducts = meta.totalItems > 0 || products.length > 0;
+
   return (
-    <div className="pl-14 pr-6 py-6 space-y-8 w-full">
+    <div className="pl-14 pr-6 py-6 space-y-6 w-full">
+
+      {/* Breadcrumb + encabezado */}
       <div className="space-y-3">
         <div className="flex items-center gap-1.5 text-xs text-muted">
           <LayoutDashboard className="w-3.5 h-3.5" />
@@ -553,12 +637,15 @@ export default function BusinessProducts() {
               <h1 className="text-xl font-serif text-heading">Productos</h1>
               <p className="text-sm text-muted mt-0.5">
                 {business.name ?? business.businessName} ·{' '}
-                {products.length} producto{products.length !== 1 ? 's' : ''}
+                {search
+                  ? `${meta.totalItems} resultado${meta.totalItems !== 1 ? 's' : ''}`
+                  : `${meta.totalItems} producto${meta.totalItems !== 1 ? 's' : ''}`
+                }
               </p>
             </div>
           </div>
 
-          {products.length > 0 && (
+          {hasProducts && (
             <button
               onClick={openCreate}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-dark hover:bg-primary-darkest text-white text-sm font-medium transition-colors"
@@ -570,22 +657,96 @@ export default function BusinessProducts() {
         </div>
       </div>
 
-      {products.length === 0 ? (
-        <EmptyProducts onAdd={openCreate} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {products.map((p) => (
-            <ProductCard
-              key={p.id_product}
-              product={p}
-              onEdit={openEdit}
-              onDelete={setDeletingProduct}
-              onView={setViewingProduct}
+      {/* Buscador + ordenamiento — visible cuando hay productos o hay búsqueda activa */}
+      {(hasProducts || search) && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Buscador */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Buscar producto…"
+              className="w-full pl-9 pr-3.5 py-2 border border-edge rounded-xl text-sm outline-none transition-colors focus:border-primary-mid focus:ring-2 focus:ring-primary-mid/20"
             />
-          ))}
+          </div>
+
+          {/* Ordenamiento */}
+          <select
+            value={sortBy}
+            onChange={handleSortChange}
+            className="px-3.5 py-2 border border-edge rounded-xl text-sm text-body outline-none transition-colors focus:border-primary-mid focus:ring-2 focus:ring-primary-mid/20 bg-white cursor-pointer"
+          >
+            <option value="createdAt_DESC">Más recientes</option>
+            <option value="updatedAt_DESC">Actualizados</option>
+            <option value="name_ASC">A → Z</option>
+            <option value="price_ASC">Precio: menor a mayor</option>
+            <option value="price_DESC">Precio: mayor a menor</option>
+          </select>
         </div>
       )}
 
+      {/* Contenido */}
+      {listLoading ? (
+        <div className="flex items-center justify-center h-48">
+          <Loader2 className="w-6 h-6 animate-spin text-primary-mid" />
+        </div>
+      ) : products.length === 0 && !search ? (
+        <EmptyProducts onAdd={openCreate} />
+      ) : products.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+          <Search className="w-10 h-10 text-muted/40 mb-3" />
+          <p className="text-sm text-muted">
+            Sin resultados para <strong className="text-body">"{search}"</strong>
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Grid de productos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {products.map((p) => (
+              <ProductCard
+                key={p.id_product}
+                product={p}
+                onEdit={openEdit}
+                onDelete={setDeletingProduct}
+                onView={setViewingProduct}
+              />
+            ))}
+          </div>
+
+          {/* Paginador — solo se muestra cuando hay más de una página */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-sm text-muted">
+                {meta.totalItems} producto{meta.totalItems !== 1 ? 's' : ''} en total
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page <= 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm text-body font-medium min-w-[90px] text-center">
+                  Página {page} de {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page >= totalPages}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Modales */}
       {showForm && (
         <ProductFormModal
           initial={editingProduct}

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Hash, Plus, Search, Edit2, Trash2, X, AlertTriangle, Loader2, LayoutDashboard, ChevronRight } from 'lucide-react';
+import { Hash, Plus, Search, Edit2, Trash2, X, AlertTriangle, Loader2, LayoutDashboard, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { getTags, createTag, updateTag, deleteTag } from '../../services/admin/tags.service';
 import { useToastContext } from '../../context/ToastContext';
+
+const LIMIT = 15;
 
 function Modal({ title, onClose, children }) {
   return (
@@ -51,22 +53,29 @@ const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-edge text-sm t
 
 export default function AdminTags() {
   const toast = useToastContext();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [items, setItems]           = useState([]);
+  const [meta, setMeta]             = useState({ totalItems: 0, totalPages: 1, currentPage: 1 });
+  const [page, setPage]             = useState(1);
+  const [loading, setLoading]       = useState(true);
+  const [search, setSearch]         = useState('');
   const [showCreate, setShowCreate] = useState(false);
-  const [editItem, setEditItem] = useState(null);
+  const [editItem, setEditItem]     = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
-  const [formValue, setFormValue] = useState('');
-  const [formError, setFormError] = useState('');
+  const [formValue, setFormValue]   = useState('');
+  const [formError, setFormError]   = useState('');
   const [formLoading, setFormLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async (p = 1) => {
     try {
       setLoading(true);
-      const data = await getTags();
-      setItems(Array.isArray(data) ? data : []);
+      const data = await getTags({ page: p, limit: LIMIT });
+      setItems(Array.isArray(data?.data) ? data.data : []);
+      if (data?.meta) setMeta({
+        totalItems:  data.meta.totalItems  ?? 0,
+        totalPages:  data.meta.totalPages  ?? 1,
+        currentPage: data.meta.currentPage ?? p,
+      });
     } catch {
       toast.error('Error al cargar los tags');
     } finally {
@@ -74,12 +83,18 @@ export default function AdminTags() {
     }
   }, []);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => { fetchAll(1); }, [fetchAll]);
 
+  const handlePageChange = (p) => {
+    setPage(p);
+    fetchAll(p);
+  };
+
+  // Client-side search on current page
   const filtered = items.filter((i) => i.tag?.toLowerCase().includes(search.toLowerCase()));
 
   const openCreate = () => { setFormValue(''); setFormError(''); setShowCreate(true); };
-  const openEdit = (item) => { setFormValue(item.tag); setFormError(''); setEditItem(item); };
+  const openEdit   = (item) => { setFormValue(item.tag); setFormError(''); setEditItem(item); };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -89,7 +104,7 @@ export default function AdminTags() {
       await createTag(formValue.trim());
       toast.success('Tag creado');
       setShowCreate(false);
-      fetchAll();
+      fetchAll(page);
     } catch (err) {
       setFormError(err?.response?.data?.message || 'Error al crear');
     } finally {
@@ -105,7 +120,7 @@ export default function AdminTags() {
       await updateTag(editItem.id_tags, formValue.trim());
       toast.success('Tag actualizado');
       setEditItem(null);
-      fetchAll();
+      fetchAll(page);
     } catch (err) {
       setFormError(err?.response?.data?.message || 'Error al actualizar');
     } finally {
@@ -119,7 +134,10 @@ export default function AdminTags() {
       await deleteTag(deleteItem.id_tags);
       toast.success('Tag eliminado');
       setDeleteItem(null);
-      fetchAll();
+      // If we deleted the last item on this page, go back one page
+      const newPage = filtered.length === 1 && page > 1 ? page - 1 : page;
+      setPage(newPage);
+      fetchAll(newPage);
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Error al eliminar');
       setDeleteItem(null);
@@ -130,6 +148,7 @@ export default function AdminTags() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center gap-1.5 text-xs text-muted">
           <LayoutDashboard className="w-3.5 h-3.5" />
@@ -153,22 +172,31 @@ export default function AdminTags() {
         </div>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-card-bg rounded-xl px-5 py-4 border border-edge">
           <p className="text-xs text-muted font-medium">Total tags</p>
-          <p className="text-2xl font-bold mt-1 text-heading">{items.length}</p>
+          <p className="text-2xl font-bold mt-1 text-heading">{meta.totalItems}</p>
         </div>
         <div className="bg-primary-softest rounded-xl px-5 py-4 border border-edge">
-          <p className="text-xs text-muted font-medium">Resultados</p>
+          <p className="text-xs text-muted font-medium">En esta página</p>
           <p className="text-2xl font-bold mt-1 text-primary-dark">{filtered.length}</p>
         </div>
       </div>
 
+      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-        <input type="text" placeholder="Buscar tag..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg" />
+        <input
+          type="text"
+          placeholder="Buscar tag en esta página..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-edge text-sm text-body placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-mid/30 focus:border-primary-mid transition-all bg-card-bg"
+        />
       </div>
 
+      {/* Table */}
       <div className="bg-card-bg rounded-2xl border border-edge overflow-hidden shadow-warm-sm">
         {loading ? (
           <div className="flex items-center justify-center py-20 gap-3 text-muted">
@@ -177,7 +205,7 @@ export default function AdminTags() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted gap-3">
             <Hash className="w-10 h-10 opacity-30" />
-            <p className="text-sm">{search ? 'Sin resultados' : 'No hay tags registrados'}</p>
+            <p className="text-sm">{search ? 'Sin resultados en esta página' : 'No hay tags registrados'}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -193,7 +221,7 @@ export default function AdminTags() {
               <tbody className="divide-y divide-edge/40">
                 {filtered.map((item, idx) => (
                   <tr key={item.id_tags} className="hover:bg-app-bg/50 transition-colors">
-                    <td className="px-4 py-3.5 text-xs text-muted font-mono">{idx + 1}</td>
+                    <td className="px-4 py-3.5 text-xs text-muted font-mono">{(page - 1) * LIMIT + idx + 1}</td>
                     <td className="px-4 py-3.5">
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-body">
                         <Hash className="w-3.5 h-3.5 text-teal-500 shrink-0" />{item.tag}
@@ -216,13 +244,40 @@ export default function AdminTags() {
             </table>
           </div>
         )}
-        {!loading && filtered.length > 0 && (
-          <div className="px-4 py-3 border-t border-edge text-xs text-muted">
-            {filtered.length} de {items.length} tags
+
+        {/* Paginator */}
+        {!loading && meta.totalItems > 0 && (
+          <div className="flex items-center justify-between px-5 py-3 border-t border-edge">
+            <span className="text-xs text-muted">
+              <span className="font-semibold text-body">{meta.totalItems}</span> tag{meta.totalItems !== 1 ? 's' : ''} en total
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+                aria-label="Página anterior"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-xs text-muted px-1">
+                Página <span className="font-semibold text-body">{meta.currentPage}</span> de{' '}
+                <span className="font-semibold text-body">{meta.totalPages}</span>
+              </span>
+              <button
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= meta.totalPages}
+                aria-label="Página siguiente"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-muted hover:bg-app-bg hover:text-body transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronRightIcon className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
       </div>
 
+      {/* Modals */}
       {showCreate && (
         <Modal title="Nuevo Tag" onClose={() => setShowCreate(false)}>
           <form onSubmit={handleCreate} className="space-y-4">

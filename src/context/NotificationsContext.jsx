@@ -8,18 +8,37 @@ import { getMyNotifications } from '../services/notifications/notifications.serv
 const NotificationsContext = createContext(null);
 
 export function NotificationsProvider({ children }) {
-  const { isOwner, isAdmin } = useMemo(() => {
+  // authTick se incrementa cada vez que el token cambia (login/logout).
+  // Esto fuerza a useMemo a re-derivar la identidad del usuario sin recargar la página.
+  const [authTick, setAuthTick] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setAuthTick((t) => t + 1);
+    window.addEventListener('app:auth-changed', handler);
+    return () => window.removeEventListener('app:auth-changed', handler);
+  }, []);
+
+  const { isOwner, isAdmin, isUser, userId } = useMemo(() => {
     const token   = getToken();
     const decoded = decodeToken(token);
     const role    = decoded?.rol?.toLowerCase() ?? '';
-    return { isOwner: role === 'owner', isAdmin: role === 'admin' };
-  }, []);
+    return {
+      isOwner: role === 'owner',
+      isAdmin: role === 'admin',
+      isUser:  role === 'user',
+      userId:  decoded?.sub ?? null,
+    };
+  }, [authTick]); // re-computa en cada cambio de sesión
 
-  const shouldConnect = isOwner || isAdmin;
+  const shouldConnect = isOwner || isAdmin || isUser;
 
   const [businessId, setBusinessId] = useState(null);
 
-  // Obtener el id del negocio activo solo si es owner
+  // Resetear businessId al cambiar de usuario para que el efecto inferior lo re-obtenga.
+  useEffect(() => {
+    setBusinessId(null);
+  }, [authTick]);
+
   useEffect(() => {
     if (!isOwner) return;
     let cancelled = false;
@@ -35,16 +54,17 @@ export function NotificationsProvider({ children }) {
 
   const socketData = useSentimentSocket({
     businessId: isOwner ? businessId : null,
-    enabled: shouldConnect,
+    userId:     isUser  ? userId     : null,
+    enabled:    shouldConnect,
   });
 
-  // Ref estable hacia loadPersisted para evitar closures viejos
+
   const loadPersistedRef = useRef(socketData.loadPersisted);
   useEffect(() => { loadPersistedRef.current = socketData.loadPersisted; });
 
-  // Cargar historial persistido al montar (solo si tiene rol con acceso)
+
   useEffect(() => {
-    if (!shouldConnect) return;
+    if (!shouldConnect || isUser) return;
     let cancelled = false;
     getMyNotifications({ page: 1, limit: 30 })
       .then((list) => {
@@ -52,16 +72,17 @@ export function NotificationsProvider({ children }) {
       })
       .catch((err) => console.warn('[Notifications] Error cargando historial:', err));
     return () => { cancelled = true; };
-  }, [shouldConnect]);
+  }, [shouldConnect, isUser]);
 
   return (
     <NotificationsContext.Provider
-      value={{ ...socketData, businessId, isOwner, isAdmin }}
+      value={{ ...socketData, businessId, isOwner, isAdmin, isUser, userId }}
     >
       {children}
     </NotificationsContext.Provider>
   );
 }
+
 
 export function useNotificationsContext() {
   return useContext(NotificationsContext);
