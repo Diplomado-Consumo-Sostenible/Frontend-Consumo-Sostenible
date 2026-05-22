@@ -115,11 +115,9 @@ function CertFormModal({ onClose, onSave, loading, editingCert = null }) {
     const e = {};
     if (!form.name.trim()) e.name = 'El nombre es requerido.';
     if (!form.issuing_entity.trim()) e.issuing_entity = 'La entidad emisora es requerida.';
-    if (!form.verification_url.trim()) {
-      e.verification_url = 'La URL de verificación es requerida.';
-    } else {
+    if (form.verification_url.trim()) {
       try { new URL(form.verification_url.trim()); }
-      catch { e.verification_url = 'Ingresa una URL válida.'; }
+      catch { e.verification_url = 'Ingresa una URL válida (ej: https://...).'; }
     }
     // En edición el PDF es opcional (puede reusar el existente)
     if (!isEdit && !uploaderRef.current?.canUpload) {
@@ -149,7 +147,7 @@ function CertFormModal({ onClose, onSave, loading, editingCert = null }) {
     onSave({
       name:             form.name.trim(),
       issuing_entity:   form.issuing_entity.trim(),
-      verification_url: form.verification_url.trim(),
+      ...(form.verification_url.trim() ? { verification_url: form.verification_url.trim() } : {}),
       badge_url:        badgeUrl,
     });
   }
@@ -215,7 +213,7 @@ function CertFormModal({ onClose, onSave, loading, editingCert = null }) {
 
           <div>
             <label className="block text-sm font-medium text-body mb-1">
-              URL de verificación <span className="text-red-500">*</span>
+              URL de verificación <span className="text-muted text-xs font-normal">(opcional)</span>
             </label>
             <input
               type="url"
