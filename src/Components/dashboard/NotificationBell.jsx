@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  Award,
   Ban,
   BadgeCheck,
   Bell,
@@ -32,7 +33,9 @@ const ALERT_CONFIG = {
   business_created:      { Icon: Clock,           color: 'text-indigo-600',   bg: 'bg-indigo-50',        label: 'Negocio en revisión'          },
   business_approved:     { Icon: BadgeCheck,      color: 'text-emerald-600',  bg: 'bg-emerald-50',       label: 'Negocio aprobado'             },
   business_rejected:     { Icon: XCircle,         color: 'text-red-600',      bg: 'bg-red-50',           label: 'Negocio rechazado'            },
-  business_resubmitted:  { Icon: RotateCcw,       color: 'text-blue-600',     bg: 'bg-blue-50',          label: 'Solicitud reenviada'          },
+  business_resubmitted:      { Icon: RotateCcw,  color: 'text-blue-600',    bg: 'bg-blue-50',    label: 'Solicitud reenviada'         },
+  certification_approved:    { Icon: Award,      color: 'text-emerald-600', bg: 'bg-emerald-50', label: 'Certificación aprobada'      },
+  certification_rejected:    { Icon: Award,      color: 'text-red-600',     bg: 'bg-red-50',     label: 'Certificación rechazada'     },
 };
 
 const HIDDEN_TYPES = new Set(['negative_review', 'suspicious_review']);
@@ -227,6 +230,32 @@ function AlertDetailCard({ alert, anchorRef, onClose }) {
             <p className="text-[10px] text-muted mt-0.5">
               Tu solicitud fue reenviada a revisión. Te notificaremos cuando nuestro equipo tome una
               decisión sobre tu negocio.
+            </p>
+          </div>
+        )}
+
+        {alert.alertType === 'certification_approved' && (
+          <div>
+            <p className="text-[10px] text-muted uppercase tracking-wide">Certificación aprobada</p>
+            <p className="text-sm font-bold text-emerald-600">{alert.certificationName}</p>
+            {alert.issuingEntity && (
+              <p className="text-[10px] text-muted">{alert.issuingEntity}</p>
+            )}
+            <p className="text-[10px] text-muted mt-0.5">
+              Ya es visible en tu perfil público.
+            </p>
+          </div>
+        )}
+
+        {alert.alertType === 'certification_rejected' && (
+          <div>
+            <p className="text-[10px] text-muted uppercase tracking-wide">Certificación rechazada</p>
+            <p className="text-sm font-bold text-red-600">{alert.certificationName}</p>
+            {alert.issuingEntity && (
+              <p className="text-[10px] text-muted">{alert.issuingEntity}</p>
+            )}
+            <p className="text-[10px] text-muted mt-0.5">
+              Puedes editarla y reenviarla desde la sección de Certificaciones.
             </p>
           </div>
         )}
