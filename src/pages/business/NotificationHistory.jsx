@@ -1,6 +1,7 @@
 import {
   AlertCircle,
   AlertTriangle,
+  Award,
   BadgeCheck,
   Bell,
   Calendar,
@@ -72,6 +73,20 @@ const ALERT_CONFIG = {
     border: 'border-blue-100',
     label: 'Solicitud reenviada',
   },
+  certification_approved: {
+    Icon: Award,
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-100',
+    label: 'Certificación aprobada',
+  },
+  certification_rejected: {
+    Icon: Award,
+    color: 'text-red-600',
+    bg: 'bg-red-50',
+    border: 'border-red-100',
+    label: 'Certificación rechazada',
+  },
 };
 
 const FALLBACK_CONFIG = {
@@ -82,18 +97,25 @@ const FALLBACK_CONFIG = {
   label: 'Notificación',
 };
 
-function NotificationCard({ notification, onDelete, deleting }) {
+function NotificationCard({ notification, onDelete, onRead, deleting }) {
   const cfg     = ALERT_CONFIG[notification.alertType] ?? FALLBACK_CONFIG;
   const date    = new Date(notification.createdAt ?? notification.timestamp);
   const dateStr = date.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
   const timeStr = date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
   const payload = notification.payload ?? {};
 
+  const handleCardClick = () => {
+    if (!notification.isRead) onRead?.(notification.id);
+  };
+
   return (
     <div
-      className={`flex items-start gap-4 p-4 rounded-2xl border ${cfg.border} ${
-        notification.isRead ? 'bg-card-bg' : `${cfg.bg}/50`
-      } transition-colors`}
+      onClick={handleCardClick}
+      className={`flex items-start gap-4 p-4 rounded-2xl border transition-colors cursor-pointer ${
+        notification.isRead
+          ? 'bg-slate-100 border-slate-200'
+          : `bg-white ${cfg.border}`
+      }`}
     >
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${cfg.bg}`}>
         <cfg.Icon className={`h-5 w-5 ${cfg.color}`} />
@@ -163,11 +185,25 @@ function NotificationCard({ notification, onDelete, deleting }) {
           </p>
         )}
 
+        {notification.alertType === 'certification_approved' && (
+          <p className="text-sm text-emerald-700 mt-1">
+            Tu certificación <strong>{payload.certificationName}</strong>
+            {payload.issuingEntity ? ` (${payload.issuingEntity})` : ''} ha sido <strong>aprobada</strong> y ya es visible en tu perfil.
+          </p>
+        )}
+
+        {notification.alertType === 'certification_rejected' && (
+          <p className="text-sm text-red-700 mt-1">
+            Tu certificación <strong>{payload.certificationName}</strong>
+            {payload.issuingEntity ? ` (${payload.issuingEntity})` : ''} fue <strong>rechazada</strong>. Puedes editarla y reenviarla para revisión.
+          </p>
+        )}
+
         <p className="text-xs text-muted mt-1.5">{dateStr} · {timeStr}</p>
       </div>
 
       <button
-        onClick={() => onDelete(notification.id)}
+        onClick={(e) => { e.stopPropagation(); onDelete(notification.id); }}
         disabled={deleting}
         aria-label="Eliminar notificación"
         className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-red-50 hover:text-red-500 transition-colors disabled:opacity-40 cursor-pointer"
@@ -213,7 +249,7 @@ export default function NotificationHistory() {
   const [error, setError]                 = useState(null);
   const [deletingId, setDeletingId]       = useState(null);
 
-  const { deleteAlert } = useNotificationsContext() ?? {};
+  const { deleteAlert, markRead: markReadCtx } = useNotificationsContext() ?? {};
 
 
   const totalPages = total > 0 ? Math.ceil(total / PAGE_SIZE) : 1;
@@ -234,6 +270,11 @@ export default function NotificationHistory() {
   };
 
   useEffect(() => { load(page); }, [page]);
+
+  const handleRead = async (id) => {
+    if (markReadCtx) await markReadCtx(id);
+    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, isRead: true } : n));
+  };
 
   const handleDelete = async (id) => {
     setDeletingId(id);
@@ -261,7 +302,7 @@ export default function NotificationHistory() {
   return (
     <div className="pl-14 pr-4 py-6 max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-xl font-serif text-heading">Historial de Notificaciones</h1>
+        <h1 className="text-2xl font-bold text-heading">Historial de Notificaciones</h1>
         <p className="text-sm text-muted mt-0.5">
           Todas las alertas recibidas sobre tu negocio, ordenadas por fecha.
         </p>
@@ -286,16 +327,44 @@ export default function NotificationHistory() {
         </div>
       ) : (
         <div className="space-y-3">
-          {notifications.map((n) => (
-            <NotificationCard
-              key={n.id}
-              notification={n}
-              onDelete={handleDelete}
-              deleting={deletingId === n.id}
-            />
-          ))}
+          {/* Sección: No leídas */}
+          {notifications.some((n) => !n.isRead) && (
+            <>
+              <p className="text-[10px] font-semibold text-muted uppercase tracking-wide px-1">
+                No leídas · {notifications.filter((n) => !n.isRead).length}
+              </p>
+              {notifications.filter((n) => !n.isRead).map((n) => (
+                <NotificationCard
+                  key={n.id}
+                  notification={n}
+                  onDelete={handleDelete}
+                  onRead={handleRead}
+                  deleting={deletingId === n.id}
+                />
+              ))}
+            </>
+          )}
 
-          {}
+          {/* Sección: Leídas */}
+          {notifications.some((n) => n.isRead) && (
+            <>
+              <p className={`text-[10px] font-semibold text-muted uppercase tracking-wide px-1 ${
+                notifications.some((n) => !n.isRead) ? 'pt-2 border-t border-edge/40' : ''
+              }`}>
+                Leídas · {notifications.filter((n) => n.isRead).length}
+              </p>
+              {notifications.filter((n) => n.isRead).map((n) => (
+                <NotificationCard
+                  key={n.id}
+                  notification={n}
+                  onDelete={handleDelete}
+                  onRead={handleRead}
+                  deleting={deletingId === n.id}
+                />
+              ))}
+            </>
+          )}
+
           {showPaginator && (
             <Pagination
               page={page}

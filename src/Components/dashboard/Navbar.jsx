@@ -2,6 +2,8 @@ import { Leaf } from 'lucide-react';
 import useUserProfile from '../../hooks/useUserProfile';
 import NotificationBell from './NotificationBell';
 import UserMenu from './UserMenu';
+import { getToken } from '../../utils/storage';
+import { decodeToken } from '../../utils/jwt.utils';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -13,6 +15,9 @@ function getGreeting() {
 export default function Navbar() {
   const { profile } = useUserProfile();
   const firstName = (profile?._profile?.nombre ?? profile?.nombre ?? '').split(' ')[0] || '';
+
+  const decoded = decodeToken(getToken());
+  const isAdmin = decoded?.rol?.toLowerCase() === 'admin';
 
   return (
     <header className="sticky top-0 z-40 bg-card-bg/95 backdrop-blur-sm border-b border-edge/60 px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between shrink-0 shadow-sm">
@@ -28,7 +33,7 @@ export default function Navbar() {
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <NotificationBell />
+        {!isAdmin && <NotificationBell />}
         <UserMenu profile={profile} />
       </div>
     </header>

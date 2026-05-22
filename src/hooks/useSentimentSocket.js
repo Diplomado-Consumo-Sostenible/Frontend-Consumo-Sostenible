@@ -171,10 +171,12 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
     });
 
     for (const [event, alertType] of [
-      ['business:created',     'business_created'],
-      ['business:approved',    'business_approved'],
-      ['business:rejected',    'business_rejected'],
-      ['business:resubmitted', 'business_resubmitted'],
+      ['business:created',          'business_created'],
+      ['business:approved',         'business_approved'],
+      ['business:rejected',         'business_rejected'],
+      ['business:resubmitted',      'business_resubmitted'],
+      ['certification:approved',    'certification_approved'],
+      ['certification:rejected',    'certification_rejected'],
     ]) {
       socket.on(event, (data) => {
         const alert = {

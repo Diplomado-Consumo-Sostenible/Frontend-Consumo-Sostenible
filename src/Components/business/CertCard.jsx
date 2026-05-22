@@ -59,15 +59,19 @@ export default function CertCard({ cert, onDelete, onEdit }) {
         <p className="text-xs text-muted">{cert.issuing_entity}</p>
 
         <div className="flex items-center justify-between mt-auto pt-2">
-          <a
-            href={cert.verification_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-xs text-primary-mid hover:text-primary-dark transition-colors"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            Verificar
-          </a>
+          {cert.verification_url ? (
+            <a
+              href={cert.verification_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-primary-mid hover:text-primary-dark transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Verificar
+            </a>
+          ) : (
+            <span className="text-xs text-muted/40">Sin URL</span>
+          )}
           <div className="flex items-center gap-2">
             {onEdit && cert.status === 'Rejected' && (
               <button

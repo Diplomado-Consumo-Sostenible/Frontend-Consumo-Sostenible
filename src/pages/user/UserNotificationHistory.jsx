@@ -80,7 +80,7 @@ function BusinessAvatar({ logo, name, size = 'md' }) {
   );
 }
 
-function NotificationCard({ notification, onDelete, deleting }) {
+function NotificationCard({ notification, onDelete, onRead, deleting }) {
   const cfg     = ALERT_CONFIG[notification.alertType] ?? FALLBACK_CONFIG;
   const date    = new Date(notification.createdAt ?? notification.timestamp);
   const dateStr = date.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -97,11 +97,18 @@ function NotificationCard({ notification, onDelete, deleting }) {
 
   const isNewProduct = notification.alertType === 'new_product';
 
+  const handleCardClick = () => {
+    if (!notification.isRead) onRead?.(notification.id);
+  };
+
   const content = (
     <div
-      className={`flex items-start gap-4 p-4 rounded-2xl border ${cfg.border} ${
-        notification.isRead ? 'bg-card-bg' : `${cfg.bg}/40`
-      } transition-colors`}
+      onClick={handleCardClick}
+      className={`flex items-start gap-4 p-4 rounded-2xl border transition-colors cursor-pointer ${
+        notification.isRead
+          ? 'bg-slate-100 border-slate-200'
+          : `bg-white ${cfg.border}`
+      }`}
     >
       {/* Logo del negocio (o icono genérico) */}
       {isNewProduct ? (
@@ -240,7 +247,7 @@ export default function UserNotificationHistory() {
   const [error, setError]                 = useState(null);
   const [deletingId, setDeletingId]       = useState(null);
 
-  const { deleteAlert } = useNotificationsContext() ?? {};
+  const { deleteAlert, markRead: markReadCtx } = useNotificationsContext() ?? {};
 
   const totalPages    = total > 0 ? Math.ceil(total / PAGE_SIZE) : 1;
   const showPaginator = total > PAGE_SIZE;
@@ -260,6 +267,11 @@ export default function UserNotificationHistory() {
   };
 
   useEffect(() => { load(page); }, [page]);
+
+  const handleRead = async (id) => {
+    if (markReadCtx) await markReadCtx(id);
+    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, isRead: true } : n));
+  };
 
   const handleDelete = async (id) => {
     setDeletingId(id);
@@ -289,7 +301,7 @@ export default function UserNotificationHistory() {
           <Bell className="w-4 h-4 text-primary-dark" />
         </div>
         <div>
-          <h1 className="text-xl font-serif text-heading">Mis Notificaciones</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif text-heading">Mis Notificaciones</h1>
           <p className="text-sm text-muted">Alertas sobre los negocios que sigues.</p>
         </div>
       </div>
@@ -313,14 +325,43 @@ export default function UserNotificationHistory() {
         </div>
       ) : (
         <div className="space-y-3">
-          {notifications.map((n) => (
-            <NotificationCard
-              key={n.id}
-              notification={n}
-              onDelete={handleDelete}
-              deleting={deletingId === n.id}
-            />
-          ))}
+          {/* Sección: No leídas */}
+          {notifications.some((n) => !n.isRead) && (
+            <>
+              <p className="text-[10px] font-semibold text-muted uppercase tracking-wide px-1">
+                No leídas · {notifications.filter((n) => !n.isRead).length}
+              </p>
+              {notifications.filter((n) => !n.isRead).map((n) => (
+                <NotificationCard
+                  key={n.id}
+                  notification={n}
+                  onDelete={handleDelete}
+                  onRead={handleRead}
+                  deleting={deletingId === n.id}
+                />
+              ))}
+            </>
+          )}
+
+          {/* Sección: Leídas */}
+          {notifications.some((n) => n.isRead) && (
+            <>
+              <p className={`text-[10px] font-semibold text-muted uppercase tracking-wide px-1 ${
+                notifications.some((n) => !n.isRead) ? 'pt-2 border-t border-edge/40' : ''
+              }`}>
+                Leídas · {notifications.filter((n) => n.isRead).length}
+              </p>
+              {notifications.filter((n) => n.isRead).map((n) => (
+                <NotificationCard
+                  key={n.id}
+                  notification={n}
+                  onDelete={handleDelete}
+                  onRead={handleRead}
+                  deleting={deletingId === n.id}
+                />
+              ))}
+            </>
+          )}
 
           {showPaginator && (
             <Pagination

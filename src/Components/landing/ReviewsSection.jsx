@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import useBusinessReviews from '../../hooks/useBusinessReviews';
 import { useToastContext } from '../../context/ToastContext';
 import ReportModal from '../reviews/ReportModal';
+import SuspiciousReviewModal from '../reviews/SuspiciousReviewModal';
 
 const MAX_COMMENT_PREVIEW = 160;
 
@@ -325,7 +326,7 @@ function ReviewsSummary({ reviews, total, onFilterChange, activeFilter }) {
 }
 
 /* ── Main ────────────────────────────────────────────────────── */
-export default function ReviewsSection({ businessId }) {
+export default function ReviewsSection({ businessId, ownerUserId }) {
   const { success, error: toastError } = useToastContext();
   const [ratingFilter, setRatingFilter] = useState(null);
 
@@ -335,9 +336,10 @@ export default function ReviewsSection({ businessId }) {
     submitReview, report, loadMore, hasMore, retry,
   } = useBusinessReviews(businessId, { ratingFilter });
 
-  const [editing,  setEditing]  = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [reported, setReported] = useState(new Set());
+  const [editing,         setEditing]         = useState(false);
+  const [showForm,        setShowForm]        = useState(false);
+  const [reported,        setReported]        = useState(new Set());
+  const [suspiciousError, setSuspiciousError] = useState(null);
 
   const handleSubmit = async (payload) => {
     try {
@@ -346,7 +348,13 @@ export default function ReviewsSection({ businessId }) {
       setEditing(false);
       setShowForm(false);
     } catch (err) {
-      toastError(err?.response?.data?.message ?? 'No se pudo guardar la reseña.');
+      const data = err?.response?.data;
+      if (data?.code === 'SUSPICIOUS_REVIEW') {
+        // Mostrar modal bloqueante; el formulario queda intacto para corrección
+        setSuspiciousError({ aiStars: data.aiStars ?? null });
+      } else {
+        toastError(data?.message ?? 'No se pudo guardar la reseña.');
+      }
     }
   };
 
@@ -361,9 +369,17 @@ export default function ReviewsSection({ businessId }) {
   };
 
   const total = meta?.totalItems ?? reviews.length;
+  const isBusinessOwner = currentUserId !== null && ownerUserId !== null &&
+    Number(currentUserId) === Number(ownerUserId);
 
   return (
     <section className="space-y-5 max-w-3xl">
+      {suspiciousError && (
+        <SuspiciousReviewModal
+          aiStars={suspiciousError.aiStars}
+          onDismiss={() => setSuspiciousError(null)}
+        />
+      )}
       {/* Título */}
       <div className="flex items-center gap-2 border-b border-edge pb-3">
         <MessageSquare className="w-5 h-5 text-muted" />
@@ -387,33 +403,37 @@ export default function ReviewsSection({ businessId }) {
         />
       )}
 
-      {/* CTA reseña nueva */}
-      {isAuthenticated && myReview === null && !showForm && (
-        <button onClick={() => setShowForm(true)}
-          className="py-2.5 px-4 rounded-xl border border-dashed border-edge text-sm text-muted hover:border-primary-mid hover:text-primary-dark transition-colors">
-          + Escribir reseña
-        </button>
-      )}
-      {isAuthenticated && myReview === null && showForm && (
-        <ReviewForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} isEdit={false} />
-      )}
-      {!isAuthenticated && (
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary-softest/30 border border-primary-softest">
-          <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
-            <Star className="w-5 h-5 text-primary-dark" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-heading">¿Visitaste este negocio?</p>
-            <p className="text-xs text-muted mt-0.5">Inicia sesión para compartir tu experiencia con la comunidad</p>
-          </div>
-          <Link
-            to="/login"
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-dark text-white text-xs font-semibold hover:bg-primary-darkest transition-colors whitespace-nowrap"
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            Iniciar sesión
-          </Link>
-        </div>
+      {/* CTA reseña nueva — oculto para el owner de este negocio */}
+      {!isBusinessOwner && (
+        <>
+          {isAuthenticated && myReview === null && !showForm && (
+            <button onClick={() => setShowForm(true)}
+              className="py-2.5 px-4 rounded-xl border border-dashed border-edge text-sm text-muted hover:border-primary-mid hover:text-primary-dark transition-colors">
+              + Escribir reseña
+            </button>
+          )}
+          {isAuthenticated && myReview === null && showForm && (
+            <ReviewForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} isEdit={false} />
+          )}
+          {!isAuthenticated && (
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary-softest/30 border border-primary-softest">
+              <div className="w-10 h-10 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
+                <Star className="w-5 h-5 text-primary-dark" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-heading">¿Visitaste este negocio?</p>
+                <p className="text-xs text-muted mt-0.5">Inicia sesión para compartir tu experiencia con la comunidad</p>
+              </div>
+              <Link
+                to="/login"
+                className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-dark text-white text-xs font-semibold hover:bg-primary-darkest transition-colors whitespace-nowrap"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                Iniciar sesión
+              </Link>
+            </div>
+          )}
+        </>
       )}
 
       {/* Estados */}

@@ -18,6 +18,7 @@ import BusinessCertificationsCard from '../../Components/business/profile/Busine
 import BusinessStatsBar from '../../Components/business/profile/BusinessStatsBar';
 import BusinessMetadata from '../../Components/business/profile/BusinessMetadata';
 import PublicProductCard from '../../Components/landing/PublicProductCard';
+import ProductsSlider from '../../Components/landing/ProductsSlider';
 import PublicCertRow from '../../Components/landing/PublicCertRow';
 import useBusinessProfile from '../../hooks/useBusinessProfile';
 import { usePublicProducts } from '../../hooks/usePublicBusinessContent';
@@ -829,40 +830,23 @@ function ProductPreviewModal({ product, onClose }) {
   );
 }
 
-function ProductsCarousel({ businessId }) {
-  const { products, loading, error } = usePublicProducts(businessId);
+/* Wrapper local que gestiona el modal de detalle del producto */
+function ProductsSection({ businessId, onGoToProducts }) {
   const [viewingProduct, setViewingProduct] = useState(null);
-  const scrollRef = useRef(null);
-
-  const scroll = (dir) => scrollRef.current?.scrollBy({ left: dir * 280, behavior: 'smooth' });
-
-  if (loading) return <SectionLoader />;
-  if (error || !products.length) return (
-    <Empty icon={Package} message="Aún no tienes productos publicados." />
-  );
-
   return (
     <>
-      <div className="relative group">
-        {products.length > 2 && (
-          <>
-            <button onClick={() => scroll(-1)} aria-label="Anterior" className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-8 h-8 rounded-full bg-card-bg border border-edge shadow-warm-sm flex items-center justify-center hover:border-muted transition-colors opacity-0 group-hover:opacity-100">
-              <ChevronLeft className="w-4 h-4 text-body" />
-            </button>
-            <button onClick={() => scroll(1)} aria-label="Siguiente" className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-8 h-8 rounded-full bg-card-bg border border-edge shadow-warm-sm flex items-center justify-center hover:border-muted transition-colors opacity-0 group-hover:opacity-100">
-              <ChevronRight className="w-4 h-4 text-body" />
-            </button>
-          </>
-        )}
-        <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {products.map((p, i) => (
-            <button key={p.id_product ?? i} type="button" onClick={() => setViewingProduct(p)} className="shrink-0 w-52 text-left focus:outline-none">
-              <PublicProductCard product={p} />
-            </button>
-          ))}
-        </div>
-      </div>
-      {viewingProduct && <ProductPreviewModal product={viewingProduct} onClose={() => setViewingProduct(null)} />}
+      <ProductsSlider
+        businessId={businessId}
+        onView={setViewingProduct}
+        onSeeAll={onGoToProducts}
+        emptyMessage="Aún no tienes productos publicados."
+      />
+      {viewingProduct && (
+        <ProductPreviewModal
+          product={viewingProduct}
+          onClose={() => setViewingProduct(null)}
+        />
+      )}
     </>
   );
 }
@@ -907,7 +891,7 @@ function TagsForm({ selectedIds, onChange, allTags }) {
 }
 
 /* ── Tab: Información ─────────────────────────────────────── */
-function TabInfo({ business, save, basicSave, canManage, allTags }) {
+function TabInfo({ business, save, basicSave, canManage, allTags, onGoToProducts }) {
   return (
     <div className="space-y-10">
 
@@ -1009,7 +993,7 @@ function TabInfo({ business, save, basicSave, canManage, allTags }) {
             </span>
           )}
         </div>
-        <ProductsCarousel businessId={business.id_business} />
+        <ProductsSection businessId={business.id_business} onGoToProducts={onGoToProducts} />
       </div>
 
       {/* Etiquetas sostenibles */}
@@ -1322,7 +1306,7 @@ export default function BusinessProfile() {
   const [submitting,     setSubmitting]     = useState(false);
 
   useEffect(() => {
-    getMyCertifications().then((d) => setCertifications(Array.isArray(d) ? d : [])).catch(() => {});
+    getMyCertifications().then((d) => setCertifications(Array.isArray(d?.data) ? d.data : [])).catch(() => {});
     getTiposNegocio().then((d) => setCategories(Array.isArray(d) ? d : [])).catch(() => {});
     getTags().then((d) => setAllTags(Array.isArray(d) ? d : [])).catch(() => {});
   }, []);
@@ -1469,7 +1453,7 @@ export default function BusinessProfile() {
       {/* Contenido principal + sidebar */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-10">
         <div>
-          {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} allTags={allTags} />}
+          {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} allTags={allTags} onGoToProducts={() => setActiveTab('prods')} />}
           {activeTab === 'prods' && <TabProducts businessId={id} canManage={canManage} />}
           {activeTab === 'certs' && <TabCertifications certifications={certifications} />}
         </div>
