@@ -5,10 +5,11 @@ import {
   UserCheck, UserPlus, X,
 } from 'lucide-react';
 import SingleLocationMap from '../Components/map/SingleLocationMap';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PublicCertRow from '../Components/landing/PublicCertRow';
 import PublicProductCard from '../Components/landing/PublicProductCard';
+import ProductsSlider from '../Components/landing/ProductsSlider';
 import ReviewsSection from '../Components/landing/ReviewsSection';
 import AiReviewSummary from '../Components/landing/AiReviewSummary';
 import { ContactDisplay } from '../Components/business/profile/BusinessContactCard';
@@ -207,7 +208,7 @@ function BusinessProfile({ business }) {
               <Leaf className="w-3 h-3" />{business.category.category}
             </span>
           )}
-          {business.certifications?.length > 0 && (
+          {business.certifications?.some(c => c.status === 'Active') && (
             <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-ok-bg text-ok-text border border-ok-text/20">
               <ShieldCheck className="w-3 h-3" />Certificado
             </span>
@@ -441,63 +442,8 @@ function PublicProductDetailModal({ product, onClose }) {
   );
 }
 
-/* ── Products carousel ────────────────────────────────────── */
-function ProductsCarousel({ businessId, onView }) {
-  const { products, loading, error, retry } = usePublicProducts(businessId);
-  const scrollRef = useRef(null);
-
-  const scroll = (dir) => {
-    scrollRef.current?.scrollBy({ left: dir * 280, behavior: 'smooth' });
-  };
-
-  if (loading) return <SectionLoader />;
-  if (error)   return <PageError message={error} onRetry={retry} />;
-  if (!products.length) return (
-    <Empty icon={Package} message="Este negocio aún no tiene productos publicados." />
-  );
-
-  return (
-    <div className="relative group">
-      {products.length > 2 && (
-        <>
-          <button
-            onClick={() => scroll(-1)}
-            aria-label="Anterior"
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-8 h-8 rounded-full bg-card-bg border border-edge shadow-warm-sm flex items-center justify-center hover:border-muted transition-colors opacity-0 group-hover:opacity-100"
-          >
-            <ChevronLeft className="w-4 h-4 text-body" />
-          </button>
-          <button
-            onClick={() => scroll(1)}
-            aria-label="Siguiente"
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-8 h-8 rounded-full bg-card-bg border border-edge shadow-warm-sm flex items-center justify-center hover:border-muted transition-colors opacity-0 group-hover:opacity-100"
-          >
-            <ChevronRight className="w-4 h-4 text-body" />
-          </button>
-        </>
-      )}
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-1"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {products.map((p, i) => (
-          <button
-            key={p.id_product ?? i}
-            type="button"
-            onClick={() => onView?.(p)}
-            className="shrink-0 w-52 text-left focus:outline-none"
-          >
-            <PublicProductCard product={p} />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ── Tab content components ───────────────────────────────── */
-function TabInfo({ business, businessId, onViewProduct }) {
+function TabInfo({ business, businessId, ownerUserId, onViewProduct, onGoToProducts }) {
   const reviewsCount = business.total_reviews ?? 0;
 
   return (
@@ -534,7 +480,7 @@ function TabInfo({ business, businessId, onViewProduct }) {
           <h2 className="font-serif text-2xl text-heading">Productos</h2>
           <p className="text-sm text-muted mt-0.5">Lo más recomendado del negocio</p>
         </div>
-        <ProductsCarousel businessId={businessId} onView={onViewProduct} />
+        <ProductsSlider businessId={businessId} onView={onViewProduct} onSeeAll={onGoToProducts} />
       </div>
 
       {/* Tags */}
@@ -571,7 +517,7 @@ function TabInfo({ business, businessId, onViewProduct }) {
               : 'Sé el primero en dejar una reseña'}
           </p>
         </div>
-        <ReviewsSection businessId={businessId} />
+        <ReviewsSection businessId={businessId} ownerUserId={ownerUserId} />
       </div>
     </div>
   );
@@ -788,10 +734,8 @@ export default function NegocioDetalle() {
   const [viewingProduct, setViewingProduct] = useState(null);
 
   const fromState = location.state?.business;
-  const { business: fetched, loading, error, retry } = usePublicBusinessById(
-    fromState ? null : id,
-  );
-  const business = fromState ?? fetched;
+  const { business: fetched, loading, error, retry } = usePublicBusinessById(id);
+  const business = fetched ?? fromState;
 
   useEffect(() => {
     if (!location.state?.scrollToReviews) return;
@@ -812,7 +756,7 @@ export default function NegocioDetalle() {
   if (!business) return null;
 
   const businessId = Number(id);
-  const certsCount = business.certifications?.length ?? 0;
+  const certsCount = business.certifications?.filter(c => c.status === 'Active').length ?? 0;
 
   const tabCount = (tab) => {
     if (tab.id === 'certs' && certsCount > 0) return certsCount;
@@ -880,7 +824,7 @@ export default function NegocioDetalle() {
 
         {/* Main */}
         <div>
-          {activeTab === 'info'  && <TabInfo business={business} businessId={businessId} onViewProduct={setViewingProduct} />}
+          {activeTab === 'info'  && <TabInfo business={business} businessId={businessId} ownerUserId={business.owner_id ?? null} onViewProduct={setViewingProduct} onGoToProducts={() => setActiveTab('prods')} />}
           {activeTab === 'prods' && <TabProducts businessId={businessId} onViewProduct={setViewingProduct} />}
           {activeTab === 'certs' && <TabCertifications businessId={businessId} />}
         </div>
