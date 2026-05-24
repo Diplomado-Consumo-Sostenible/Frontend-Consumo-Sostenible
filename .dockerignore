@@ -1,0 +1,17 @@
+
+node_modules
+
+dist
+dist-ssr
+
+.git
+.github
+
+.env
+.env.*.local
+
+*.log
+*.zip
+.DS_Store
+.claude
+README.md
