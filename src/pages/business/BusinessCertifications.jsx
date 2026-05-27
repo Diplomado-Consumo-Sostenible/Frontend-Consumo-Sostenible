@@ -408,7 +408,7 @@ export default function BusinessCertifications() {
               <Award className="w-5 h-5 text-primary-dark" />
             </div>
             <div>
-              <h1 className="text-xl font-serif text-heading">Certificaciones</h1>
+              <h1 className="text-3xl font-serif text-heading">Certificaciones</h1>
               <p className="text-sm text-muted mt-0.5">
                 {meta.totalItems} certificación{meta.totalItems !== 1 ? 'es' : ''} · cada envío pasa por revisión
               </p>

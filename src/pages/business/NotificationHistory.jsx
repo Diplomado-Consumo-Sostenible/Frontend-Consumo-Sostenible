@@ -113,7 +113,7 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
       onClick={handleCardClick}
       className={`flex items-start gap-4 p-4 rounded-2xl border transition-colors cursor-pointer ${
         notification.isRead
-          ? 'bg-slate-100 border-slate-200'
+          ? 'bg-primary-softest/30 border-primary-light/30'
           : `bg-white ${cfg.border}`
       }`}
     >
@@ -123,32 +123,32 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-sm font-bold ${cfg.color}`}>{cfg.label}</span>
+          <span className="text-sm font-bold text-heading">{cfg.label}</span>
           {!notification.isRead && (
             <span className="inline-block w-2 h-2 rounded-full bg-primary-dark" />
           )}
         </div>
 
         {notification.alertType === 'critical_rating' && payload.currentRating != null && (
-          <p className="text-sm text-red-500 mt-1">
+          <p className="text-sm text-body mt-1">
             Calificación actual: <strong>{Number(payload.currentRating).toFixed(2)} ★</strong>
             {' '}— cayó por debajo de 3.5
           </p>
         )}
         {notification.alertType === 'accumulated_negatives' && payload.totalNegatives != null && (
-          <p className="text-sm text-orange-600 mt-1">
+          <p className="text-sm text-body mt-1">
             <strong>{payload.totalNegatives}</strong> reseñas negativas en los últimos 30 días
           </p>
         )}
         {notification.alertType === 'weekly_summary' && payload.stats && (
-          <p className="text-sm text-muted mt-1">
+          <p className="text-sm text-body mt-1">
             {payload.stats.total ?? 0} reseñas · {payload.stats.positive ?? 0} positivas ·{' '}
             {payload.stats.negative ?? 0} negativas
           </p>
         )}
 
         {notification.alertType === 'business_created' && (
-          <p className="text-sm text-indigo-700 mt-1">
+          <p className="text-sm text-body mt-1">
             Tu negocio <strong>{payload.businessName}</strong> fue registrado y está pendiente de
             revisión. Nuestro equipo evaluará si cumple con los requisitos de la plataforma y te
             notificaremos la decisión.
@@ -156,7 +156,7 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
         )}
 
         {notification.alertType === 'business_approved' && (
-          <p className="text-sm text-emerald-700 mt-1">
+          <p className="text-sm text-body mt-1">
             ¡Tu negocio <strong>{payload.businessName}</strong> ha sido aprobado! Ya puedes
             configurar tu perfil, agregar productos y comenzar a recibir reseñas de tus clientes.
           </p>
@@ -164,36 +164,36 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
 
         {notification.alertType === 'business_rejected' && (
           <div className="mt-1 space-y-0.5">
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-body">
               Tu negocio <strong>{payload.businessName}</strong> fue rechazado.
             </p>
             {payload.rejectionReason && (
-              <p className="text-sm text-red-600">
+              <p className="text-sm text-body">
                 <span className="font-semibold">Motivo:</span> {payload.rejectionReason}
               </p>
             )}
-            <p className="text-xs text-muted">
+            <p className="text-xs text-gray-600">
               Puedes corregir la información de tu negocio y reenviar la solicitud para una nueva revisión.
             </p>
           </div>
         )}
 
         {notification.alertType === 'business_resubmitted' && (
-          <p className="text-sm text-blue-700 mt-1">
+          <p className="text-sm text-body mt-1">
             Tu solicitud para <strong>{payload.businessName}</strong> fue reenviada a revisión.
             Te notificaremos cuando nuestro equipo tome una decisión.
           </p>
         )}
 
         {notification.alertType === 'certification_approved' && (
-          <p className="text-sm text-emerald-700 mt-1">
+          <p className="text-sm text-body mt-1">
             Tu certificación <strong>{payload.certificationName}</strong>
             {payload.issuingEntity ? ` (${payload.issuingEntity})` : ''} ha sido <strong>aprobada</strong> y ya es visible en tu perfil.
           </p>
         )}
 
         {notification.alertType === 'certification_rejected' && (
-          <p className="text-sm text-red-700 mt-1">
+          <p className="text-sm text-body mt-1">
             Tu certificación <strong>{payload.certificationName}</strong>
             {payload.issuingEntity ? ` (${payload.issuingEntity})` : ''} fue <strong>rechazada</strong>. Puedes editarla y reenviarla para revisión.
           </p>

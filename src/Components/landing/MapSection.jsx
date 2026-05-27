@@ -47,23 +47,23 @@ function PodiumCard({ business, rank, onSelect }) {
         </div>
       )}
 
-      <p className="text-sm font-semibold text-heading line-clamp-1">{business.businessName}</p>
+      <p className="text-base font-semibold text-heading line-clamp-1">{business.businessName}</p>
 
       {categoryLabel && (
-        <span className="inline-block mt-1 px-2 py-0.5 rounded-full border border-edge bg-primary-softest text-primary-dark text-[10px] font-medium">
+        <span className="inline-block mt-1 px-2.5 py-1 rounded-full border border-edge bg-primary-softest text-primary-dark text-sm font-medium">
           {categoryLabel}
         </span>
       )}
 
       <div className="flex items-center justify-between mt-2.5 gap-2">
-        <span className="flex items-center gap-1 text-xs font-semibold text-terracotta">
-          <Heart className="w-3.5 h-3.5 fill-terracotta" />
+        <span className="flex items-center gap-1 text-base font-semibold text-terracotta">
+          <Heart className="w-4 h-4 fill-terracotta" />
           {follows.toLocaleString('es-ES')}
-          <span className="text-muted font-normal">seguidores</span>
+          <span className="text-gray-600 font-normal">seguidores</span>
         </span>
         {rating > 0 && (
-          <span className="flex items-center gap-0.5 text-xs text-muted shrink-0">
-            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+          <span className="flex items-center gap-1 text-base text-gray-600 shrink-0">
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             {rating.toFixed(1)}
           </span>
         )}
@@ -86,7 +86,7 @@ export default function MapSection({ communityFavorites = [], onViewDetail }) {
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary-softest">
               <MapPin className="w-5 h-5 text-primary-dark" />
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-heading tracking-tight">Explora el mapa</h2>
+            <h2 className="font-serif text-4xl sm:text-5xl text-heading tracking-tight">Explora el mapa</h2>
           </div>
           <button
             onClick={() => setExpanded((v) => !v)}
@@ -121,8 +121,8 @@ export default function MapSection({ communityFavorites = [], onViewDetail }) {
                 <Users className="w-5 h-5 text-terracotta" />
               </div>
               <div>
-                <h3 className="font-serif text-2xl sm:text-3xl text-heading tracking-tight">Favoritos de la comunidad</h3>
-                <p className="text-xs text-muted mt-0.5">Los negocios con más seguidores</p>
+                <h3 className="font-serif text-3xl sm:text-4xl text-heading tracking-tight">Favoritos de la comunidad</h3>
+                <p className="text-sm text-muted mt-0.5">Los negocios con más seguidores</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4 items-end">

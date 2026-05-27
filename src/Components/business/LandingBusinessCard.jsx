@@ -1,4 +1,4 @@
-import { ArrowRight, Award, Building2, Clock, Heart, MapPin, ShieldCheck, Star, Store } from 'lucide-react';
+import { ArrowRight, Award, Building2, Heart, MapPin, ShieldCheck, Star, Store } from 'lucide-react';
 
 const tagName = (t) => t.name ?? t.tagName ?? t.tag ?? '';
 
@@ -103,41 +103,26 @@ function FeaturedCard({ business, isFavorite, onToggleFavorite, onViewDetail }) 
 
       <div className="flex flex-col gap-2 p-4 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <h4 className="text-sm font-semibold text-heading leading-tight line-clamp-1 flex-1">
+          <h4 className="text-base font-semibold text-heading leading-tight line-clamp-1 flex-1">
             {business.businessName}
           </h4>
           {rating > 0 && (
             <div className="flex items-center gap-1 shrink-0">
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span className="text-xs font-medium text-heading">{rating.toFixed(1)}</span>
+              <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+              <span className="text-sm font-semibold text-heading">{rating.toFixed(1)}</span>
             </div>
           )}
         </div>
 
-        <p className="text-xs text-muted leading-snug line-clamp-2 min-h-[2.5rem]">
+        <p className="text-sm text-gray-600 leading-snug line-clamp-2 min-h-[2.5rem]">
           {business.description ?? ''}
         </p>
 
-        <div className="flex items-center gap-3 text-xs text-muted flex-wrap min-h-[1.25rem]">
-          {business.address && (
-            <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3 shrink-0" />
-              <span className="truncate max-w-[110px]">{business.address}</span>
-            </span>
-          )}
-          {business.schedule && (
-            <span className="flex items-center gap-1 text-ok-text">
-              <Clock className="w-3 h-3 shrink-0" />
-              <span>Abierto</span>
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1 flex-wrap min-h-[1.375rem]">
+        <div className="flex items-center gap-1.5 flex-wrap min-h-[1.375rem]">
           {tags.map((t) => (
             <span
               key={t.id_tags ?? tagName(t)}
-              className="px-2 py-0.5 bg-primary-softest text-primary-dark text-[10px] rounded-full border border-edge"
+              className="px-2.5 py-1 bg-primary-softest text-gray-700 text-xs font-medium rounded-full border border-edge"
             >
               {tagName(t)}
             </span>
@@ -147,7 +132,7 @@ function FeaturedCard({ business, isFavorite, onToggleFavorite, onViewDetail }) 
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onViewDetail?.(business); }}
-          className="mt-auto w-full py-2 text-xs font-semibold rounded-xl bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
+          className="mt-auto w-full py-2.5 text-sm font-semibold rounded-xl bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
         >
           Ver perfil completo
         </button>

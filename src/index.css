@@ -35,13 +35,22 @@
   /* ── Tipografía ──────────────────────────────────────── */
   --color-heading:        #1A2D1F;
   --color-body:           #2E4035;
-  --color-muted:          #7A9A82;
+  --color-muted:          #4B5563;
   --color-on-dark:        #A8C9B0;
   --color-on-dark-active: #F0EBE0;
 
   /* ── Fuentes ─────────────────────────────────────────── */
   --font-sans:  'Geist', system-ui, sans-serif;
   --font-serif: 'Instrument Serif', Georgia, serif;
+
+  /* ── Escala tipográfica ──────────────────────────────── */
+  /* text-3xl (30px) y mayores sin cambios → preserva h1   */
+  --text-xs:   0.8125rem;   /* 13px  ← era 12px */
+  --text-sm:   0.9375rem;   /* 15px  ← era 14px */
+  --text-base: 1.0625rem;   /* 17px  ← era 16px */
+  --text-lg:   1.1875rem;   /* 19px  ← era 18px */
+  --text-xl:   1.375rem;    /* 22px  ← era 20px */
+  --text-2xl:  1.625rem;    /* 26px  ← era 24px */
 
   /* ── Sombras cálidas ─────────────────────────────────── */
   --shadow-warm-sm: 0 1px 4px 0 rgb(31 61 43 / 0.06);

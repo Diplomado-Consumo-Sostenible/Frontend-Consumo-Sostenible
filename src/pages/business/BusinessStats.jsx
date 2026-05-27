@@ -12,12 +12,16 @@ import OptimizationCard from '../../Components/business/stats/OptimizationCard';
 import AiInsightsCard from '../../Components/business/stats/AiInsightsCard';
 
 const PERIODS = [
-  { label: '7 días', value: '7d' },
-  { label: '30 días', value: '30d' },
-  { label: 'Año', value: 'year' },
+  { label: '7 días',  value: '7d'   },
+  { label: '30 días', value: '30d'  },
+  { label: 'Año',     value: 'year' },
 ];
 
-const PERIOD_LABELS = { '7d': 'Últimos 7 días', '30d': 'Últimos 30 días', year: 'Último año' };
+const PERIOD_LABELS = {
+  '7d':  'Últimos 7 días',
+  '30d': 'Últimos 30 días',
+  year:  'Último año',
+};
 
 function LoadingState() {
   return (
@@ -76,7 +80,8 @@ function ChartSection({ title, subtitle, data, color, periodLabel, loading }) {
 
 export default function BusinessStats() {
   const [period, setPeriod] = useState('30d');
-  const { isRejected, isPending, rejectionReason, status, loading: statusLoading } = useOwnerBusinessStatus();
+  const { isRejected, isPending, rejectionReason, status, loading: statusLoading } =
+    useOwnerBusinessStatus();
 
   const skipStats = statusLoading || isRejected || isPending;
 
@@ -84,29 +89,29 @@ export default function BusinessStats() {
     useBusinessStats(period, { skip: skipStats });
 
   if (statusLoading || loading) return <LoadingState />;
-  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
-  if (error) return <ErrorState onRetry={retry} />;
-  if (!business) return null;
+  if (isRejected || isPending)  return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
+  if (error)                    return <ErrorState onRetry={retry} />;
+  if (!business)                return null;
 
   const hasChartError = Boolean(chartError);
 
   const metrics = [
     {
-      icon: Users,
+      icon:  Users,
       label: 'Seguidores Totales',
       value: business.followers_count != null
         ? Number(business.followers_count).toLocaleString('es-ES')
         : '—',
     },
     {
-      icon: Star,
+      icon:  Star,
       label: 'Calificación Promedio',
       value: business.average_rating
         ? `${Number(business.average_rating).toFixed(1)} / 5`
         : '—',
     },
     {
-      icon: FileText,
+      icon:  FileText,
       label: 'Total de Reseñas',
       value: business.total_reviews != null
         ? Number(business.total_reviews).toLocaleString('es-ES')
@@ -115,108 +120,119 @@ export default function BusinessStats() {
   ];
 
   return (
-    <div className="pl-14 pr-4 py-6 flex gap-5 items-start w-full">
+    <div className="px-4 sm:px-6 lg:pl-14 lg:pr-6 py-6 w-full">
 
-      {/* Contenido principal */}
-      <div className="flex-1 min-w-0 space-y-5">
+      {/* ── Layout principal: columna en mobile, fila en xl ── */}
+      <div className="flex flex-col xl:flex-row gap-6 items-start">
 
-        {/* Encabezado + filtros de período */}
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-xl font-serif text-heading">Estadísticas de Negocio</h1>
-            <p className="text-sm text-muted mt-0.5">
-              Monitorea el crecimiento y compromiso de tu comunidad sostenible.
-            </p>
+        {/* ── Contenido principal ─────────────────────────── */}
+        <div className="flex-1 min-w-0 space-y-5 w-full">
+
+          {/* Encabezado + selector de período */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-serif text-heading">Estadísticas de Negocio</h1>
+              <p className="text-sm text-muted mt-0.5">
+                Monitorea el crecimiento y compromiso de tu comunidad sostenible.
+              </p>
+            </div>
+            <div className="flex gap-1 bg-primary-softest rounded-xl p-1 shrink-0 self-start">
+              {PERIODS.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => setPeriod(p.value)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                    period === p.value
+                      ? 'bg-primary-dark text-on-dark-active shadow-sm'
+                      : 'text-primary-dark hover:bg-primary-light'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex gap-1 bg-primary-softest rounded-xl p-1 shrink-0">
-            {PERIODS.map(p => (
-              <button
-                key={p.value}
-                onClick={() => setPeriod(p.value)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                  period === p.value
-                    ? 'bg-primary-dark text-on-dark-active shadow-sm'
-                    : 'text-primary-dark hover:bg-primary-light'
-                }`}
-              >
-                {p.label}
-              </button>
+
+          {/* Tarjetas de métricas */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {metrics.map((m) => (
+              <StatsMetricCard key={m.label} {...m} />
             ))}
           </div>
-        </div>
 
-        {/* Tarjetas de métricas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {metrics.map(m => (
-            <StatsMetricCard key={m.label} {...m} />
-          ))}
-        </div>
+          {/* Gráfica seguidores + lista — apilados en mobile, lado a lado en md+ */}
+          <div className="flex flex-col md:flex-row gap-4">
 
-        {/* Gráfica seguidores + lista de seguidores */}
-        <div className="flex gap-4">
-          {/* Gráfica */}
-          <div className="flex-1 min-w-0 bg-card-bg rounded-2xl border border-edge p-5">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <h2 className="text-base font-semibold text-heading">Nuevos seguidores</h2>
-                <p className="text-xs text-muted mt-0.5">Seguidores ganados en el período seleccionado</p>
+            {/* Gráfica */}
+            <div className="flex-1 min-w-0 bg-card-bg rounded-2xl border border-edge p-5">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-base font-semibold text-heading">Nuevos seguidores</h2>
+                  <p className="text-xs text-muted mt-0.5">
+                    Seguidores ganados en el período seleccionado
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-2xl font-bold text-heading leading-none">
+                    {chartLoading
+                      ? '—'
+                      : (() => {
+                          const t = periodTotal(chartData.followers);
+                          return t > 0 ? `+${t}` : t;
+                        })()}
+                  </p>
+                  <p className="text-xs text-muted mt-1 flex items-center gap-1 justify-end">
+                    <TrendingUp className="w-3 h-3" />
+                    {PERIOD_LABELS[period]}
+                  </p>
+                </div>
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-2xl font-bold text-heading leading-none">
-                  {chartLoading
-                    ? '—'
-                    : (() => { const t = periodTotal(chartData.followers); return t > 0 ? `+${t}` : t; })()
-                  }
-                </p>
-                <p className="text-xs text-muted mt-1 flex items-center gap-1 justify-end">
-                  <TrendingUp className="w-3 h-3" />
-                  {PERIOD_LABELS[period]}
-                </p>
-              </div>
+
+              {chartLoading ? (
+                <div className="h-40 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary-mid" />
+                </div>
+              ) : hasChartError ? (
+                <div className="h-40 flex items-center justify-center gap-2 text-sm text-red-400">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{chartError}</span>
+                </div>
+              ) : (
+                <StatsLineChart data={chartData.followers} yKey="valor" height={160} />
+              )}
             </div>
-            {chartLoading ? (
-              <div className="h-40 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-primary-mid" />
-              </div>
-            ) : hasChartError ? (
-              <div className="h-40 flex items-center justify-center gap-2 text-sm text-red-400">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{chartError}</span>
-              </div>
-            ) : (
-              <StatsLineChart data={chartData.followers} yKey="valor" height={160} />
-            )}
+
+            {/* Lista de últimos seguidores */}
+            <div className="w-full md:w-72 shrink-0 bg-card-bg rounded-2xl border border-edge p-5 flex flex-col overflow-hidden min-h-[200px]">
+              <RecentFollowersList followers={rawFollowers} />
+            </div>
           </div>
 
-          {/* Lista de últimos seguidores */}
-          <div className="w-72 shrink-0 bg-card-bg rounded-2xl border border-edge p-5 flex flex-col overflow-hidden">
-            <RecentFollowersList followers={rawFollowers} />
-          </div>
+          {/* Gráfica: Nuevas reseñas */}
+          <ChartSection
+            title="Nuevas reseñas"
+            subtitle="Reseñas recibidas en el período seleccionado"
+            data={chartData.reviews}
+            color="#4A9C6D"
+            periodLabel={PERIOD_LABELS[period]}
+            loading={chartLoading}
+          />
+
+          {/* Sección completa de reseñas */}
+          <ReviewsSection businessId={business.id_business} />
         </div>
 
-        {/* Gráfica: Nuevas reseñas */}
-        <ChartSection
-          title="Nuevas reseñas"
-          subtitle="Reseñas recibidas en el período seleccionado"
-          data={chartData.reviews}
-          color="#4A9C6D"
-          periodLabel={PERIOD_LABELS[period]}
-          loading={chartLoading}
-        />
+        {/* ── Panel lateral — debajo en mobile/xl, sticky en xl ── */}
+        <aside className="w-full xl:w-80 shrink-0 space-y-4 xl:sticky xl:top-6">
+          <RecentReviewsPanel
+            businessId={business.id_business}
+            total={business.total_reviews}
+          />
+          <AiInsightsCard businessId={business.id_business} />
+          <OptimizationCard />
+        </aside>
 
-        {/* Sección completa de reseñas */}
-        <ReviewsSection businessId={business.id_business} />
       </div>
-
-      {/* Panel lateral */}
-      <aside className="w-80 shrink-0 space-y-4 sticky top-6">
-        <RecentReviewsPanel
-          businessId={business.id_business}
-          total={business.total_reviews}
-        />
-        <AiInsightsCard businessId={business.id_business} />
-        <OptimizationCard />
-      </aside>
     </div>
   );
 }
