@@ -22,6 +22,7 @@ import UserNotificationHistory from './pages/user/UserNotificationHistory';
 import ForgotPassword from './pages/ForgotPassword';
 import GoogleCallback from './pages/GoogleCallback';
 import LandingPage from './pages/LandingPage';
+import SobreNosotros from './pages/SobreNosotros';
 import Login from './pages/Login';
 import NegocioDetalle from './pages/NegocioDetalle';
 import Profile from './pages/profile/Profile';
@@ -49,6 +50,7 @@ function App() {
         <Route path="/unauthorized"    element={<Unauthorized />} />
         <Route path="/auth/callback"      element={<GoogleCallback />} />
         <Route path="/register/business"  element={<RegisterBusiness />} />
+        <Route path="/sobre-nosotros"      element={<SobreNosotros />} />
 
         {/* ── Usuario (LandingNavbar + Footer) */}
         <Route
