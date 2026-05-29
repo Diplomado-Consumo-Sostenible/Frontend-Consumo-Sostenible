@@ -11,7 +11,6 @@ export default function useBusinessProfile() {
     setError(null);
     try {
       const data = await getMyBusinesses();
-      // El endpoint devuelve un array; el owner tiene un único negocio activo
       setBusiness(Array.isArray(data) ? (data[0] ?? null) : data);
     } catch (err) {
       setError(err?.message || 'Error al cargar el negocio');

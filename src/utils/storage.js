@@ -1,6 +1,3 @@
-
-// Evento global que se dispara cada vez que el token cambia (login / logout).
-// Cualquier listener puede suscribirse con window.addEventListener('app:auth-changed', fn).
 const AUTH_CHANGE_EVENT = 'app:auth-changed';
 
 export const saveToken = (token) => {

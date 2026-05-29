@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import usePublicReviewsTotal from '../hooks/usePublicReviewsTotal';
 import CTABanner from '../Components/landing/CTABanner';
 import FavoritesFAB from '../Components/landing/FavoritesFAB';
 import HeroSection from '../Components/landing/HeroSection';
@@ -12,9 +11,10 @@ import ResultsGrid from '../Components/landing/ResultsGrid';
 import TrendSection from '../Components/landing/TrendSection';
 import { useToastContext } from '../context/ToastContext';
 import { useFollows } from '../hooks/useFollows';
-import { getToken } from '../utils/storage';
 import usePublicBusinesses from '../hooks/usePublicBusinesses';
+import usePublicReviewsTotal from '../hooks/usePublicReviewsTotal';
 import useTopBusinesses from '../hooks/useTopBusinesses';
+import { getToken } from '../utils/storage';
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const PAGE_LOAD_TIME = Date.now();
@@ -24,7 +24,6 @@ export default function LandingPage() {
   const navigate  = useNavigate();
   const resultsSectionRef = useRef(null);
 
-  /* ── Scroll al hash cuando se navega desde otra ruta (éj. /#explorar) */
   useEffect(() => {
     if (!hash) return;
     const id = hash.replace('#', '');
@@ -32,7 +31,6 @@ export default function LandingPage() {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      // El DOM puede no estar listo aún; reintentamos una vez
       const t = setTimeout(() => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 300);
@@ -45,10 +43,12 @@ export default function LandingPage() {
     navigate(`/negocio/${business.id_business}`, { state: { business } });
   }, [navigate]);
 
-  const [activeCategoryId, setActiveCategoryId] = useState(null);
-  const [activeTagIds, setActiveTagIds]         = useState(() => new Set());
-  const [sortOrder, setSortOrder]               = useState('relevant');
-  const [searchText, setSearchText]             = useState('');
+  const [activeCategoryId,    setActiveCategoryId]    = useState(null);
+  const [activeTagIds,        setActiveTagIds]        = useState(() => new Set());
+  const [sortOrder,           setSortOrder]           = useState('relevant');
+  const [searchText,          setSearchText]          = useState('');
+  const [activeDepartamentoId, setActiveDepartamentoId] = useState(null);
+  const [activeMunicipioId,    setActiveMunicipioId]    = useState(null);
 
   const SORT_MAP = { relevant: 'relevant', rated: 'rated', reviews: 'reviews' };
 
@@ -65,7 +65,7 @@ export default function LandingPage() {
     limit: 50,
   });
 
-  const { followedIds, followedBusinesses, toggleFollow } = useFollows();
+  const { followedIds, toggleFollow } = useFollows();
   const { error: showError, auth: showAuthPrompt } = useToastContext();
 
   const heroStats = useMemo(() => {
@@ -89,7 +89,7 @@ export default function LandingPage() {
 
   const weeklyBusinesses = useMemo(() => topBusinesses.slice(0, 8), [topBusinesses]);
 
-  const hasFilters = Boolean(activeCategoryId || activeTagIds.size > 0 || searchText.trim());
+  const hasFilters = Boolean(activeCategoryId || activeTagIds.size > 0 || searchText.trim() || activeDepartamentoId || activeMunicipioId);
 
   const filteredAndSorted = useMemo(() => {
     let list = [...allBusinesses];
@@ -117,8 +117,18 @@ export default function LandingPage() {
       );
     }
 
+    if (activeMunicipioId) {
+      list = list.filter(
+        (b) => (b.municipio?.id_municipio ?? b.id_municipio) === activeMunicipioId,
+      );
+    } else if (activeDepartamentoId) {
+      list = list.filter(
+        (b) => b.municipio?.departamento?.id_departamento === activeDepartamentoId,
+      );
+    }
+
     return list;
-  }, [allBusinesses, activeCategoryId, activeTagIds, searchText]);
+  }, [allBusinesses, activeCategoryId, activeTagIds, searchText, activeDepartamentoId, activeMunicipioId]);
 
   const handleToggleFavorite = useCallback(
     (id) => {
@@ -143,6 +153,8 @@ export default function LandingPage() {
     setActiveCategoryId(null);
     setActiveTagIds(new Set());
     setSearchText('');
+    setActiveDepartamentoId(null);
+    setActiveMunicipioId(null);
   }, []);
 
   const handleHeroSearch = useCallback((query) => {
@@ -170,10 +182,14 @@ export default function LandingPage() {
           activeTagIds={activeTagIds}
           sortOrder={sortOrder}
           searchText={searchText}
+          activeDepartamentoId={activeDepartamentoId}
+          activeMunicipioId={activeMunicipioId}
           onCategoryChange={setActiveCategoryId}
           onTagToggle={handleTagToggle}
           onSortChange={setSortOrder}
           onSearchClear={() => setSearchText('')}
+          onDepartamentoChange={(id) => { setActiveDepartamentoId(id); setActiveMunicipioId(null); }}
+          onMunicipioChange={setActiveMunicipioId}
           onClear={handleClear}
         />
 

@@ -86,7 +86,7 @@ export default function MapSection({ communityFavorites = [], onViewDetail }) {
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary-softest">
               <MapPin className="w-5 h-5 text-primary-dark" />
             </div>
-            <h2 className="font-serif text-4xl sm:text-5xl text-heading tracking-tight">Explora el mapa</h2>
+            <h2 className="font-serif text-3xl sm:text-4xl text-heading tracking-tight">Explora el mapa</h2>
           </div>
           <button
             onClick={() => setExpanded((v) => !v)}
@@ -121,7 +121,7 @@ export default function MapSection({ communityFavorites = [], onViewDetail }) {
                 <Users className="w-5 h-5 text-terracotta" />
               </div>
               <div>
-                <h3 className="font-serif text-3xl sm:text-4xl text-heading tracking-tight">Favoritos de la comunidad</h3>
+                <h3 className="font-serif text-2xl sm:text-3xl text-heading tracking-tight">Favoritos de la comunidad</h3>
                 <p className="text-sm text-muted mt-0.5">Los negocios con más seguidores</p>
               </div>
             </div>

@@ -12,7 +12,7 @@ import PublicProductCard from '../Components/landing/PublicProductCard';
 import ProductsSlider from '../Components/landing/ProductsSlider';
 import ReviewsSection from '../Components/landing/ReviewsSection';
 import AiReviewSummary from '../Components/landing/AiReviewSummary';
-import { ContactDisplay } from '../Components/business/profile/BusinessContactCard';
+import { ContactDisplay, SocialCard } from '../Components/business/profile/BusinessContactCard';
 import { ScheduleDisplay } from '../Components/business/profile/BusinessScheduleCard';
 import usePublicBusinessById from '../hooks/usePublicBusinessById';
 import { usePublicCertifications, usePublicProducts } from '../hooks/usePublicBusinessContent';
@@ -20,7 +20,6 @@ import useFollow from '../hooks/useFollow';
 import useSimilarBusinesses from '../hooks/useSimilarBusinesses';
 import { useToastContext } from '../context/ToastContext';
 
-/* ── Helpers ──────────────────────────────────────────────── */
 const DAY_JS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 function calcOpenStatus(schedule) {
@@ -36,7 +35,6 @@ function calcOpenStatus(schedule) {
   return { open: isOpen, label: isOpen ? `Abierto · cierra ${parts[1]}` : `Cerrado · abre ${parts[0]}` };
 }
 
-/* ── Micro-components ─────────────────────────────────────── */
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -82,7 +80,6 @@ function Empty({ icon, message }) {
   );
 }
 
-/* ── Cover banner ─────────────────────────────────────────── */
 function BusinessCover({ business }) {
   const year    = business.createdAt ? new Date(business.createdAt).getFullYear() : null;
   const mapsUrl = business.address
@@ -96,7 +93,6 @@ function BusinessCover({ business }) {
       className="relative h-60 sm:h-80 rounded-3xl overflow-hidden"
       style={!bannerSrc ? { background: 'linear-gradient(160deg, var(--color-primary-mid) 0%, var(--color-primary-darkest) 100%)' } : undefined}
     >
-      {/* Imagen de banner */}
       {bannerSrc && (
         <img
           src={bannerSrc}
@@ -105,12 +101,13 @@ function BusinessCover({ business }) {
         />
       )}
 
-      {/* Overlays decorativos */}
       {bannerSrc ? (
-        <div className="absolute inset-0 bg-black/35" />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)' }}
+        />
       ) : (
         <>
-          {/* Radial texture */}
           <div
             className="absolute inset-0"
             style={{
@@ -119,7 +116,6 @@ function BusinessCover({ business }) {
                 'radial-gradient(circle at 78% 68%, rgba(91,138,102,0.25) 0%, transparent 52%)',
             }}
           />
-          {/* Dot grid */}
           <div
             className="absolute inset-0 opacity-[0.05]"
             style={{
@@ -130,12 +126,10 @@ function BusinessCover({ business }) {
         </>
       )}
 
-      {/* Decorative leaf */}
       <div className="absolute right-[-50px] top-[-50px] opacity-[0.07] pointer-events-none select-none text-white">
         <Leaf style={{ width: 380, height: 380 }} strokeWidth={0.4} />
       </div>
 
-      {/* Chips */}
       <div className="absolute top-4 right-4 flex gap-2">
         {mapsUrl && (
           <a
@@ -157,7 +151,6 @@ function BusinessCover({ business }) {
   );
 }
 
-/* ── Profile header ───────────────────────────────────────── */
 function BusinessProfile({ business }) {
   const { success, error: toastError } = useToastContext();
   const { isFollowing, toggle, loading, initializing, isAuthenticated } =
@@ -188,20 +181,29 @@ function BusinessProfile({ business }) {
     : null;
 
   return (
-    <div className="flex items-start gap-5 flex-wrap">
-      {/* Avatar — overlaps cover */}
-      <div
-        className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl border-[5px] border-app-bg bg-primary-softest flex items-center justify-center shrink-0 overflow-hidden"
-        style={{ marginTop: '-80px', boxShadow: '0 4px 20px 0 rgb(31 61 43 / 0.18)' }}
-      >
-        {business.logo
-          ? <img src={business.logo} alt={business.businessName} className="w-full h-full object-cover" />
-          : <Building2 className="w-12 h-12 sm:w-16 sm:h-16 text-muted" />}
+    <div
+      className="relative z-10 -mt-16 mx-4 sm:mx-6 flex items-center flex-wrap gap-5 px-5 sm:px-8 py-5 rounded-2xl bg-white border"
+      style={{
+        borderColor: 'rgba(243,244,246,0.4)',
+        boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 2px 4px rgba(23,26,31,0.09)',
+      }}
+    >
+      <div className="relative shrink-0">
+        <div
+          className="w-[100px] h-[100px] rounded-full flex items-center justify-center overflow-hidden border-[3px] border-white"
+          style={{ background: '#E5F9EF', boxShadow: '0 4px 20px 0 rgb(31 61 43 / 0.18)' }}
+        >
+          {business.logo
+            ? <img src={business.logo} alt={business.businessName} className="w-full h-full object-cover" />
+            : <Building2 className="w-10 h-10 text-primary-mid" />}
+        </div>
+        <div
+          className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-full border-2 border-white"
+          style={{ background: status?.open ? '#28A745' : '#9CA3AF' }}
+        />
       </div>
 
-      {/* Info + CTAs */}
-      <div className="flex-1 min-w-[200px] space-y-3 pt-2">
-        {/* Pills */}
+      <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           {business.category?.category && (
             <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-primary-dark text-on-dark-active">
@@ -215,12 +217,10 @@ function BusinessProfile({ business }) {
           )}
         </div>
 
-        {/* Name */}
-        <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-heading leading-[1.05] tracking-tight">
+        <h1 className="font-serif text-[30px] leading-[36px] font-bold" style={{ color: '#171A1F' }}>
           {business.businessName}
         </h1>
 
-        {/* Stats row */}
         <div className="flex items-center gap-3 text-sm text-muted flex-wrap">
           {status && (
             <>
@@ -248,50 +248,52 @@ function BusinessProfile({ business }) {
             </span>
           )}
         </div>
+      </div>
 
-        {/* CTAs */}
-        <div className="flex items-center gap-2 flex-wrap pt-1">
-          <button
-            onClick={handleShare}
-            aria-label="Compartir"
-            className="w-9 h-9 rounded-xl border border-edge bg-card-bg flex items-center justify-center text-body hover:border-muted transition-colors shrink-0"
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={handleFollow}
+          disabled={initializing || loading}
+          aria-label={isFollowing ? 'Dejar de seguir' : 'Seguir'}
+          className={`h-9 flex items-center gap-2 px-3 rounded-[6px] text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed backdrop-blur-[4px] ${
+            isFollowing
+              ? 'bg-[#3B803D] text-white hover:bg-[#2C5F2E]'
+              : 'bg-white text-[#3B803D] hover:text-[#2C5F2E] active:text-[#1D3E1E]'
+          }`}
+          style={{ boxShadow: '0px 0px 2px #171a1f14, 0px 1px 2.5px #171a1f12' }}
+        >
+          {initializing || loading
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : isFollowing
+              ? <><UserCheck className="w-4 h-4" />Siguiendo</>
+              : <><UserPlus className="w-4 h-4" />Seguir</>}
+        </button>
+
+        <button
+          onClick={handleShare}
+          aria-label="Compartir"
+          className="h-9 flex items-center gap-2 px-3 rounded-[6px] bg-white text-[#3B803D] text-sm font-medium transition-colors hover:text-[#2C5F2E] active:text-[#1D3E1E] backdrop-blur-[4px]"
+          style={{ boxShadow: '0px 0px 2px #171a1f14, 0px 1px 2.5px #171a1f12' }}
+        >
+          <Share2 className="w-4 h-4" />Compartir
+        </button>
+
+        {mapsUrl && (
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-9 flex items-center gap-2 px-3 rounded-[6px] bg-white text-[#3B803D] text-sm font-medium transition-colors hover:text-[#2C5F2E] active:text-[#1D3E1E] backdrop-blur-[4px]"
+            style={{ boxShadow: '0px 0px 2px #171a1f14, 0px 1px 2.5px #171a1f12' }}
           >
-            <Share2 className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={handleFollow}
-            disabled={initializing || loading}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
-              isFollowing
-                ? 'bg-primary-softest text-primary-dark border border-edge hover:bg-primary-light/40'
-                : 'bg-primary-dark text-on-dark-active hover:bg-primary-darkest'
-            }`}
-          >
-            {initializing || loading
-              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              : isFollowing
-                ? <><UserCheck className="w-3.5 h-3.5" />Siguiendo</>
-                : <><UserPlus className="w-3.5 h-3.5" />Seguir</>}
-          </button>
-
-          {mapsUrl && (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
-            >
-              <Compass className="w-3.5 h-3.5" />Cómo llegar
-            </a>
-          )}
-        </div>
+            <Compass className="w-4 h-4" />Cómo llegar
+          </a>
+        )}
       </div>
     </div>
   );
 }
 
-/* ── Image lightbox ───────────────────────────────────────── */
 function ImageLightbox({ images, startIndex, onClose }) {
   const [current, setCurrent] = useState(startIndex ?? 0);
 
@@ -358,7 +360,6 @@ function ImageLightbox({ images, startIndex, onClose }) {
   );
 }
 
-/* ── Gallery mosaic ───────────────────────────────────────── */
 function GalleryMosaic({ images }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const items = images.slice(0, 5);
@@ -401,7 +402,6 @@ function GalleryMosaic({ images }) {
   );
 }
 
-/* ── Public product detail modal ──────────────────────────── */
 function PublicProductDetailModal({ product, onClose }) {
   const price = product.price != null
     ? Number(product.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
@@ -442,31 +442,72 @@ function PublicProductDetailModal({ product, onClose }) {
   );
 }
 
-/* ── Tab content components ───────────────────────────────── */
 function TabInfo({ business, businessId, ownerUserId, onViewProduct, onGoToProducts }) {
   const reviewsCount = business.total_reviews ?? 0;
+  const { products }  = usePublicProducts(businessId);
+  const certsCount    = business.certifications?.filter(c => c.status === 'Active').length ?? 0;
 
   return (
     <div className="space-y-10">
-      {/* About */}
       {business.description && (
-        <div
-          className="rounded-2xl p-6 sm:p-8 border border-primary-softest"
-          style={{ background: 'linear-gradient(135deg, rgba(200,219,191,0.22) 0%, var(--color-app-bg) 100%)' }}
-        >
-          <p className="text-[11px] font-semibold text-primary-mid uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Leaf className="w-3.5 h-3.5" />Sobre el negocio
-          </p>
-          <p className="font-serif text-xl sm:text-2xl text-heading leading-relaxed">
-            {business.description}
-          </p>
+        <div className="rounded-2xl border border-edge overflow-hidden bg-card-bg">
+          <div className="px-6 pt-5 pb-4">
+            <h2 className="font-serif text-xl text-heading">Sobre el negocio</h2>
+          </div>
+
+          <div className="border-t border-edge/40 mx-6" />
+
+          <div className="px-6 py-5">
+            <p className="font-serif text-sm sm:text-base text-muted leading-relaxed">
+              {business.description}
+            </p>
+          </div>
+
+          <div className="flex gap-3 px-6 pb-6">
+            {[
+              { value: products.length,  label: 'Productos'       },
+              { value: certsCount,       label: 'Certificaciones' },
+              {
+                value: business.average_rating != null
+                  ? Number(business.average_rating).toFixed(1)
+                  : '—',
+                label: 'Puntuación',
+              },
+            ].map(({ value, label }) => (
+              <div
+                key={label}
+                className="flex-1 min-w-0 rounded-2xl border px-3 py-3 flex flex-col items-center justify-center gap-0.5"
+                style={{ background: '#F5FAF5', borderColor: 'rgba(60,143,75,0.1)' }}
+              >
+                <span className="font-serif text-2xl font-bold leading-none" style={{ color: '#588157' }}>
+                  {value}
+                </span>
+                <span className="text-xs font-semibold text-center leading-tight" style={{ color: '#565D6D' }}>
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Gallery */}
+      <div
+        className="rounded-[10px] bg-white p-5 sm:p-6"
+        style={{ boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 1px 2.5px rgba(23,26,31,0.07)' }}
+      >
+        <div className="mb-4">
+          <h2 className="font-serif text-2xl text-heading">Productos</h2>
+          <p className="text-sm text-muted mt-0.5">Lo más recomendado del negocio</p>
+        </div>
+        <ProductsSlider businessId={businessId} onView={onViewProduct} onSeeAll={onGoToProducts} />
+      </div>
+
       {business.images?.length > 0 && (
-        <div className="space-y-4">
-          <div>
+        <div
+          className="rounded-[10px] bg-white p-5 sm:p-6"
+          style={{ boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 1px 2.5px rgba(23,26,31,0.07)' }}
+        >
+          <div className="mb-4">
             <h2 className="font-serif text-2xl text-heading">Galería</h2>
             <p className="text-sm text-muted mt-0.5">{business.images.length} fotos del espacio</p>
           </div>
@@ -474,19 +515,12 @@ function TabInfo({ business, businessId, ownerUserId, onViewProduct, onGoToProdu
         </div>
       )}
 
-      {/* Products carousel */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="font-serif text-2xl text-heading">Productos</h2>
-          <p className="text-sm text-muted mt-0.5">Lo más recomendado del negocio</p>
-        </div>
-        <ProductsSlider businessId={businessId} onView={onViewProduct} onSeeAll={onGoToProducts} />
-      </div>
-
-      {/* Tags */}
       {business.tags?.length > 0 && (
-        <div className="space-y-4">
-          <div>
+        <div
+          className="rounded-[10px] bg-white p-5 sm:p-6"
+          style={{ boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 1px 2.5px rgba(23,26,31,0.07)' }}
+        >
+          <div className="mb-4">
             <h2 className="font-serif text-2xl text-heading">Etiquetas sostenibles</h2>
             <p className="text-sm text-muted mt-0.5">Tipos de producto que ofrece este negocio</p>
           </div>
@@ -504,10 +538,8 @@ function TabInfo({ business, businessId, ownerUserId, onViewProduct, onGoToProdu
         </div>
       )}
 
-      {/* Reseña general IA — visible para todos los usuarios */}
       <AiReviewSummary businessId={businessId} />
 
-      {/* Reviews */}
       <div id="reviews-section" className="space-y-4 border-t border-edge pt-8">
         <div>
           <h2 className="font-serif text-2xl text-heading">Reseñas de la comunidad</h2>
@@ -574,7 +606,6 @@ function TabCertifications({ businessId }) {
   );
 }
 
-/* ── Sidebar components ───────────────────────────────────── */
 function SidebarCard({ title, icon, children }) {
   const SideIcon = icon;
   return (
@@ -612,14 +643,26 @@ function ScheduleCard({ schedule }) {
   );
 }
 
-function MiniMapCard({ address, latitude, longitude }) {
+function MiniMapCard({ address, latitude, longitude, municipio }) {
   const hasCoords = Boolean(latitude && longitude);
   const mapsUrl = hasCoords
     ? `https://www.google.com/maps?q=${latitude},${longitude}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    : address
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+      : null;
+
+  const municipioLine = municipio?.nombre
+    ? [municipio.departamento?.nombre, municipio.nombre].filter(Boolean).join(' · ')
+    : null;
 
   return (
     <SidebarCard title="Ubicación" icon={MapPin}>
+      {municipioLine && (
+        <div className="flex items-center gap-2 text-sm text-body">
+          <MapPin className="w-3.5 h-3.5 text-primary-mid shrink-0" />
+          <span>{municipioLine}</span>
+        </div>
+      )}
       {hasCoords
         ? <SingleLocationMap latitude={latitude} longitude={longitude} className="mb-1" />
         : (
@@ -628,14 +671,16 @@ function MiniMapCard({ address, latitude, longitude }) {
           </div>
         )
       }
-      <a
-        href={mapsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-edge text-sm text-body hover:border-primary-mid hover:text-primary-dark transition-colors"
-      >
-        <Compass className="w-4 h-4" />Cómo llegar
-      </a>
+      {mapsUrl && (
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-edge text-sm text-body hover:border-primary-mid hover:text-primary-dark transition-colors"
+        >
+          <Compass className="w-4 h-4" />Cómo llegar
+        </a>
+      )}
     </SidebarCard>
   );
 }
@@ -697,19 +742,24 @@ function Sidebar({ business }) {
           phone={business.phone}
           emailBusiness={business.emailBusiness}
           website={business.website}
-          instagramUrl={business.instagramUrl}
-          facebookUrl={business.facebookUrl}
-          xUrl={business.xUrl}
         />
       </SidebarCard>
 
+      <SocialCard
+        instagramUrl={business.instagramUrl}
+        facebookUrl={business.facebookUrl}
+        xUrl={business.xUrl}
+        website={business.website}
+      />
+
       <ScheduleCard schedule={business.schedule} />
 
-      {(business.address || business.latitude) && (
+      {(business.address || business.latitude || business.municipio) && (
         <MiniMapCard
           address={business.address}
           latitude={business.latitude}
           longitude={business.longitude}
+          municipio={business.municipio}
         />
       )}
 
@@ -718,14 +768,12 @@ function Sidebar({ business }) {
   );
 }
 
-/* ── Tabs definition ──────────────────────────────────────── */
 const TABS = [
   { id: 'info',  label: 'Información',     icon: Globe   },
   { id: 'prods', label: 'Productos',       icon: Package },
   { id: 'certs', label: 'Certificaciones', icon: Award   },
 ];
 
-/* ── Main page ────────────────────────────────────────────── */
 export default function NegocioDetalle() {
   const { id }   = useParams();
   const location = useLocation();
@@ -766,7 +814,6 @@ export default function NegocioDetalle() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-      {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted">
         <button onClick={() => navigate(-1)} className="hover:text-body transition-colors">
           ← Volver
@@ -781,13 +828,10 @@ export default function NegocioDetalle() {
         <span className="text-body font-medium truncate max-w-[160px]">{business.businessName}</span>
       </nav>
 
-      {/* Cover */}
       <BusinessCover business={business} />
 
-      {/* Profile header */}
       <BusinessProfile business={business} />
 
-      {/* Tabs */}
       <div className="flex items-center gap-0.5 border-b border-edge overflow-hidden">
         {TABS.map((tab) => {
           const count = tabCount(tab);
@@ -819,17 +863,14 @@ export default function NegocioDetalle() {
         })}
       </div>
 
-      {/* Content: main + sidebar */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-10">
 
-        {/* Main */}
         <div>
           {activeTab === 'info'  && <TabInfo business={business} businessId={businessId} ownerUserId={business.owner_id ?? null} onViewProduct={setViewingProduct} onGoToProducts={() => setActiveTab('prods')} />}
           {activeTab === 'prods' && <TabProducts businessId={businessId} onViewProduct={setViewingProduct} />}
           {activeTab === 'certs' && <TabCertifications businessId={businessId} />}
         </div>
 
-        {/* Sidebar */}
         <Sidebar business={business} />
       </div>
 

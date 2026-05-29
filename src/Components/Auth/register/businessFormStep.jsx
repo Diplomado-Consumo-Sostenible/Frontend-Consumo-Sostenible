@@ -1,7 +1,8 @@
-import { Check, FileText, Leaf, Loader2, Plus, UploadCloud, X } from 'lucide-react';
+import { Check, FileText, Leaf, Loader2, MapPin, Plus, UploadCloud, X } from 'lucide-react';
 
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import useUbicacion from '../../../hooks/useUbicacion';
 import { getTags } from '../../../services/types/tags.service';
 import { getTiposNegocio } from '../../../services/types/tiposNegocio.service';
 import { uploadDocument } from '../../../services/upload/upload.service';
@@ -20,8 +21,17 @@ export default function BusinessForm({ onNext, onBack }) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm();
+
+  const { departamentos, municipios, loadMunicipios, loadingDeps, loadingMunis } = useUbicacion();
+  const watchedDepId = watch('id_departamento');
+
+  useEffect(() => {
+    loadMunicipios(watchedDepId ? Number(watchedDepId) : null);
+    if (watchedDepId) setValue('id_municipio', '');
+  }, [watchedDepId, setValue, loadMunicipios]);
 
   const [tipos, setTipos]               = useState([]);
   const [tags, setTags]                 = useState([]);
@@ -179,6 +189,74 @@ export default function BusinessForm({ onNext, onBack }) {
             {errors.address && (
               <p className="text-red-400 text-xs flex items-center gap-1 pl-1">
                 <span>&#9888;</span> {errors.address.message}
+              </p>
+            )}
+          </div>
+
+          {/* Departamento */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-body">Departamento</label>
+            <div className="relative group">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none group-focus-within:text-primary-dark transition-colors">
+                <MapPin className="w-4 h-4" />
+              </span>
+              <select
+                disabled={loadingDeps}
+                className={`${inputClass(errors.id_departamento)} pr-10 appearance-none cursor-pointer`}
+                {...register('id_departamento', { required: 'Selecciona un departamento' })}
+              >
+                <option value="">
+                  {loadingDeps ? 'Cargando departamentos…' : 'Selecciona un departamento'}
+                </option>
+                {departamentos.map((d) => (
+                  <option key={d.id_departamento} value={d.id_departamento}>{d.nombre}</option>
+                ))}
+              </select>
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </div>
+            {errors.id_departamento && (
+              <p className="text-red-400 text-xs flex items-center gap-1 pl-1">
+                <span>&#9888;</span> {errors.id_departamento.message}
+              </p>
+            )}
+          </div>
+
+          {/* Municipio */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-body">Municipio</label>
+            <div className="relative group">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none group-focus-within:text-primary-dark transition-colors">
+                <MapPin className="w-4 h-4" />
+              </span>
+              <select
+                disabled={!watchedDepId || loadingMunis}
+                className={`${inputClass(errors.id_municipio)} pr-10 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+                {...register('id_municipio', { required: 'Selecciona un municipio' })}
+              >
+                <option value="">
+                  {!watchedDepId
+                    ? 'Primero selecciona un departamento'
+                    : loadingMunis
+                      ? 'Cargando municipios…'
+                      : 'Selecciona un municipio'}
+                </option>
+                {municipios.map((m) => (
+                  <option key={m.id_municipio} value={m.id_municipio}>{m.nombre}</option>
+                ))}
+              </select>
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </div>
+            {errors.id_municipio && (
+              <p className="text-red-400 text-xs flex items-center gap-1 pl-1">
+                <span>&#9888;</span> {errors.id_municipio.message}
               </p>
             )}
           </div>

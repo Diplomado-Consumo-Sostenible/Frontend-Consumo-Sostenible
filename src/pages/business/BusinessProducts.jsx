@@ -23,11 +23,7 @@ import { getMyBusinesses } from '../../services/business/busienss.service';
 import { createProduct, deleteProduct, getProductsByBusiness, updateProduct } from '../../services/product/product.service';
 import { uploadGeneralImage } from '../../services/upload/upload.service';
 
-// ─── Constantes ───────────────────────────────────────────────────────────────
-
 const LIMIT = 12;
-
-// ─── ProductFormModal ─────────────────────────────────────────────────────────
 
 const emptyForm = { name: '', description: '', price: '', image: '' };
 

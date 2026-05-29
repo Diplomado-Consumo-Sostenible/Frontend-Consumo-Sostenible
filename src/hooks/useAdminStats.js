@@ -42,7 +42,6 @@ function getTimePoints(period) {
       points.push(d);
     }
   } else {
-    // '1a' → 12 monthly points
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
       points.push(d);
@@ -52,10 +51,6 @@ function getTimePoints(period) {
   return points;
 }
 
-/**
- * Builds a cumulative count series from items with a `createdAt` field.
- * Items can be filtered with an optional predicate.
- */
 export function buildCumulativeSeries(items, period, filterFn) {
   const filtered = filterFn ? items.filter(filterFn) : items;
   if (!filtered.length) return [];
@@ -66,13 +61,13 @@ export function buildCumulativeSeries(items, period, filterFn) {
   );
 }
 
-const POLL_INTERVAL = 30_000; // 30 segundos
+const POLL_INTERVAL = 30_000;
 
 export function useAdminStats() {
   const [stats,       setStats]       = useState(null);
   const [loading,     setLoading]     = useState(true);
   const [refreshing,  setRefreshing]  = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null); // Date
+  const [lastUpdated, setLastUpdated] = useState(null);
   const isFirstLoad = useRef(true);
 
   const load = useCallback(async () => {
@@ -87,11 +82,9 @@ export function useAdminStats() {
         getBusinessesForAdmin({ page: 1, limit: 500 }),
         getBusinessesForAdmin({ status: 'Pending', page: 1, limit: 50 }),
         getMyProfile(),
-        // GET /perfil devuelve createdAt real por usuario — GET /user no lo incluye
         getAllProfiles({ page: 1, limit: 1000 }),
       ]);
 
-      // /perfil devuelve { data: [...], total, page, limit, totalPages }
       const allProfiles = Array.isArray(profilesRes) ? profilesRes : (profilesRes?.data ?? []);
 
       const allBizList = Array.isArray(allBizRes) ? allBizRes : (allBizRes?.data ?? []);
@@ -105,7 +98,6 @@ export function useAdminStats() {
         ? pendingBizRes.length
         : (pendingBizRes?.total ?? pendingList.length);
 
-      // Category breakdown
       const catMap = {};
       allBizList.forEach(b => {
         const cat = b.category?.category || 'Sin categoría';
@@ -120,7 +112,6 @@ export function useAdminStats() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 
-      // Pending moderation queue
       const pendingQueue = pendingList.slice(0, 5).map(b => ({
         id: b.id_business,
         name: b.businessName,
@@ -135,10 +126,8 @@ export function useAdminStats() {
         color: BIZ_PALETTE[b.id_business % BIZ_PALETTE.length],
       }));
 
-      // ── Activity feed: registros de usuarios + estados de negocios
       const activityItems = [];
 
-      // Registros de usuarios — usar allProfiles porque GET /user no expone createdAt
       allProfiles.forEach(p => {
         if (!p.createdAt) return;
         activityItems.push({
@@ -151,7 +140,6 @@ export function useAdminStats() {
         });
       });
 
-      // Negocios aprobados (usar updatedAt = momento real de aprobación)
       allBizList
         .filter(b => b.status === 'Active' && b.isActive !== false)
         .forEach(b => {
@@ -165,7 +153,6 @@ export function useAdminStats() {
           });
         });
 
-      // Negocios rechazados
       allBizList
         .filter(b => b.status === 'Rejected')
         .forEach(b => {
@@ -179,7 +166,6 @@ export function useAdminStats() {
           });
         });
 
-      // Negocios revocados (aprobados pero desactivados por el admin)
       allBizList
         .filter(b => b.status === 'Active' && b.isActive === false)
         .forEach(b => {
@@ -193,7 +179,6 @@ export function useAdminStats() {
           });
         });
 
-      // Negocios pendientes enviados
       pendingList.forEach(b => {
         activityItems.push({
           id: `bp-${b.id_business}`,
@@ -205,11 +190,9 @@ export function useAdminStats() {
         });
       });
 
-      // Ordenar por más reciente y tomar los 7 primeros
       activityItems.sort((a, b) => b.sortDate - a.sortDate);
       const activity = activityItems.slice(0, 7);
 
-      // getAllUsers ahora devuelve { data, meta } — compatibilidad con forma anterior (array)
       const usersData   = Array.isArray(users) ? users : (users?.data ?? []);
       const totalUsers  = Array.isArray(users) ? users.length  : (users?.meta?.totalItems  ?? 0);
       const activeUsers = Array.isArray(users) ? users.filter(u => u.isActive).length : (users?.meta?.totalActive ?? 0);
@@ -231,7 +214,6 @@ export function useAdminStats() {
       });
       setLastUpdated(new Date());
     } catch {
-      // stats remains null, components handle empty state
     } finally {
       isFirstLoad.current = false;
       setLoading(false);
@@ -239,12 +221,10 @@ export function useAdminStats() {
     }
   }, []);
 
-  // Carga inicial
   useEffect(() => {
     load();
   }, [load]);
 
-  // Polling cada 30 segundos
   useEffect(() => {
     const id = setInterval(load, POLL_INTERVAL);
     return () => clearInterval(id);

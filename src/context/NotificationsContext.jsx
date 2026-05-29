@@ -1,15 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import useSentimentSocket from '../hooks/useSentimentSocket';
 import { getMyBusinesses } from '../services/business/busienss.service';
+import { getMyNotifications } from '../services/notifications/notifications.service';
 import { decodeToken } from '../utils/jwt.utils';
 import { getToken } from '../utils/storage';
-import useSentimentSocket from '../hooks/useSentimentSocket';
-import { getMyNotifications } from '../services/notifications/notifications.service';
 
 const NotificationsContext = createContext(null);
 
 export function NotificationsProvider({ children }) {
-  // authTick se incrementa cada vez que el token cambia (login/logout).
-  // Esto fuerza a useMemo a re-derivar la identidad del usuario sin recargar la página.
   const [authTick, setAuthTick] = useState(0);
 
   useEffect(() => {
@@ -28,13 +26,12 @@ export function NotificationsProvider({ children }) {
       isUser:  role === 'user',
       userId:  decoded?.sub ?? null,
     };
-  }, [authTick]); // re-computa en cada cambio de sesión
+  }, [authTick]);
 
   const shouldConnect = isOwner || isAdmin || isUser;
 
   const [businessId, setBusinessId] = useState(null);
 
-  // Resetear businessId al cambiar de usuario para que el efecto inferior lo re-obtenga.
   useEffect(() => {
     setBusinessId(null);
   }, [authTick]);

@@ -3,11 +3,11 @@ import BackButton from "../../backButton";
 
 export default function RoleStep({ onSelectRole }) {
   return (
-    <div className="flex-1 bg-card-bg flex flex-col justify-center px-10 py-10">
+    <div className="flex-1 bg-card-bg flex flex-col justify-center px-5 py-6 sm:px-10 sm:py-10 overflow-y-auto">
       <BackButton />
 
-      <div className="mb-8">
-        <h1 className="text-heading text-4xl font-serif">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-heading text-2xl sm:text-4xl font-serif">
           ¿Cómo deseas registrarte?
         </h1>
         <p className="text-muted text-sm mt-1">

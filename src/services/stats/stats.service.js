@@ -64,7 +64,6 @@ function getPeriodCutoff(period) {
   } else if (period === '30d') {
     d.setDate(d.getDate() - 30);
   } else if (period === 'year') {
-    // Primer día del mes de hace 11 meses → exactamente 12 buckets mensuales
     d.setMonth(d.getMonth() - 11);
     d.setDate(1);
   } else {
@@ -103,11 +102,6 @@ function generateWeekBuckets(from, to) {
   return buckets;
 }
 
-/**
- * Genera exactamente 12 buckets mensuales: desde hace 11 meses hasta el mes actual.
- * Incluye el año en la etiqueta del primer bucket y en enero para evitar
- * ambigüedad cuando el rango cruza dos años distintos.
- */
 function generateLast12MonthBuckets() {
   const now = new Date();
   return Array.from({ length: 12 }, (_, i) => {
@@ -115,7 +109,6 @@ function generateLast12MonthBuckets() {
     const yyyy = d.getFullYear();
     const mm   = String(d.getMonth() + 1).padStart(2, '0');
     const name = MONTHS_ES[d.getMonth()];
-    // Mostrar año en el primer bucket y al inicio de cada nuevo año (enero)
     const label = (i === 0 || d.getMonth() === 0) ? `${name} ${yyyy}` : name;
     return { key: `${yyyy}-${mm}`, label };
   });
@@ -146,7 +139,6 @@ export function aggregateChartData(items, dateField, period) {
       return localDateKey(monday);
     };
   } else {
-    // 'year': exactamente 12 meses sin duplicar etiquetas
     buckets = generateLast12MonthBuckets();
     getKey  = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   }

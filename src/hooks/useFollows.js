@@ -14,8 +14,6 @@ export function useFollows() {
   }, []);
 
   const fetchFollowing = useCallback(async () => {
-    // Skip the authenticated request entirely when there is no session token.
-    // This avoids a 401 network error on public pages.
     if (!getToken()) {
       setFollowedBusinesses([]);
       setFollowedIds(new Set());

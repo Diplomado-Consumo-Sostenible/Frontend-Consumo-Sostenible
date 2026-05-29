@@ -1,13 +1,7 @@
 import { AlertTriangle, Edit3, Star, X } from 'lucide-react';
 import { useEffect } from 'react';
 
-/**
- * Modal bloqueante que se muestra cuando la IA detecta incongruencia
- * entre la calificación en estrellas y el tono del comentario.
- * Solo se cierra mediante el botón de acción o la X.
- */
 export default function SuspiciousReviewModal({ aiStars, onDismiss }) {
-  // Cierra con Escape — no impide al usuario corregir, solo cierra el aviso
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onDismiss(); };
     document.addEventListener('keydown', handler);
@@ -36,7 +30,7 @@ export default function SuspiciousReviewModal({ aiStars, onDismiss }) {
         {/* Cuerpo */}
         <div className="space-y-3">
           <p className="text-sm text-body leading-relaxed">
-            Nuestra IA detectó una incongruencia entre la calificación que diste y el tono
+            El sistema detectó una incongruencia entre la calificación que diste y el tono
             de tu comentario. La reseña no puede publicarse en este estado.
           </p>
 

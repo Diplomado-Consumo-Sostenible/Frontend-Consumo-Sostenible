@@ -40,17 +40,24 @@
   --color-on-dark-active: #F0EBE0;
 
   /* ── Fuentes ─────────────────────────────────────────── */
-  --font-sans:  'Geist', system-ui, sans-serif;
-  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans:  'Open Sans', system-ui, sans-serif;
+  --font-serif: 'Montserrat', system-ui, sans-serif;
 
   /* ── Escala tipográfica ──────────────────────────────── */
-  /* text-3xl (30px) y mayores sin cambios → preserva h1   */
-  --text-xs:   0.8125rem;   /* 13px  ← era 12px */
-  --text-sm:   0.9375rem;   /* 15px  ← era 14px */
-  --text-base: 1.0625rem;   /* 17px  ← era 16px */
-  --text-lg:   1.1875rem;   /* 19px  ← era 18px */
-  --text-xl:   1.375rem;    /* 22px  ← era 20px */
-  --text-2xl:  1.625rem;    /* 26px  ← era 24px */
+  /* Cuerpo sin cambios: xs/sm/base/lg se mantienen        */
+  --text-xs:   0.8125rem;   
+  --text-sm:   0.9375rem;   
+  --text-base: 1.0625rem;   
+  --text-lg:   1.1875rem;   
+
+  --text-xl:   1.0625rem; 
+  --text-2xl:  1.3125rem; 
+  --text-3xl:  1.5625rem; 
+  --text-4xl:  1.9375rem; 
+  --text-5xl:  2.6875rem; 
+  --text-6xl:  3.4375rem; 
+  --text-7xl:  4.1875rem; 
+  --text-8xl:  5.6875rem; 
 
   /* ── Sombras cálidas ─────────────────────────────────── */
   --shadow-warm-sm: 0 1px 4px 0 rgb(31 61 43 / 0.06);
@@ -59,7 +66,7 @@
 
 /* ── Base ────────────────────────────────────────────── */
 body {
-  font-family: 'Geist', system-ui, sans-serif;
+  font-family: 'Open Sans', system-ui, sans-serif;
   background-color: var(--color-app-bg);
   color: var(--color-body);
 }
