@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import API from '../api/api';
 
-/**
- * Fetches the total review count across a list of business IDs.
- * Uses limit=1 requests so the payload is minimal — only meta.totalItems matters.
- * Errors per-business are swallowed and count as 0 (graceful degradation).
- */
 const fetchReviewCount = async (businessId) => {
   try {
     const { data } = await API.get(`/reviews/business/${businessId}`, {
@@ -21,7 +16,6 @@ export default function usePublicReviewsTotal(businessIds = []) {
   const [total, setTotal]     = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Stable key so the effect only re-fires when the actual IDs change
   const idsKey = JSON.stringify(businessIds);
 
   const load = useCallback(async () => {

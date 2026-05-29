@@ -11,11 +11,11 @@ export default function Unauthorized() {
     if (!token) return navigate('/');
 
     const decoded = decodeToken(token);
-    const rol = decoded?.rol?.toLowerCase(); // normaliza a minúsculas
+    const rol = decoded?.rol?.toLowerCase(); 
 
     if (rol === 'admin') return navigate('/adminDashboard');
     if (rol === 'owner') return navigate('/dashboardBusiness/perfil');
-    if (rol === 'user')  return navigate('/');   // USER → landing page
+    if (rol === 'user')  return navigate('/');  
     navigate('/');
   };
 

@@ -6,30 +6,27 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useToastContext } from '../../context/ToastContext';
-import EditableSection from '../../Components/business/profile/EditableSection';
-import { HeaderForm } from '../../Components/business/profile/BusinessProfileHeader';
-import { GeneralInfoForm } from '../../Components/business/profile/BusinessGeneralInfo';
-import { ContactDisplay, ContactForm } from '../../Components/business/profile/BusinessContactCard';
-import { LocationDisplay, LocationForm } from '../../Components/business/profile/BusinessLocationCard';
-import { ScheduleDisplay, ScheduleForm } from '../../Components/business/profile/BusinessScheduleCard';
-import { GalleryForm } from '../../Components/business/profile/BusinessImageGallery';
 import BusinessCertificationsCard from '../../Components/business/profile/BusinessCertificationsCard';
-import BusinessStatsBar from '../../Components/business/profile/BusinessStatsBar';
+import { ContactDisplay, ContactForm, SocialCard } from '../../Components/business/profile/BusinessContactCard';
+import { GalleryForm } from '../../Components/business/profile/BusinessImageGallery';
+import { LocationDisplay, LocationForm, MunicipioDisplay, MunicipioForm } from '../../Components/business/profile/BusinessLocationCard';
 import BusinessMetadata from '../../Components/business/profile/BusinessMetadata';
-import PublicProductCard from '../../Components/landing/PublicProductCard';
+import { HeaderForm } from '../../Components/business/profile/BusinessProfileHeader';
+import { ScheduleDisplay, ScheduleForm } from '../../Components/business/profile/BusinessScheduleCard';
+import BusinessStatsBar from '../../Components/business/profile/BusinessStatsBar';
+import EditableSection from '../../Components/business/profile/EditableSection';
 import ProductsSlider from '../../Components/landing/ProductsSlider';
 import PublicCertRow from '../../Components/landing/PublicCertRow';
+import PublicProductCard from '../../Components/landing/PublicProductCard';
+import { useToastContext } from '../../context/ToastContext';
 import useBusinessProfile from '../../hooks/useBusinessProfile';
 import { usePublicProducts } from '../../hooks/usePublicBusinessContent';
 import { updateMyBusiness } from '../../services/business/busienss.service';
-import { uploadDocument } from '../../services/upload/upload.service';
 import { getMyCertifications } from '../../services/certifications/certifications.service';
-import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
 import { getTags } from '../../services/types/tags.service';
-import { uploadGeneralImage } from '../../services/upload/upload.service';
+import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
+import { uploadDocument, uploadGeneralImage } from '../../services/upload/upload.service';
 
-/* ── Helpers ──────────────────────────────────────────────── */
 const DAY_JS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 function calcOpenStatus(schedule) {
@@ -47,9 +44,6 @@ function calcOpenStatus(schedule) {
 
 const ALLOWED_IMG = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 
-/* ── Shared states ────────────────────────────────────────── */
-
-/* renderProps: gestiona estado edición + guardado sin imponer estilo visual */
 function SectionEdit({ initialValues, onSave, children }) {
   const canEdit = typeof onSave === 'function';
   const [editing, setEditing] = useState(false);
@@ -79,7 +73,6 @@ function SectionEdit({ initialValues, onSave, children }) {
   });
 }
 
-/* botones Editar / Guardar / Cancelar flotantes en la esquina de la sección */
 function SectionEditButtons({ editing, saving, onEdit, onSave, onCancel }) {
   if (!editing) {
     return (
@@ -112,7 +105,6 @@ function SectionEditButtons({ editing, saving, onEdit, onSave, onCancel }) {
   );
 }
 
-/* ── StatusBanner ─────────────────────────────────────────── */
 function StatusBanner({ status, rejectionReason }) {
   if (status === 'Active') return null;
   const isPending = status === 'Pending';
@@ -143,7 +135,6 @@ function StatusBanner({ status, rejectionReason }) {
   );
 }
 
-/* ── Cover ────────────────────────────────────────────────── */
 function BusinessCover({ business, onSave }) {
   const year    = business.createdAt ? new Date(business.createdAt).getFullYear() : null;
   const mapsUrl = business.address
@@ -160,7 +151,7 @@ function BusinessCover({ business, onSave }) {
   async function handleBannerChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    e.target.value = '';                                   // permite re-seleccionar el mismo archivo
+    
     if (!ALLOWED_IMG.includes(file.type)) { showError('Formato no permitido. Usa PNG, JPG o WEBP.'); return; }
     if (file.size > 5 * 1024 * 1024)     { showError('La imagen no puede superar los 5 MB.'); return; }
 
@@ -199,7 +190,6 @@ function BusinessCover({ business, onSave }) {
       className="relative h-52 sm:h-72 rounded-3xl overflow-hidden group"
       style={!bannerSrc ? { background: 'linear-gradient(160deg, var(--color-primary-mid) 0%, var(--color-primary-darkest) 100%)' } : undefined}
     >
-      {/* Imagen de banner */}
       {bannerSrc && (
         <img
           src={bannerSrc}
@@ -208,9 +198,11 @@ function BusinessCover({ business, onSave }) {
         />
       )}
 
-      {/* Overlays decorativos — gradiente cuando no hay banner, oscuro cuando hay foto */}
       {bannerSrc ? (
-        <div className="absolute inset-0 bg-black/35" />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)' }}
+        />
       ) : (
         <>
           <div
@@ -231,12 +223,10 @@ function BusinessCover({ business, onSave }) {
         </>
       )}
 
-      {/* Hoja decorativa */}
       <div className="absolute right-[-50px] top-[-50px] opacity-[0.07] pointer-events-none select-none text-white">
         <Leaf style={{ width: 320, height: 320 }} strokeWidth={0.4} />
       </div>
 
-      {/* Chips: mapa + año */}
       <div className="absolute top-4 right-4 flex gap-2">
         {mapsUrl && (
           <a
@@ -255,7 +245,6 @@ function BusinessCover({ business, onSave }) {
         )}
       </div>
 
-      {/* Controles de portada (solo owner) */}
       {onSave && (
         <>
           <input
@@ -265,7 +254,7 @@ function BusinessCover({ business, onSave }) {
             className="hidden"
             onChange={handleBannerChange}
           />
-          <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-20 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -294,7 +283,6 @@ function BusinessCover({ business, onSave }) {
   );
 }
 
-/* ── Header con logo solapando el cover ───────────────────── */
 const STATUS_BADGE = {
   Active:   { label: 'Aprobado',    cls: 'bg-ok-bg text-ok-text border-ok-text/30' },
   Pending:  { label: 'En revisión', cls: 'bg-warn-bg text-warn-text border-warn-text/30' },
@@ -316,7 +304,7 @@ function OwnerProfileHeader({ business, categories, onSave }) {
   });
 
   const docInputRef                     = useRef(null);
-  const [pendingDoc,   setPendingDoc]   = useState(null);   // File seleccionado aún no subido
+  const [pendingDoc,   setPendingDoc]   = useState(null);
   const [docUploading, setDocUploading] = useState(false);
   const [docProgress,  setDocProgress]  = useState(0);
   const [docError,     setDocError]     = useState(null);
@@ -423,20 +411,25 @@ function OwnerProfileHeader({ business, categories, onSave }) {
   };
 
   return (
-    <div className="flex items-start gap-5 flex-wrap">
+    <div
+      className="relative z-10 -mt-16 mx-4 sm:mx-6 flex items-center flex-wrap gap-5 px-5 sm:px-8 py-5 rounded-2xl bg-white border"
+      style={{
+        borderColor: 'rgba(243,244,246,0.4)',
+        boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 2px 4px rgba(23,26,31,0.09)',
+      }}
+    >
 
-      {/* Logo — solapa el cover */}
       <div className="relative shrink-0">
         <button
           type="button"
           onClick={() => setLogoMenuOpen((o) => !o)}
           disabled={logoLoading}
-          className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl border-[5px] border-app-bg bg-primary-softest flex items-center justify-center overflow-hidden group focus:outline-none disabled:cursor-wait"
-          style={{ marginTop: '-80px', boxShadow: '0 4px 20px 0 rgb(31 61 43 / 0.18)' }}
+          className="relative w-[100px] h-[100px] rounded-full flex items-center justify-center overflow-hidden group focus:outline-none disabled:cursor-wait border-[3px] border-white"
+          style={{ background: '#E5F9EF', boxShadow: '0 4px 20px 0 rgb(31 61 43 / 0.18)' }}
         >
           {displayLogo
             ? <img src={displayLogo} alt={business.businessName} className="w-full h-full object-cover" />
-            : <Building2 className="w-12 h-12 sm:w-16 sm:h-16 text-muted" />
+            : <Building2 className="w-10 h-10 text-primary-mid" />
           }
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             {logoLoading
@@ -445,6 +438,10 @@ function OwnerProfileHeader({ business, categories, onSave }) {
             }
           </div>
         </button>
+        <div
+          className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-full border-2 border-white pointer-events-none"
+          style={{ background: status?.open ? '#28A745' : '#9CA3AF' }}
+        />
 
         {logoMenuOpen && (
           <>
@@ -474,9 +471,7 @@ function OwnerProfileHeader({ business, categories, onSave }) {
         )}
       </div>
 
-      {/* Info + CTAs */}
-      <div className="flex-1 min-w-[200px] space-y-3 pt-2">
-        {/* Pills */}
+      <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${badge.cls}`}>
             {badge.label}
@@ -493,12 +488,10 @@ function OwnerProfileHeader({ business, categories, onSave }) {
           )}
         </div>
 
-        {/* Nombre */}
-        <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-heading leading-[1.05] tracking-tight">
+        <h1 className="font-serif text-[30px] leading-[36px] font-bold" style={{ color: '#171A1F' }}>
           {business.businessName}
         </h1>
 
-        {/* Stats row */}
         <div className="flex items-center gap-3 text-sm text-muted flex-wrap">
           {status && (
             <>
@@ -533,31 +526,34 @@ function OwnerProfileHeader({ business, categories, onSave }) {
             </>
           )}
         </div>
+      </div>
 
-        {/* CTAs */}
-        {!editing ? (
-          <div className="flex items-center gap-2 flex-wrap pt-1">
+      {!editing && (
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleShare}
+            aria-label="Compartir"
+            className="h-9 flex items-center gap-2 px-3 rounded-[6px] bg-white text-[#3B803D] text-sm font-medium transition-colors hover:text-[#2C5F2E] active:text-[#1D3E1E] backdrop-blur-[4px]"
+            style={{ boxShadow: '0px 0px 2px #171a1f14, 0px 1px 2.5px #171a1f12' }}
+          >
+            <Share2 className="w-4 h-4" />Compartir
+          </button>
+          {typeof onSave === 'function' && (
             <button
-              onClick={handleShare}
-              aria-label="Compartir"
-              className="w-9 h-9 rounded-xl border border-edge bg-card-bg flex items-center justify-center text-body hover:border-muted transition-colors shrink-0"
+              onClick={() => setEditing(true)}
+              className="h-9 flex items-center gap-2 px-3 rounded-[6px] bg-white text-[#3B803D] text-sm font-medium transition-colors hover:text-[#2C5F2E] active:text-[#1D3E1E] backdrop-blur-[4px]"
+              style={{ boxShadow: '0px 0px 2px #171a1f14, 0px 1px 2.5px #171a1f12' }}
             >
-              <Share2 className="w-4 h-4" />
+              <Pencil className="w-4 h-4" />Editar información
             </button>
-            {typeof onSave === 'function' && (
-              <button
-                onClick={() => setEditing(true)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-dark text-on-dark-active hover:bg-primary-darkest transition-colors"
-              >
-                <Pencil className="w-3.5 h-3.5" />Editar información
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="pt-1 space-y-4">
-            <HeaderForm values={draft} onChange={setDraft} categories={categories} />
+          )}
+        </div>
+      )}
 
-            {/* Actualizar cámara de comercio */}
+      {editing && (
+        <div className="w-full pt-4 border-t border-edge space-y-4">
+          <HeaderForm values={draft} onChange={setDraft} categories={categories} />
+
             <div className="pt-3 border-t border-edge space-y-2">
               <p className="text-xs font-semibold text-muted uppercase tracking-wide">Cámara de comercio</p>
               <input
@@ -611,7 +607,6 @@ function OwnerProfileHeader({ business, categories, onSave }) {
                 </button>
               )}
 
-              {/* Barra de progreso visible mientras sube (al guardar) */}
               {docUploading && (
                 <div className="space-y-1">
                   <div className="relative h-1.5 bg-edge rounded-full overflow-hidden">
@@ -646,12 +641,11 @@ function OwnerProfileHeader({ business, categories, onSave }) {
             </div>
           </div>
         )}
-      </div>
+
     </div>
   );
 }
 
-/* ── Image lightbox ───────────────────────────────────────── */
 function ImageLightbox({ images, startIndex, onClose }) {
   const [current, setCurrent] = useState(startIndex ?? 0);
 
@@ -670,7 +664,6 @@ function ImageLightbox({ images, startIndex, onClose }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
       onClick={onClose}
     >
-      {/* Close */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
@@ -678,13 +671,11 @@ function ImageLightbox({ images, startIndex, onClose }) {
         <X className="w-5 h-5 text-white" />
       </button>
 
-      {/* Counter */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm">
         <Images className="w-3.5 h-3.5 text-white/70" />
         <span className="text-xs text-white/80">{current + 1} / {images.length}</span>
       </div>
 
-      {/* Prev */}
       {images.length > 1 && (
         <button
           onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c - 1 + images.length) % images.length); }}
@@ -694,7 +685,6 @@ function ImageLightbox({ images, startIndex, onClose }) {
         </button>
       )}
 
-      {/* Image */}
       <img
         src={images[current]}
         alt={`Foto ${current + 1}`}
@@ -702,7 +692,6 @@ function ImageLightbox({ images, startIndex, onClose }) {
         onClick={(e) => e.stopPropagation()}
       />
 
-      {/* Next */}
       {images.length > 1 && (
         <button
           onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c + 1) % images.length); }}
@@ -712,7 +701,6 @@ function ImageLightbox({ images, startIndex, onClose }) {
         </button>
       )}
 
-      {/* Thumbnails */}
       {images.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
           {images.map((src, i) => (
@@ -732,7 +720,6 @@ function ImageLightbox({ images, startIndex, onClose }) {
   );
 }
 
-/* ── Gallery mosaic ───────────────────────────────────────── */
 function GalleryMosaic({ images }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const items = images.slice(0, 5);
@@ -780,7 +767,6 @@ function GalleryMosaic({ images }) {
   );
 }
 
-/* ── Products carousel ────────────────────────────────────── */
 function SectionLoader() {
   return (
     <div className="flex items-center justify-center py-14">
@@ -801,7 +787,6 @@ function Empty({ icon, message }) {
   );
 }
 
-/* ── Product preview modal (read-only, public view) ──────── */
 function ProductPreviewModal({ product, onClose }) {
   const price = product.price != null
     ? Number(product.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
@@ -830,7 +815,6 @@ function ProductPreviewModal({ product, onClose }) {
   );
 }
 
-/* Wrapper local que gestiona el modal de detalle del producto */
 function ProductsSection({ businessId, onGoToProducts }) {
   const [viewingProduct, setViewingProduct] = useState(null);
   return (
@@ -851,7 +835,6 @@ function ProductsSection({ businessId, onGoToProducts }) {
   );
 }
 
-/* ── TagsForm ─────────────────────────────────────────────── */
 function TagsForm({ selectedIds, onChange, allTags }) {
   const toggle = (id) =>
     onChange(
@@ -890,32 +873,30 @@ function TagsForm({ selectedIds, onChange, allTags }) {
   );
 }
 
-/* ── Tab: Información ─────────────────────────────────────── */
-function TabInfo({ business, save, basicSave, canManage, allTags, onGoToProducts }) {
+function TabInfo({ business, save, basicSave, canManage, allTags, certsCount, onGoToProducts }) {
+  const { products } = usePublicProducts(business.id_business);
+
   return (
     <div className="space-y-10">
 
-      {/* Sobre el negocio */}
       <SectionEdit
         initialValues={{ description: business.description ?? '' }}
         onSave={basicSave ? (v) => basicSave({ description: v.description }) : null}
       >
         {({ draft, setDraft, editing, setEditing, saving, canEdit, handleSave, handleCancel }) => (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-semibold text-primary-mid uppercase tracking-wider flex items-center gap-2">
-                <Leaf className="w-3.5 h-3.5" />Sobre el negocio
-              </p>
-              {canEdit && (
+          editing ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-semibold text-primary-mid uppercase tracking-wider flex items-center gap-2">
+                  <Leaf className="w-3.5 h-3.5" />Sobre el negocio
+                </p>
                 <SectionEditButtons
                   editing={editing} saving={saving}
                   onEdit={() => setEditing(true)}
                   onSave={handleSave}
                   onCancel={handleCancel}
                 />
-              )}
-            </div>
-            {editing ? (
+              </div>
               <textarea
                 value={draft.description}
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
@@ -923,30 +904,98 @@ function TabInfo({ business, save, basicSave, canManage, allTags, onGoToProducts
                 placeholder="Describe tu negocio…"
                 className="w-full px-4 py-3 border border-edge rounded-2xl text-sm text-body bg-card-bg outline-none focus:ring-2 focus:ring-green-400/30 focus:border-green-400 transition-colors resize-none"
               />
-            ) : business.description ? (
-              <div
-                className="rounded-2xl p-6 sm:p-8 border border-primary-softest"
-                style={{ background: 'linear-gradient(135deg, rgba(200,219,191,0.22) 0%, var(--color-app-bg) 100%)' }}
-              >
-                <p className="font-serif text-xl sm:text-2xl text-heading leading-relaxed">
-                  {business.description}
-                </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-edge overflow-hidden bg-card-bg">
+              <div className="flex items-center justify-between px-6 pt-5 pb-4">
+                <h2 className="font-serif text-xl text-heading">Sobre el negocio</h2>
+                {canEdit && (
+                  <SectionEditButtons
+                    editing={editing} saving={saving}
+                    onEdit={() => setEditing(true)}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                  />
+                )}
               </div>
-            ) : (
-              <p className="text-sm text-muted italic">Sin descripción. Haz clic en Editar para agregar una.</p>
-            )}
-          </div>
+
+              <div className="border-t border-edge/40 mx-6" />
+
+              <div className="px-6 py-5">
+                {business.description ? (
+                  <p className="font-serif text-sm sm:text-base text-muted leading-relaxed">
+                    {business.description}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted italic">Sin descripción. Haz clic en Editar para agregar una.</p>
+                )}
+              </div>
+
+              <div className="flex gap-3 px-6 pb-6">
+                {[
+                  { value: products.length, label: 'Productos'       },
+                  { value: certsCount,      label: 'Certificaciones' },
+                  {
+                    value: business.average_rating != null
+                      ? Number(business.average_rating).toFixed(1)
+                      : '—',
+                    label: 'Puntuación',
+                  },
+                ].map(({ value, label }) => (
+                  <div
+                    key={label}
+                    className="flex-1 min-w-0 rounded-2xl border px-3 py-3 flex flex-col items-center justify-center gap-0.5"
+                    style={{ background: '#F5FAF5', borderColor: 'rgba(60,143,75,0.1)' }}
+                  >
+                    <span className="font-serif text-2xl font-bold leading-none" style={{ color: '#588157' }}>
+                      {value}
+                    </span>
+                    <span className="text-xs font-semibold text-center leading-tight" style={{ color: '#565D6D' }}>
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
         )}
       </SectionEdit>
 
-      {/* Galería */}
+      <div
+        className="rounded-[10px] bg-white p-5 sm:p-6"
+        style={{ boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 1px 2.5px rgba(23,26,31,0.07)' }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-serif text-2xl text-heading">Productos</h2>
+            <p className="text-sm text-muted mt-0.5">Lo que ofrece tu negocio</p>
+          </div>
+          {canManage ? (
+            <Link
+              to="/dashboardBusiness/productos"
+              className="flex items-center gap-1.5 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors"
+            >
+              <Package className="w-3.5 h-3.5" />Gestionar
+            </Link>
+          ) : (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-muted opacity-40 cursor-not-allowed select-none">
+              <Package className="w-3.5 h-3.5" />Gestionar
+            </span>
+          )}
+        </div>
+        <ProductsSection businessId={business.id_business} onGoToProducts={onGoToProducts} />
+      </div>
+
       <SectionEdit
         initialValues={{ images: business.images ?? [] }}
         onSave={canManage ? (v) => save({ images: v.images }) : null}
       >
         {({ draft, setDraft, editing, setEditing, saving, canEdit, handleSave, handleCancel }) => (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div
+            className="rounded-[10px] bg-white p-5 sm:p-6"
+            style={{ boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 1px 2.5px rgba(23,26,31,0.07)' }}
+          >
+            <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="font-serif text-2xl text-heading">Galería</h2>
                 <p className="text-sm text-muted mt-0.5">
@@ -973,37 +1022,16 @@ function TabInfo({ business, save, basicSave, canManage, allTags, onGoToProducts
         )}
       </SectionEdit>
 
-      {/* Productos (preview carousel) */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-serif text-2xl text-heading">Productos</h2>
-            <p className="text-sm text-muted mt-0.5">Lo que ofrece tu negocio</p>
-          </div>
-          {canManage ? (
-            <Link
-              to="/dashboardBusiness/productos"
-              className="flex items-center gap-1.5 text-xs font-medium text-primary-dark hover:text-primary-darkest transition-colors"
-            >
-              <Package className="w-3.5 h-3.5" />Gestionar
-            </Link>
-          ) : (
-            <span className="flex items-center gap-1.5 text-xs font-medium text-muted opacity-40 cursor-not-allowed select-none">
-              <Package className="w-3.5 h-3.5" />Gestionar
-            </span>
-          )}
-        </div>
-        <ProductsSection businessId={business.id_business} onGoToProducts={onGoToProducts} />
-      </div>
-
-      {/* Etiquetas sostenibles */}
       <SectionEdit
         initialValues={{ tagIds: (business.tags ?? []).map((t) => t.id_tags ?? t.id) }}
         onSave={basicSave ? (v) => basicSave({ tagIds: v.tagIds }) : null}
       >
         {({ draft, setDraft, editing, setEditing, saving, canEdit, handleSave, handleCancel }) => (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div
+            className="rounded-[10px] bg-white p-5 sm:p-6"
+            style={{ boxShadow: '0px 0px 2px rgba(23,26,31,0.08), 0px 1px 2.5px rgba(23,26,31,0.07)' }}
+          >
+            <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="font-serif text-2xl text-heading">Etiquetas sostenibles</h2>
                 <p className="text-sm text-muted mt-0.5">
@@ -1063,7 +1091,6 @@ function TabInfo({ business, save, basicSave, canManage, allTags, onGoToProducts
   );
 }
 
-/* ── Tab: Productos ───────────────────────────────────────── */
 function TabProducts({ businessId, canManage }) {
   const { products, loading, error, retry } = usePublicProducts(businessId);
   const [viewingProduct, setViewingProduct] = useState(null);
@@ -1116,7 +1143,6 @@ function TabProducts({ businessId, canManage }) {
   );
 }
 
-/* ── Tab: Certificaciones ─────────────────────────────────── */
 function TabCertifications({ certifications }) {
   return (
     <div className="space-y-4">
@@ -1147,7 +1173,6 @@ function TabCertifications({ certifications }) {
   );
 }
 
-/* ── Sidebar ──────────────────────────────────────────────── */
 function SidebarCard({ title, icon, children }) {
   const SidebarIcon = icon;
   return (
@@ -1225,7 +1250,7 @@ function MiniMapCard({ address }) {
   );
 }
 
-function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage }) {
+function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage, locationState, setLocationState }) {
   return (
     <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
 
@@ -1236,19 +1261,11 @@ function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage
           address:       business.address,
           phone:         business.phone,
           emailBusiness: business.emailBusiness,
-          website:       business.website,
-          instagramUrl:  business.instagramUrl,
-          facebookUrl:   business.facebookUrl,
-          xUrl:          business.xUrl,
         }}
         onSave={basicSave ? (v) => basicSave({
           address:       v.address,
           phone:         v.phone,
           emailBusiness: v.emailBusiness,
-          website:       v.website,
-          instagramUrl:  v.instagramUrl,
-          facebookUrl:   v.facebookUrl,
-          xUrl:          v.xUrl,
         }) : null}
       >
         {({ values, setValues, editing }) =>
@@ -1258,27 +1275,101 @@ function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage
                 address={values.address}
                 phone={values.phone}
                 emailBusiness={values.emailBusiness}
-                website={values.website}
-                instagramUrl={values.instagramUrl}
-                facebookUrl={values.facebookUrl}
-                xUrl={values.xUrl}
               />
         }
       </EditableSection>
+
+      <SocialCard
+        instagramUrl={business.instagramUrl}
+        facebookUrl={business.facebookUrl}
+        xUrl={business.xUrl}
+        website={business.website}
+        onSave={basicSave ? (v) => basicSave({
+          instagramUrl: v.instagramUrl,
+          facebookUrl:  v.facebookUrl,
+          xUrl:         v.xUrl,
+          website:      v.website,
+        }) : null}
+      />
 
       <ScheduleCard business={business} save={fullSave} />
 
       <EditableSection
         title="Ubicación geográfica"
         icon={MapPin}
-        initialValues={{ latitude: business.latitude, longitude: business.longitude }}
-        onSave={fullSave ? (v) => fullSave({ latitude: v.latitude, longitude: v.longitude }) : null}
-      >
-        {({ values, setValues, editing }) =>
-          editing
-            ? <LocationForm values={values} onChange={setValues} />
-            : <LocationDisplay latitude={values.latitude} longitude={values.longitude} />
+        initialValues={locationState}
+        onSave={
+          fullSave
+            ? (v) => {
+                const payload = {};
+                if (v.municipioId != null)                        payload.municipioId = v.municipioId;
+                if (v.latitude    != null && v.latitude    !== '') payload.latitude   = Number(v.latitude);
+                if (v.longitude   != null && v.longitude   !== '') payload.longitude  = Number(v.longitude);
+                if (v.departamentoId != null) {
+                  setLocationState((prev) => ({ ...prev, departamentoId: v.departamentoId }));
+                }
+                return fullSave(payload);
+              }
+            : null
         }
+      >
+        {({ values, setValues, editing }) => {
+          const effectiveMunicipioId =
+            business.municipio?.id_municipio ??
+            locationState.municipioId ??
+            null;
+
+          return editing ? (
+            <>
+              <MunicipioForm
+                values={values}
+                onChange={setValues}
+              />
+
+              <div className="mt-4 pt-4 border-t border-edge">
+                <LocationForm
+                  values={values}
+                  onChange={setValues}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              {business.municipio?.nombre ? (
+                <div className="flex items-center gap-2 text-sm text-body">
+                  <MapPin className="w-3.5 h-3.5 text-primary-mid shrink-0" />
+
+                  <span>
+                    {[
+                      business.municipio.departamento?.nombre,
+                      business.municipio.nombre,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </div>
+              ) : effectiveMunicipioId ? (
+                <MunicipioDisplay
+                  municipioId={effectiveMunicipioId}
+                  departamentoId={locationState.departamentoId}
+                />
+              ) : (
+                <p className="text-sm text-muted italic">
+                  Sin municipio registrado.
+                </p>
+              )}
+
+              {(values.latitude || values.longitude) && (
+                <div className="mt-3">
+                  <LocationDisplay
+                    latitude={values.latitude}
+                    longitude={values.longitude}
+                  />
+                </div>
+              )}
+            </>
+          );
+        }}
       </EditableSection>
 
       <BusinessCertificationsCard certifications={certifications} canManage={canManage} />
@@ -1286,24 +1377,25 @@ function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage
   );
 }
 
-/* ── Tabs ─────────────────────────────────────────────────── */
 const TABS = [
   { id: 'info',  label: 'Información',     icon: Info    },
   { id: 'prods', label: 'Productos',       icon: Package },
   { id: 'certs', label: 'Certificaciones', icon: Award   },
 ];
 
-/* ── Main ─────────────────────────────────────────────────── */
 export default function BusinessProfile() {
   const { business, loading, error, retry } = useBusinessProfile();
   const navigate = useNavigate();
   const { success: toastSuccess, error: toastError } = useToastContext();
-  const [certifications, setCertifications] = useState([]);
-  const [categories,     setCategories]     = useState([]);
-  const [allTags,        setAllTags]        = useState([]);
-  const [activeTab,      setActiveTab]      = useState('info');
-  const [localDraft,     setLocalDraft]     = useState({});
-  const [submitting,     setSubmitting]     = useState(false);
+  const [certifications,   setCertifications]   = useState([]);
+  const [categories,       setCategories]       = useState([]);
+  const [allTags,          setAllTags]          = useState([]);
+  const [activeTab,        setActiveTab]        = useState('info');
+  const [localDraft,       setLocalDraft]       = useState({});
+  const [submitting,       setSubmitting]       = useState(false);
+  const [locationState, setLocationState] = useState({
+    latitude: null, longitude: null, departamentoId: null, municipioId: null,
+  });
 
   useEffect(() => {
     getMyCertifications().then((d) => setCertifications(Array.isArray(d?.data) ? d.data : [])).catch(() => {});
@@ -1311,7 +1403,17 @@ export default function BusinessProfile() {
     getTags().then((d) => setAllTags(Array.isArray(d) ? d : [])).catch(() => {});
   }, []);
 
-  if (loading) {
+  useEffect(() => {
+    if (!business) return;
+    setLocationState((prev) => ({
+      latitude:       business.latitude                                         ?? prev.latitude,
+      longitude:      business.longitude                                        ?? prev.longitude,
+      departamentoId: business.municipio?.departamento?.id_departamento         ?? prev.departamentoId,
+      municipioId:    business.municipio?.id_municipio ?? business.id_municipio ?? prev.municipioId,
+    }));
+  }, [business]);
+
+  if (loading && !business) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-7 h-7 animate-spin text-primary-mid" />
@@ -1351,9 +1453,20 @@ export default function BusinessProfile() {
   const isActive   = business.status === 'Active';
   const isRejected = business.status === 'Rejected';
 
-  async function save(fields) { await updateMyBusiness(id, fields); retry(); }
+  async function save(fields) {
+    await updateMyBusiness(id, fields);
+    setLocationState((prev) => ({
+      ...prev,
+      ...(fields.municipioId != null
+            ? { municipioId: fields.municipioId }             : {}),
+      ...(fields.latitude    != null && fields.latitude    !== ''
+            ? { latitude:  Number(fields.latitude) }         : {}),
+      ...(fields.longitude   != null && fields.longitude   !== ''
+            ? { longitude: Number(fields.longitude) }        : {}),
+    }));
+    retry();
+  }
 
-  // Rejected: acumula cambios localmente hasta que el owner pulse "Enviar petición"
   const localSave = (fields) => setLocalDraft((prev) => ({ ...prev, ...fields }));
 
   const hasPendingChanges = isRejected && Object.keys(localDraft).length > 0;
@@ -1361,7 +1474,7 @@ export default function BusinessProfile() {
   const handleSubmitPetition = async () => {
     setSubmitting(true);
     try {
-      await save(localDraft);   // PATCH → backend cambia status a Pending
+      await save(localDraft);
       setLocalDraft({});
       toastSuccess('Petición enviada. Tu negocio está en revisión nuevamente.');
     } catch (err) {
@@ -1381,7 +1494,6 @@ export default function BusinessProfile() {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
 
-      {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted">
         <LayoutDashboard className="w-3.5 h-3.5" />
         <span>Mi negocio</span>
@@ -1389,10 +1501,8 @@ export default function BusinessProfile() {
         <span className="text-body font-medium">Perfil</span>
       </nav>
 
-      {/* Banner de estado */}
       <StatusBanner status={business.status} rejectionReason={business.rejectionReason} />
 
-      {/* Panel de reenvío — solo visible cuando está rechazado */}
       {isRejected && (
         <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl bg-card-bg border border-edge">
           <div className="min-w-0">
@@ -1416,13 +1526,10 @@ export default function BusinessProfile() {
         </div>
       )}
 
-      {/* Cover */}
       <BusinessCover business={displayBusiness} onSave={fullSave} />
 
-      {/* Header con logo solapando el cover */}
       <OwnerProfileHeader business={displayBusiness} categories={categories} onSave={basicSave} />
 
-      {/* Tabs */}
       <div className="flex items-center gap-0.5 border-b border-edge overflow-hidden">
         {TABS.map((tab) => {
           const count = tab.id === 'certs' && certsCount > 0 ? certsCount : null;
@@ -1450,14 +1557,13 @@ export default function BusinessProfile() {
         })}
       </div>
 
-      {/* Contenido principal + sidebar */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-10">
         <div>
-          {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} allTags={allTags} onGoToProducts={() => setActiveTab('prods')} />}
+          {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} allTags={allTags} certsCount={certsCount} onGoToProducts={() => setActiveTab('prods')} />}
           {activeTab === 'prods' && <TabProducts businessId={id} canManage={canManage} />}
           {activeTab === 'certs' && <TabCertifications certifications={certifications} />}
         </div>
-        <OwnerSidebar business={displayBusiness} certifications={certifications} basicSave={basicSave} fullSave={fullSave} canManage={canManage} />
+        <OwnerSidebar business={displayBusiness} certifications={certifications} basicSave={basicSave} fullSave={fullSave} canManage={canManage} locationState={locationState} setLocationState={setLocationState} />
       </div>
 
     </div>

@@ -1,7 +1,6 @@
 import { Flag, Loader2, X } from 'lucide-react';
 import { useState } from 'react';
 
-/* ── Valores exactos del enum ReportReason del backend ──────── */
 export const REPORT_REASONS = [
   'Lenguaje inapropiado u ofensivo',
   'Contenido falso o engañoso',

@@ -106,7 +106,7 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
       onClick={handleCardClick}
       className={`flex items-start gap-4 p-4 rounded-2xl border transition-colors cursor-pointer ${
         notification.isRead
-          ? 'bg-slate-100 border-slate-200'
+          ? 'bg-primary-softest/30 border-primary-light/30'
           : `bg-white ${cfg.border}`
       }`}
     >
@@ -122,7 +122,7 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
       <div className="flex-1 min-w-0">
         {/* Badge tipo + punto no leído */}
         <div className="flex items-center gap-2 flex-wrap mb-0.5">
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}>
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bg} text-heading`}>
             {cfg.label}
           </span>
           {!notification.isRead && (
@@ -153,7 +153,7 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
 
         {/* Reseña ocultada */}
         {notification.alertType === 'review_hidden' && businessName && (
-          <p className="text-sm text-amber-700 mt-0.5">
+          <p className="text-sm text-body mt-0.5">
             Tu reseña en <span className="font-semibold">{businessName}</span> fue oculta
             temporalmente por múltiples reportes y está en revisión.
           </p>
@@ -161,7 +161,7 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
 
         {/* Reseña restaurada por moderación */}
         {notification.alertType === 'review_restored' && businessName && (
-          <p className="text-sm text-green-700 mt-0.5">
+          <p className="text-sm text-body mt-0.5">
             Tu reseña en <span className="font-semibold">{businessName}</span> fue revisada y
             está visible nuevamente. Los reportes recibidos no ameritaban penalización.
           </p>
@@ -171,13 +171,13 @@ function NotificationCard({ notification, onDelete, onRead, deleting }) {
         {notification.alertType === 'review_deleted' && (
           <div className="mt-0.5 space-y-0.5">
             {businessName && (
-              <p className="text-sm text-red-700">
+              <p className="text-sm text-body">
                 Tu reseña en <span className="font-semibold">{businessName}</span> fue eliminada
                 por incumplimiento de normas.
               </p>
             )}
             {penaltyCount != null && (
-              <p className={`text-xs font-semibold ${isBanned ? 'text-red-600' : 'text-orange-500'}`}>
+              <p className="text-xs font-semibold text-body">
                 {isBanned
                   ? '⚠️ Tu cuenta ha sido suspendida por acumular 3 penalizaciones.'
                   : `Penalización ${penaltyCount} de 3. Con 3 tu cuenta será suspendida.`}

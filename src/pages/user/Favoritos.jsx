@@ -41,34 +41,34 @@ function FavoriteCard({ business, onUnfollow }) {
 
         <div className="flex-1 min-w-0 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-semibold text-heading leading-tight">{business.businessName}</h3>
+            <h3 className="text-base font-semibold text-heading leading-tight">{business.businessName}</h3>
             {hasCerts && (
-              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-ok-bg border border-ok-text/30 rounded-full text-ok-text">
-                <Award className="w-3 h-3" />
+              <span className="flex items-center gap-1 text-sm px-2.5 py-1 bg-ok-bg border border-ok-text/30 rounded-full text-ok-text">
+                <Award className="w-3.5 h-3.5" />
                 Certificado
               </span>
             )}
           </div>
 
           {business.category?.category && (
-            <span className="inline-block text-xs px-2 py-0.5 bg-primary-softest border border-edge rounded-full text-body">
+            <span className="inline-block text-sm px-2.5 py-1 bg-primary-softest border border-edge rounded-full text-body">
               {business.category.category}
             </span>
           )}
 
           {business.description && (
-            <p className="text-xs text-muted leading-snug line-clamp-2">{business.description}</p>
+            <p className="text-sm text-gray-600 leading-snug line-clamp-2">{business.description}</p>
           )}
 
-          <div className="flex items-center gap-3 text-xs text-muted pt-0.5">
+          <div className="flex items-center gap-3 text-sm text-gray-600 pt-0.5">
             {business.address && (
               <span className="flex items-center gap-1 min-w-0">
-                <MapPin className="w-3 h-3 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{business.address}</span>
               </span>
             )}
-            <span className="flex items-center gap-1 ml-auto shrink-0 opacity-50" title="Valoración">
-              <Star className="w-3 h-3" />
+            <span className="flex items-center gap-1 ml-auto shrink-0" title="Valoración">
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
               <span>{business.average_rating ? Number(business.average_rating).toFixed(1) : '—'}</span>
             </span>
           </div>

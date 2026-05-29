@@ -41,7 +41,6 @@ export default function useBusinessStats(period, { skip = false } = {}) {
     if (!business) return null;
     return {
       ...business,
-      // Si el fetch trajo seguidores, usar ese conteo; si no, usar el del negocio
       followers_count: rawData.followers.length > 0
         ? rawData.followers.length
         : (business.followers_count ?? 0),

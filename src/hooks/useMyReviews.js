@@ -13,7 +13,6 @@ export default function useMyReviews() {
       const data = await getMyReviews({ limit: 50 });
       setReviews(Array.isArray(data?.data) ? data.data : []);
     } catch (err) {
-      // 404 significa "sin reseñas", no es un error real
       if (err?.response?.status === 404) {
         setReviews([]);
       } else {

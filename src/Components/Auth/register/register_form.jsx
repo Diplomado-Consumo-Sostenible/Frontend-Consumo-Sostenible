@@ -60,7 +60,7 @@ export default function RegisterForm({ onNext, onBack, defaultValues, role }) {
   };
 
   return (
-    <div className="flex-1 bg-card-bg flex flex-col justify-center px-10 py-10">
+    <div className="flex-1 bg-card-bg flex flex-col justify-center px-5 py-6 sm:px-10 sm:py-10 overflow-y-auto">
       <BackButton onBack={onBack} />
 
       {/* Logo móvil */}
@@ -79,12 +79,12 @@ export default function RegisterForm({ onNext, onBack, defaultValues, role }) {
         </Link>
       </div>
 
-      <div className="mb-6">
-        <h1 className="text-heading text-4xl font-serif">Crea tu cuenta</h1>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-heading text-2xl sm:text-4xl font-serif">Crea tu cuenta</h1>
         <p className="text-muted text-sm mt-1">Completa los datos para registrarte</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
 
         {/* Nombre */}
         <div className="flex flex-col gap-1.5">

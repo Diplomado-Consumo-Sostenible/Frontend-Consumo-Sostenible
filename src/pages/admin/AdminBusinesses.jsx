@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Building2, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight, Loader2, AlertTriangle, X, Power, PowerOff, Plus, Edit2, Trash2, Tag as TagIcon, LayoutDashboard, Eye, LayoutGrid, LayoutList, MapPin, Phone, Mail, Globe, CalendarDays } from 'lucide-react';
-import { getBusinessesForAdmin, changeBusinessStatus, toggleBusinessActive, createBusiness, updateBusiness, deleteBusiness } from '../../services/business/business.admin.service';
-import { useToastContext } from '../../context/ToastContext';
-import BusinessDetailModal from '../../Components/ui/BusinessDetailModal';
+import { AlertTriangle, Building2, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, Edit2, Eye, Globe, LayoutDashboard, LayoutGrid, LayoutList, Loader2, Mail, MapPin, Phone, Search, Tag as TagIcon, Trash2, X, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { MunicipioForm } from '../../Components/business/profile/BusinessLocationCard';
 import Button from '../../Components/button';
+import BusinessDetailModal from '../../Components/ui/BusinessDetailModal';
 import API from '../../api/api';
+import { useToastContext } from '../../context/ToastContext';
+import { changeBusinessStatus, deleteBusiness, getBusinessesForAdmin, toggleBusinessActive, updateBusiness } from '../../services/business/business.admin.service';
 
 const STATUS = { ALL: '', PENDING: 'Pending', ACTIVE: 'Active', REJECTED: 'Rejected' };
 const STATUS_LABELS = { Pending: 'Pendiente', Active: 'Aprobado', Rejected: 'Rechazado' };
@@ -30,6 +31,8 @@ const INIT_FORM = {
   xUrl: '',
   categoryId: '',
   tagIds: [],
+  departamentoId: null, 
+  municipioId: null,
 };
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -183,34 +186,31 @@ function DeleteConfirm({ business, onConfirm, onCancel, loading }) {
   );
 }
 
-/* ─── Business form drawer ───────────────────────────────────────────────── */
+/* ─── Business form drawer (solo edición) ───────────────────────────────── */
 function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, tags }) {
   const toast = useToastContext();
   const [form, setForm] = useState(INIT_FORM);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const isEdit = !!editTarget;
 
   useEffect(() => {
-    if (!open) return;
-    if (editTarget) {
-      setForm({
-        businessName: editTarget.businessName || '',
-        description: editTarget.description || '',
-        logo: editTarget.logo || '',
-        address: editTarget.address || '',
-        phone: editTarget.phone || '',
-        emailBusiness: editTarget.emailBusiness || '',
-        website: editTarget.website || '',
-        instagramUrl: editTarget.instagramUrl || '',
-        facebookUrl: editTarget.facebookUrl || '',
-        xUrl: editTarget.xUrl || '',
-        categoryId: editTarget.category?.id_category?.toString() || '',
-        tagIds: editTarget.tags?.map((t) => t.id_tags) || [],
-      });
-    } else {
-      setForm(INIT_FORM);
-    }
+    if (!open || !editTarget) return;
+    setForm({
+      businessName:  editTarget.businessName  || '',
+      description:   editTarget.description   || '',
+      logo:          editTarget.logo          || '',
+      address:       editTarget.address       || '',
+      phone:         editTarget.phone         || '',
+      emailBusiness: editTarget.emailBusiness || '',
+      website:       editTarget.website       || '',
+      instagramUrl:  editTarget.instagramUrl  || '',
+      facebookUrl:   editTarget.facebookUrl   || '',
+      xUrl:          editTarget.xUrl          || '',
+      categoryId:    editTarget.category?.id_category?.toString() || '',
+      tagIds:        editTarget.tags?.map((t) => t.id_tags) || [],
+      departamentoId: editTarget.municipio?.departamento?.id_departamento ?? null,
+      municipioId:    editTarget.municipio?.id_municipio ?? null,
+    });
     setErrors({});
   }, [open, editTarget]);
 
@@ -219,24 +219,27 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!editTarget) return;
     setLoading(true);
     try {
       const payload = {
         businessName: form.businessName.trim(),
-        description: form.description.trim(),
-        address: form.address.trim(),
-        categoryId: parseInt(form.categoryId),
-        tagIds: form.tagIds,
-        ...(form.logo && { logo: form.logo.trim() }),
-        ...(form.phone && { phone: form.phone.trim() }),
+        description:  form.description.trim(),
+        address:      form.address.trim(),
+        categoryId:   parseInt(form.categoryId),
+        tagIds:       form.tagIds,
+        ...(form.logo          && { logo:          form.logo.trim() }),
+        ...(form.phone         && { phone:         form.phone.trim() }),
         ...(form.emailBusiness && { emailBusiness: form.emailBusiness.trim() }),
-        ...(form.website && { website: form.website.trim() }),
-        ...(form.instagramUrl && { instagramUrl: form.instagramUrl.trim() }),
-        ...(form.facebookUrl && { facebookUrl: form.facebookUrl.trim() }),
-        ...(form.xUrl && { xUrl: form.xUrl.trim() }),
+        ...(form.website       && { website:       form.website.trim() }),
+        ...(form.instagramUrl  && { instagramUrl:  form.instagramUrl.trim() }),
+        ...(form.facebookUrl   && { facebookUrl:   form.facebookUrl.trim() }),
+        ...(form.xUrl          && { xUrl:          form.xUrl.trim() }),
       };
-      const res = isEdit ? await updateBusiness(editTarget.id_business, payload) : await createBusiness(payload);
-      toast.success(res?.message || `Negocio ${isEdit ? 'actualizado' : 'creado'} exitosamente`);
+      // Solo incluir municipioId si tiene valor (null causaría error en el backend)
+      if (form.municipioId != null) payload.municipioId = form.municipioId;
+      const res = await updateBusiness(editTarget.id_business, payload);
+      toast.success(res?.message || 'Negocio actualizado exitosamente');
       onSaved();
       onClose();
     } catch (err) {
@@ -255,8 +258,8 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-edge shrink-0">
           <div>
-            <h2 className="text-base font-semibold text-heading">{isEdit ? 'Editar negocio' : 'Nuevo negocio'}</h2>
-            <p className="text-xs text-muted mt-0.5">{isEdit ? editTarget?.businessName : 'Completa los datos del negocio'}</p>
+            <h2 className="text-base font-semibold text-heading">Editar negocio</h2>
+            <p className="text-xs text-muted mt-0.5">{editTarget?.businessName}</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl text-muted hover:text-body hover:bg-app-bg transition-colors">
             <X className="w-4 h-4" />
@@ -302,6 +305,16 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
             <Field label="Dirección">
               <input type="text" placeholder="Calle 123 #45-67, Barrio Centro" value={form.address} onChange={(e) => set('address', e.target.value)} className={inp} />
             </Field>
+
+            {/* Departamento / Municipio */}
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted uppercase tracking-wide">Departamento y municipio</p>
+              <MunicipioForm
+                values={{ departamentoId: form.departamentoId, municipioId: form.municipioId }}
+                onChange={(v) => setForm((f) => ({ ...f, departamentoId: v.departamentoId, municipioId: v.municipioId }))}
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Teléfono">
                 <input type="tel" placeholder="+57 300 123 4567" value={form.phone} onChange={(e) => set('phone', e.target.value)} className={inp} />
@@ -358,7 +371,7 @@ function BusinessFormDrawer({ open, onClose, onSaved, editTarget, categories, ta
           </button>
           <button onClick={handleSubmit} disabled={loading} className="flex-1 px-4 py-2.5 rounded-xl bg-primary-dark text-sm font-medium text-on-dark-active hover:bg-primary-darkest transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isEdit ? 'Guardar cambios' : 'Crear negocio'}
+            Guardar cambios
           </button>
         </div>
       </div>
@@ -421,8 +434,17 @@ function BusinessReviewCard({ business, onApprove, onReject, onDetail, actionLoa
         )}
 
         {/* Contacto */}
-        {(business.address || business.phone || business.emailBusiness || business.website) && (
+        {(business.address || business.municipio || business.phone || business.emailBusiness || business.website) && (
           <div className="space-y-1.5">
+            {business.municipio?.nombre && (
+              <div className="flex items-center gap-1.5 text-xs text-primary-dark font-medium">
+                <MapPin className="w-3 h-3 text-primary-mid shrink-0" />
+                <span>
+                  {[business.municipio.departamento?.nombre, business.municipio.nombre]
+                    .filter(Boolean).join(' · ')}
+                </span>
+              </div>
+            )}
             {business.address && (
               <div className="flex items-center gap-1.5 text-xs text-muted">
                 <MapPin className="w-3 h-3 text-muted shrink-0" />
@@ -598,10 +620,6 @@ export default function AdminBusinesses() {
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  const openCreate = () => {
-    setEditTarget(null);
-    setDrawerOpen(true);
-  };
   const openEdit = (b) => {
     setEditTarget(b);
     setDrawerOpen(true);
@@ -686,9 +704,6 @@ export default function AdminBusinesses() {
               <p className="text-sm text-muted mt-0.5">Revisa y gestiona los negocios de la plataforma</p>
             </div>
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary-dark text-on-dark-active text-sm font-medium rounded-xl hover:bg-primary-darkest transition-colors shadow-warm-sm shrink-0">
-            <Plus className="w-4 h-4" /> Nuevo Negocio
-          </button>
         </div>
       </div>
 
@@ -779,7 +794,18 @@ export default function AdminBusinesses() {
                         <td className="px-4 py-3.5">
                           <span className="text-xs font-medium text-body bg-app-bg px-2.5 py-1 rounded-full border border-edge">{business.category?.category || '—'}</span>
                         </td>
-                        <td className="px-4 py-3.5 text-xs text-muted max-w-[160px] truncate">{business.address || '—'}</td>
+                        <td className="px-4 py-3.5 max-w-[180px]">
+                          {business.municipio?.nombre && (
+                            <div className="flex items-center gap-1 text-xs text-primary-dark font-medium mb-0.5">
+                              <MapPin className="w-3 h-3 text-primary-mid shrink-0" />
+                              <span className="truncate">
+                                {[business.municipio.departamento?.nombre, business.municipio.nombre]
+                                  .filter(Boolean).join(' · ')}
+                              </span>
+                            </div>
+                          )}
+                          <span className="text-xs text-muted truncate block">{business.address || (!business.municipio?.nombre ? '—' : '')}</span>
+                        </td>
                         <td className="px-4 py-3.5">
                           <StatusBadge status={status} />
                         </td>

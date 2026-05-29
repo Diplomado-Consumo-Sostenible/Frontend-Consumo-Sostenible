@@ -8,7 +8,6 @@ import {
 
 const WS_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080').replace(/\/$/, '');
 
-
 export function normalizePersistedNotification(n) {
   const payload = n.payload ?? {};
   return {
@@ -37,14 +36,11 @@ export function normalizePersistedNotification(n) {
 export default function useSentimentSocket({ businessId = null, userId = null, enabled = false } = {}) {
   const socketRef = useRef(null);
   const [isConnected, setIsConnected]     = useState(false);
-  const [alerts, setAlerts]               = useState([]);       // historial completo (persistido + tiempo real)
+  const [alerts, setAlerts]               = useState([]);
   const [liveStream, setLiveStream]       = useState([]);
   const [weeklySummary, setWeeklySummary] = useState(null);
   const [unreadCount, setUnreadCount]     = useState(0);
 
-  // ── Limpiar todo el estado al cambiar de usuario o al desconectarse ──
-  // Esto garantiza que al cerrar sesión e iniciar con otra cuenta no queden
-  // notificaciones de la sesión anterior sin necesidad de recargar la página.
   useEffect(() => {
     setAlerts([]);
     setLiveStream([]);
@@ -52,40 +48,36 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
     setUnreadCount(0);
   }, [userId, enabled]);
 
-  // ── Carga inicial inyectada desde NotificationsContext ──────────
   const loadPersisted = useCallback((persistedList) => {
     const normalized = persistedList.map(normalizePersistedNotification);
     setAlerts(normalized.slice(0, 30));
     setUnreadCount(normalized.filter((n) => !n.isRead).length);
   }, []);
 
-  // ── Marcar una como leída ──────
   const markRead = useCallback(async (id) => {
     try {
       await markNotificationRead(id);
-    } catch {  }
+    } catch {}
     setAlerts((prev) =>
       prev.map((a) => (a.id === id ? { ...a, isRead: true } : a))
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
   }, []);
 
-  // ── Limpiar bandeja: marca como leídas en BD y vacía la lista local ─
   const clearAlerts = useCallback(async () => {
     try {
       await markAllNotificationsRead();
-    } catch {  }
+    } catch {}
     setAlerts([]);
     setUnreadCount(0);
   }, []);
 
   const dismissWeeklySummary = useCallback(() => setWeeklySummary(null), []);
 
-  // ── Eliminar una notificación ────
   const deleteAlert = useCallback(async (id) => {
     try {
       await deleteNotification(id);
-    } catch {  }
+    } catch {}
     setAlerts((prev) => {
       const target = prev.find((a) => a.id === id);
       if (target && !target.isRead) {
@@ -95,7 +87,6 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
     });
   }, []);
 
-  // ── WebSocket ──────
   useEffect(() => {
     if (!enabled) return;
 
@@ -204,7 +195,6 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
     };
   }, [enabled, loadPersisted]);
 
-  // ── Room del negocio ────
   useEffect(() => {
     const socket = socketRef.current;
     if (!socket || !businessId) return;
@@ -217,7 +207,6 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
     };
   }, [businessId]);
 
-  // ── Room del usuario ───
   useEffect(() => {
     const socket = socketRef.current;
     if (!socket || !userId) return;

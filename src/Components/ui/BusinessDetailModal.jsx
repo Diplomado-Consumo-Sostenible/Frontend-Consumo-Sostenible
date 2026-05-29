@@ -150,12 +150,21 @@ export default function BusinessDetailModal({ business, onClose, footerSlot }) {
             <p className="text-sm text-body leading-relaxed">{business.description}</p>
           )}
 
-          {(business.address || business.phone || business.emailBusiness || business.website) && (
+          {(business.municipio || business.address || business.phone || business.emailBusiness || business.website) && (
             <div className="space-y-2 pt-1 border-t border-edge/40">
               <p className="text-xs font-semibold text-muted uppercase tracking-wider pt-2">
                 Contacto
               </p>
               <div className="space-y-2">
+                {business.municipio?.nombre && (
+                  <div className="flex items-center gap-2 text-xs text-body font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-primary-mid shrink-0" />
+                    <span>
+                      {[business.municipio.departamento?.nombre, business.municipio.nombre]
+                        .filter(Boolean).join(' · ')}
+                    </span>
+                  </div>
+                )}
                 {business.address && (
                   <div className="flex items-start gap-2 text-xs text-body">
                     <MapPin className="w-3.5 h-3.5 text-muted mt-0.5 shrink-0" />

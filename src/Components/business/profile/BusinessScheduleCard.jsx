@@ -11,7 +11,7 @@ const DAY_LABELS = {
 };
 
 const timeCls =
-  'px-2.5 py-1.5 border border-edge rounded-xl text-sm text-body bg-card-bg outline-none focus:ring-2 focus:ring-green-400/30 focus:border-green-400 transition-colors w-[7.5rem]';
+  'flex-1 min-w-0 px-2.5 py-1.5 border border-edge rounded-xl text-sm text-body bg-card-bg outline-none focus:ring-2 focus:ring-green-400/30 focus:border-green-400 transition-colors';
 
 function parseDay(val) {
   if (!val || val === 'Cerrado') return { closed: true, open: '08:00', close: '18:00' };
@@ -63,28 +63,29 @@ export function ScheduleForm({ values, onChange }) {
         const { closed, open, close } = parseDay(values.schedule?.[day]);
 
         return (
-          <div key={day} className="flex items-center gap-3 py-1.5 border-b border-edge/30 last:border-0">
-            <span className="text-sm text-body w-24 shrink-0">{DAY_LABELS[day]}</span>
-
-            <label className="flex items-center gap-1.5 cursor-pointer shrink-0 select-none">
-              <input
-                type="checkbox"
-                checked={closed}
-                onChange={(e) => setDay(day, { closed: e.target.checked })}
-                className="w-3.5 h-3.5 accent-green-600 cursor-pointer"
-              />
-              <span className="text-xs text-muted">Cerrado</span>
-            </label>
+          <div key={day} className="py-1.5 border-b border-edge/30 last:border-0">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-body w-24 shrink-0">{DAY_LABELS[day]}</span>
+              <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={closed}
+                  onChange={(e) => setDay(day, { closed: e.target.checked })}
+                  className="w-3.5 h-3.5 accent-green-600 cursor-pointer"
+                />
+                <span className="text-xs text-muted">Cerrado</span>
+              </label>
+            </div>
 
             {!closed && (
-              <div className="flex items-center gap-2 flex-1">
+              <div className="flex items-center gap-2 mt-1.5">
                 <input
                   type="time"
                   value={open}
                   onChange={(e) => setDay(day, { open: e.target.value })}
                   className={timeCls}
                 />
-                <span className="text-muted text-xs">—</span>
+                <span className="text-muted text-xs shrink-0">—</span>
                 <input
                   type="time"
                   value={close}

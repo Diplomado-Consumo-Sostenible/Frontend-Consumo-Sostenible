@@ -16,6 +16,7 @@ import {
   User,
   Users,
   VenetianMask,
+  X,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
@@ -43,22 +44,22 @@ const NAV_CONFIG = {
   },
   owner: {
     menu: [
-      { label: 'Perfil de Negocio', icon: Store,           to: '/dashboardBusiness/perfil',          alwaysAccessible: true  },
-      { label: 'Productos',         icon: Package,         to: '/dashboardBusiness/productos',       alwaysAccessible: false },
-      { label: 'Estadísticas',      icon: BarChart2,       to: '/dashboardBusiness/estadisticas',    alwaysAccessible: false },
-      { label: 'Certificaciones',   icon: Award,           to: '/dashboardBusiness/certificaciones', alwaysAccessible: false },
+      { label: 'Perfil de Negocio', icon: Store,     to: '/dashboardBusiness/perfil',          alwaysAccessible: true  },
+      { label: 'Productos',         icon: Package,   to: '/dashboardBusiness/productos',       alwaysAccessible: false },
+      { label: 'Estadísticas',      icon: BarChart2, to: '/dashboardBusiness/estadisticas',    alwaysAccessible: false },
+      { label: 'Certificaciones',   icon: Award,     to: '/dashboardBusiness/certificaciones', alwaysAccessible: false },
     ],
     explore: [
       { label: 'Explorar negocios', icon: Compass, to: '/', alwaysAccessible: true },
     ],
     account: [
-      { label: 'Mi perfil',        icon: User, to: '/dashboard/profile'                    },
-      { label: 'Notificaciones',   icon: Bell, to: '/dashboardBusiness/notificaciones', alwaysAccessible: true },
+      { label: 'Mi perfil',      icon: User, to: '/dashboard/profile'                        },
+      { label: 'Notificaciones', icon: Bell, to: '/dashboardBusiness/notificaciones', alwaysAccessible: true },
     ],
   },
 };
 
-function NavItem({ item, active, locked }) {
+function NavItem({ item, active, locked, onNavigate }) {
   if (locked) {
     return (
       <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium opacity-40 cursor-not-allowed select-none">
@@ -72,6 +73,7 @@ function NavItem({ item, active, locked }) {
   return (
     <Link
       to={item.to}
+      onClick={onNavigate}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
         active
           ? 'bg-primary-dark text-on-dark-active'
@@ -80,106 +82,141 @@ function NavItem({ item, active, locked }) {
     >
       <item.icon className="w-4 h-4 shrink-0" />
       <span className="flex-1 truncate">{item.label}</span>
-      {item.showBizCount && bizCount !== null && (
-        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-          active ? 'bg-white/20 text-on-dark-active' : 'bg-primary-mid/30 text-on-dark'
-        }`}>
-          {bizCount}
-        </span>
-      )}
     </Link>
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const token    = getToken();
   const decoded  = decodeToken(token);
-  const role   = decoded?.rol?.toLowerCase() || 'owner';
-  const config = NAV_CONFIG[role] ?? NAV_CONFIG.owner;
+  const role     = decoded?.rol?.toLowerCase() || 'owner';
+  const config   = NAV_CONFIG[role] ?? NAV_CONFIG.owner;
 
   const { isRejected, isPending } = useOwnerBusinessStatus();
   const isBlocked = isRejected || isPending;
 
   return (
-    <aside className="w-60 h-screen sticky top-0 overflow-hidden bg-primary-darkest border-r border-primary-light/20 flex flex-col shrink-0">
-      <div className="px-5 py-4 border-b border-primary-light/20">
-        <div className="flex items-center gap-2.5">
-          <img
-            src="https://res.cloudinary.com/dhhlvuzqa/image/upload/v1777184416/ecovida_perfiles/dns8fzkguprwuca0ydgv.webp"
-            alt="Consumo Sostenible"
-            className="w-8 h-8 rounded-lg object-contain shrink-0"
-          />
-          <span className="font-semibold text-on-dark-active text-sm leading-tight">
-            Consumo<br />Sostenible
-          </span>
-        </div>
-      </div>
+    <>
+      {/* ── Overlay mobile ─────────────────────────────────────────── */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto overflow-x-hidden">
-        <div className="space-y-0.5">
-          <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Menú</p>
-          {config.menu.map((item) => (
-            <NavItem
-              key={item.to}
-              item={item}
-              active={location.pathname === item.to}
-              locked={isBlocked && item.alwaysAccessible === false}
+      {/* ── Panel lateral ──────────────────────────────────────────── */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-50 w-64
+          bg-primary-darkest border-r border-primary-light/20
+          flex flex-col shrink-0
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:relative lg:translate-x-0 lg:w-60 lg:h-screen lg:sticky lg:top-0
+        `}
+      >
+        {/* Header del sidebar */}
+        <div className="px-5 py-4 border-b border-primary-light/20 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="https://res.cloudinary.com/dhhlvuzqa/image/upload/v1777184416/ecovida_perfiles/dns8fzkguprwuca0ydgv.webp"
+              alt="Consumo Sostenible"
+              className="w-8 h-8 rounded-lg object-contain shrink-0"
             />
-          ))}
+            <span className="font-semibold text-on-dark-active text-sm leading-tight">
+              Consumo<br />Sostenible
+            </span>
+          </div>
+
+          {/* Botón cerrar — solo mobile */}
+          <button
+            onClick={onClose}
+            aria-label="Cerrar menú"
+            className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg text-on-dark/60 hover:text-on-dark-active hover:bg-primary-mid/30 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {config.explore?.length > 0 && (
+        {/* Navegación */}
+        <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto overflow-x-hidden">
           <div className="space-y-0.5">
-            <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Explorar</p>
-            {config.explore.map((item) => (
+            <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Menú</p>
+            {config.menu.map((item) => (
               <NavItem
                 key={item.to}
                 item={item}
                 active={location.pathname === item.to}
-                locked={false}
+                locked={isBlocked && item.alwaysAccessible === false}
+                onNavigate={onClose}
               />
             ))}
           </div>
-        )}
 
-        {config.account.length > 0 && (
-          <div className="space-y-0.5">
-            <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Mi cuenta</p>
-            {config.account.map((item) => (
-              <NavItem key={item.to} item={item} active={location.pathname === item.to} bizCount={null} />
-            ))}
-          </div>
-        )}
-      </nav>
-
-      <div className="px-3 pb-3">
-        <div className="rounded-2xl bg-primary-mid/25 border border-primary-light/30 px-4 py-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary-mid/20 flex items-center justify-center shrink-0">
-              <Leaf className="w-4 h-4 text-on-dark" />
+          {config.explore?.length > 0 && (
+            <div className="space-y-0.5">
+              <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Explorar</p>
+              {config.explore.map((item) => (
+                <NavItem
+                  key={item.to}
+                  item={item}
+                  active={location.pathname === item.to}
+                  locked={false}
+                  onNavigate={onClose}
+                />
+              ))}
             </div>
-            <p className="text-sm font-semibold text-on-dark-active leading-tight">
-              Gracias por hacer la diferencia
+          )}
+
+          {config.account.length > 0 && (
+            <div className="space-y-0.5">
+              <p className="px-3 pb-2 text-xs font-semibold text-on-dark/60 uppercase tracking-wider">Mi cuenta</p>
+              {config.account.map((item) => (
+                <NavItem
+                  key={item.to}
+                  item={item}
+                  active={location.pathname === item.to}
+                  locked={false}
+                  onNavigate={onClose}
+                />
+              ))}
+            </div>
+          )}
+        </nav>
+
+        {/* Banner eco */}
+        <div className="px-3 pb-3">
+          <div className="rounded-2xl bg-primary-mid/25 border border-primary-light/30 px-4 py-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary-mid/20 flex items-center justify-center shrink-0">
+                <Leaf className="w-4 h-4 text-on-dark" />
+              </div>
+              <p className="text-sm font-semibold text-on-dark-active leading-tight">
+                Gracias por hacer la diferencia
+              </p>
+            </div>
+            <p className="text-xs text-on-dark/75 leading-snug pl-9">
+              Cada elección cuenta para un futuro más verde 🌱
             </p>
           </div>
-          <p className="text-xs text-on-dark/75 leading-snug pl-9">
-            Cada elección cuenta para un futuro más verde 🌱
-          </p>
         </div>
-      </div>
 
-      <div className="px-3 py-4 border-t border-primary-light/20">
-        <div className="flex items-center gap-2 px-3 py-1">
-          <HelpCircle className="w-3.5 h-3.5 text-on-dark/50 shrink-0" />
-          <a
-            href="mailto:soporte@consumosostenible.co"
-            className="text-xs text-on-dark/60 hover:text-on-dark-active transition-colors"
-          >
-            ¿Necesitas ayuda?
-          </a>
+        {/* Ayuda */}
+        <div className="px-3 py-4 border-t border-primary-light/20">
+          <div className="flex items-center gap-2 px-3 py-1">
+            <HelpCircle className="w-3.5 h-3.5 text-on-dark/50 shrink-0" />
+            <a
+              href="mailto:soporte@consumosostenible.co"
+              className="text-xs text-on-dark/60 hover:text-on-dark-active transition-colors"
+            >
+              ¿Necesitas ayuda?
+            </a>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

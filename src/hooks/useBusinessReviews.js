@@ -9,7 +9,6 @@ import {
 } from '../services/user/publicReviews.service';
 import { reportReview } from '../services/reviews/reviews-report.service';
 
-/* ── Helpers localStorage ────────────────────────────────────── */
 function storageKey(userId) {
   return `reportedReviews_${userId ?? 'anon'}`;
 }
@@ -24,14 +23,14 @@ function loadReported(userId) {
 function saveReported(userId, set) {
   try {
     localStorage.setItem(storageKey(userId), JSON.stringify([...set]));
-  } catch { /* cuota llena u otros errores — ignorar silenciosamente */ }
+  } catch {}
 }
 
 export default function useBusinessReviews(businessId, { ratingFilter = null, skipMyReview = false } = {}) {
   const [reviews,      setReviews]      = useState([]);
   const [meta,         setMeta]         = useState(null);
   const [ratingCounts, setRatingCounts] = useState({});
-  const [myReview,     setMyReview]     = useState(undefined); // undefined=cargando, null=sin reseña
+  const [myReview,     setMyReview]     = useState(undefined);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
   const [page,         setPage]         = useState(1);
@@ -41,7 +40,6 @@ export default function useBusinessReviews(businessId, { ratingFilter = null, sk
   const currentUserId = decoded?.sub != null ? Number(decoded.sub) : null;
   const isAuthenticated = Boolean(token);
 
-  // Inicializa desde localStorage para que persista entre recargas
   const [reported, setReported] = useState(() => loadReported(currentUserId));
 
   const fetchReviews = useCallback(async (p = 1) => {
@@ -71,7 +69,7 @@ export default function useBusinessReviews(businessId, { ratingFilter = null, sk
     } catch {
       setMyReview(null);
     }
-  }, [businessId, isAuthenticated]);
+  }, [businessId, isAuthenticated, skipMyReview]);
 
   const fetchRatingCounts = useCallback(async () => {
     if (!businessId) return;
@@ -86,9 +84,7 @@ export default function useBusinessReviews(businessId, { ratingFilter = null, sk
         counts[s] = results[i]?.meta?.totalItems ?? 0;
       });
       setRatingCounts(counts);
-    } catch {
-      // leave counts empty — not critical
-    }
+    } catch {}
   }, [businessId]);
 
   useEffect(() => { fetchReviews(1); }, [fetchReviews]);
