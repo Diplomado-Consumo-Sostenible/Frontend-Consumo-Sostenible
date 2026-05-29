@@ -1,4 +1,5 @@
 import { Flag, Loader2, X } from 'lucide-react';
+import ModalOverlay from '../ui/ModalOverlay';
 import { useState } from 'react';
 
 export const REPORT_REASONS = [
@@ -14,7 +15,7 @@ export default function ReportModal({ onConfirm, onCancel, loading }) {
   const [selected, setSelected] = useState('');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <ModalOverlay>
       <div className="bg-card-bg rounded-2xl border border-edge shadow-warm w-full max-w-sm p-5 space-y-4">
 
         <div className="flex items-center justify-between">
@@ -75,6 +76,6 @@ export default function ReportModal({ onConfirm, onCancel, loading }) {
         </div>
 
       </div>
-    </div>
+    </ModalOverlay>
   );
 }

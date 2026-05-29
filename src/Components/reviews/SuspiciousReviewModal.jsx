@@ -1,4 +1,5 @@
 import { AlertTriangle, Edit3, Star, X } from 'lucide-react';
+import ModalOverlay from '../ui/ModalOverlay';
 import { useEffect } from 'react';
 
 export default function SuspiciousReviewModal({ aiStars, onDismiss }) {
@@ -9,7 +10,7 @@ export default function SuspiciousReviewModal({ aiStars, onDismiss }) {
   }, [onDismiss]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <ModalOverlay>
       <div className="bg-card-bg rounded-2xl border border-edge shadow-warm w-full max-w-sm p-5 space-y-4">
 
         {/* Cabecera */}
@@ -76,6 +77,6 @@ export default function SuspiciousReviewModal({ aiStars, onDismiss }) {
         </button>
 
       </div>
-    </div>
+    </ModalOverlay>
   );
 }

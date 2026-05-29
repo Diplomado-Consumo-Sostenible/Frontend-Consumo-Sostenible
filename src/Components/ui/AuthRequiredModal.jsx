@@ -1,4 +1,5 @@
 import { Heart, LogIn, UserPlus, X } from 'lucide-react';
+import ModalOverlay from './ModalOverlay';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -15,10 +16,7 @@ export default function AuthRequiredModal({ onClose }) {
   }, []);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
-    >
+    <ModalOverlay onClose={onClose}>
       <div
         className="relative w-full max-w-sm bg-card-bg rounded-3xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -72,6 +70,6 @@ export default function AuthRequiredModal({ onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }

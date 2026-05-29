@@ -1,7 +1,8 @@
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import {
   AlertTriangle, Award, Building2, Camera, Check, CheckCircle2, ChevronLeft, ChevronRight,
   Clock, Compass, FileText, Globe, Images, Info, LayoutDashboard,
-  Leaf, Loader2, MapPin, Package, Pencil, Plus, Send, Share2,
+  Leaf, Loader2, MapPin, Package, Pencil, Plus, RefreshCw, Send, Share2,
   ShieldCheck, Star, Trash2, Users, X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -21,7 +22,7 @@ import PublicProductCard from '../../Components/landing/PublicProductCard';
 import { useToastContext } from '../../context/ToastContext';
 import useBusinessProfile from '../../hooks/useBusinessProfile';
 import { usePublicProducts } from '../../hooks/usePublicBusinessContent';
-import { updateMyBusiness } from '../../services/business/busienss.service';
+import { deleteMyBusiness, reactivateMyBusiness, requestBusinessReactivation, updateMyBusiness } from '../../services/business/busienss.service';
 import { getMyCertifications } from '../../services/certifications/certifications.service';
 import { getTags } from '../../services/types/tags.service';
 import { getTiposNegocio } from '../../services/types/tiposNegocio.service';
@@ -132,6 +133,123 @@ function StatusBanner({ status, rejectionReason }) {
         </p>
       </div>
     </div>
+  );
+}
+
+function DeletedBanner({ onReactivate, loading }) {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl border bg-red-50 border-red-200 text-red-700 text-sm">
+      <Trash2 className="w-4 h-4 shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold">Negocio eliminado</p>
+        <p className="text-xs mt-0.5 opacity-80">
+          Has eliminado este negocio. Si fue un error o deseas retomarlo, puedes solicitar su reactivación.
+        </p>
+      </div>
+      <button
+        onClick={onReactivate}
+        disabled={loading}
+        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-700 text-white text-xs font-medium hover:bg-red-800 transition-colors disabled:opacity-60"
+      >
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+        Reactivar negocio
+      </button>
+    </div>
+  );
+}
+
+function DeactivatedBanner({ onRequest, loading }) {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl border bg-amber-50 border-amber-200 text-amber-800 text-sm">
+      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold">Negocio desactivado</p>
+        <p className="text-xs mt-0.5 opacity-80">
+          Tu negocio ha sido desactivado por el equipo de administración y no es visible para el público. Puedes solicitar su revisión y reactivación.
+        </p>
+      </div>
+      <button
+        onClick={onRequest}
+        disabled={loading}
+        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-700 text-white text-xs font-medium hover:bg-amber-800 transition-colors disabled:opacity-60"
+      >
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+        Solicitar reactivación
+      </button>
+    </div>
+  );
+}
+
+function DeleteModal({ businessName, onConfirm, onCancel, loading }) {
+  const [password, setPassword] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 80);
+    return () => clearTimeout(t);
+  }, []);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!password.trim()) return;
+    onConfirm(password);
+  }
+
+  return (
+    <ModalOverlay onClose={onCancel}>
+      <div
+        className="bg-card-bg rounded-2xl shadow-xl w-full max-w-md p-6 space-y-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-edge/50 border border-edge flex items-center justify-center shrink-0">
+            <Trash2 className="w-5 h-5 text-muted" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-heading text-base">Eliminar negocio</h2>
+            <p className="text-sm text-muted mt-1 leading-relaxed">
+              Vas a eliminar <strong className="text-heading">{businessName}</strong>. Tu negocio quedará inactivo y tendrás <strong className="text-heading">1 mes</strong> para solicitar su reactivación. Pasado ese plazo, se eliminará de forma permanente.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-muted mb-1.5">
+              Confirma tu contraseña para continuar
+            </label>
+            <input
+              ref={inputRef}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Tu contraseña actual"
+              className="w-full px-3.5 py-2.5 border border-edge rounded-xl text-sm text-body bg-card-bg outline-none focus:ring-2 focus:ring-green-400/30 focus:border-green-400 transition-colors"
+              autoComplete="current-password"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-edge text-sm font-medium text-muted hover:text-body hover:bg-edge/40 transition-colors disabled:opacity-50"
+            >
+              <X className="w-3.5 h-3.5" />Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !password.trim()}
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              {loading ? 'Eliminando…' : 'Eliminar negocio'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </ModalOverlay>
   );
 }
 
@@ -792,7 +910,7 @@ function ProductPreviewModal({ product, onClose }) {
     ? Number(product.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
     : null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
+    <ModalOverlay onClose={onClose}>
       <div className="bg-card-bg rounded-2xl shadow-xl w-full max-w-sm overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="relative h-52 bg-primary-softest">
           {product.image
@@ -811,7 +929,7 @@ function ProductPreviewModal({ product, onClose }) {
           {product.description && <p className="text-sm text-muted leading-relaxed">{product.description}</p>}
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -1250,7 +1368,7 @@ function MiniMapCard({ address }) {
   );
 }
 
-function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage, locationState, setLocationState }) {
+function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage, locationState, setLocationState, isDeleted, onDeleteClick }) {
   return (
     <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
 
@@ -1373,6 +1491,22 @@ function OwnerSidebar({ business, certifications, basicSave, fullSave, canManage
       </EditableSection>
 
       <BusinessCertificationsCard certifications={certifications} canManage={canManage} />
+
+      {!isDeleted && (
+        <div className="rounded-2xl border border-edge bg-card-bg p-5">
+          <p className="text-sm font-semibold text-heading mb-0.5">Zona de peligro</p>
+          <p className="text-xs text-muted mb-4">
+            Tendrás 1 mes para reactivarlo antes de que se elimine permanentemente.
+          </p>
+          <button
+            onClick={onDeleteClick}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-red-300 bg-white text-red-600 text-sm font-medium hover:bg-red-50 hover:border-red-400 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Eliminar negocio
+          </button>
+        </div>
+      )}
     </aside>
   );
 }
@@ -1393,6 +1527,10 @@ export default function BusinessProfile() {
   const [activeTab,        setActiveTab]        = useState('info');
   const [localDraft,       setLocalDraft]       = useState({});
   const [submitting,       setSubmitting]       = useState(false);
+  const [deleteModalOpen,   setDeleteModalOpen]   = useState(false);
+  const [deleting,          setDeleting]          = useState(false);
+  const [reactivating,      setReactivating]      = useState(false);
+  const [requestingReact,   setRequestingReact]   = useState(false);
   const [locationState, setLocationState] = useState({
     latitude: null, longitude: null, departamentoId: null, municipioId: null,
   });
@@ -1449,9 +1587,11 @@ export default function BusinessProfile() {
     );
   }
 
-  const id         = business.id_business;
-  const isActive   = business.status === 'Active';
-  const isRejected = business.status === 'Rejected';
+  const id              = business.id_business;
+  const isActive        = business.status === 'Active';
+  const isRejected      = business.status === 'Rejected';
+  const isDeleted       = business.isDeletedByOwner === true;
+  const isDeactivated   = business.isActive === false;
 
   async function save(fields) {
     await updateMyBusiness(id, fields);
@@ -1484,9 +1624,48 @@ export default function BusinessProfile() {
     }
   };
 
-  const basicSave     = isActive ? save : (isRejected ? localSave : null);
-  const fullSave      = isActive ? save : null;
-  const canManage     = isActive;
+  const handleDelete = async (password) => {
+    setDeleting(true);
+    try {
+      await deleteMyBusiness(id, password);
+      setDeleteModalOpen(false);
+      toastSuccess('Negocio eliminado. Tienes 1 mes para reactivarlo.');
+      retry();
+    } catch (err) {
+      toastError(err?.message || 'No se pudo eliminar el negocio. Verifica tu contraseña.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    setReactivating(true);
+    try {
+      await reactivateMyBusiness(id);
+      toastSuccess('¡Negocio reactivado correctamente!');
+      retry();
+    } catch (err) {
+      toastError(err?.message || 'No se pudo reactivar el negocio.');
+    } finally {
+      setReactivating(false);
+    }
+  };
+
+  const handleRequestReactivation = async () => {
+    setRequestingReact(true);
+    try {
+      await requestBusinessReactivation(id);
+      toastSuccess('Solicitud enviada. Un administrador la revisará pronto.');
+    } catch (err) {
+      toastError(err?.message || 'No se pudo enviar la solicitud.');
+    } finally {
+      setRequestingReact(false);
+    }
+  };
+
+  const basicSave     = isActive && !isDeleted && !isDeactivated ? save : (isRejected && !isDeleted && !isDeactivated ? localSave : null);
+  const fullSave      = isActive && !isDeleted && !isDeactivated ? save : null;
+  const canManage     = isActive && !isDeleted && !isDeactivated;
   const displayBusiness = isRejected ? { ...business, ...localDraft } : business;
 
   const certsCount = certifications.length;
@@ -1503,7 +1682,15 @@ export default function BusinessProfile() {
 
       <StatusBanner status={business.status} rejectionReason={business.rejectionReason} />
 
-      {isRejected && (
+      {isDeactivated && !isDeleted && (
+        <DeactivatedBanner onRequest={handleRequestReactivation} loading={requestingReact} />
+      )}
+
+      {isDeleted && (
+        <DeletedBanner onReactivate={handleReactivate} loading={reactivating} />
+      )}
+
+      {isRejected && !isDeleted && !isDeactivated && (
         <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl bg-card-bg border border-edge">
           <div className="min-w-0">
             <p className="text-sm font-medium text-body">¿Listo para reenviar tu negocio a revisión?</p>
@@ -1558,13 +1745,22 @@ export default function BusinessProfile() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-10">
-        <div>
+        <div className="space-y-10">
           {activeTab === 'info'  && <TabInfo business={displayBusiness} save={save} basicSave={basicSave} canManage={canManage} allTags={allTags} certsCount={certsCount} onGoToProducts={() => setActiveTab('prods')} />}
           {activeTab === 'prods' && <TabProducts businessId={id} canManage={canManage} />}
           {activeTab === 'certs' && <TabCertifications certifications={certifications} />}
         </div>
-        <OwnerSidebar business={displayBusiness} certifications={certifications} basicSave={basicSave} fullSave={fullSave} canManage={canManage} locationState={locationState} setLocationState={setLocationState} />
+        <OwnerSidebar business={displayBusiness} certifications={certifications} basicSave={basicSave} fullSave={fullSave} canManage={canManage} locationState={locationState} setLocationState={setLocationState} isDeleted={isDeleted} onDeleteClick={() => setDeleteModalOpen(true)} />
       </div>
+
+      {deleteModalOpen && (
+        <DeleteModal
+          businessName={business.businessName}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteModalOpen(false)}
+          loading={deleting}
+        />
+      )}
 
     </div>
   );

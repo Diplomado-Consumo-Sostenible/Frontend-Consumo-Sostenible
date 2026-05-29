@@ -1,8 +1,9 @@
 import { Award, ChevronLeft, ChevronRight, FileText, LayoutDashboard, Loader2, Plus, Trash2, Upload, X } from 'lucide-react';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import CertCard from '../../Components/business/CertCard';
 import BlockedPageGuard from '../../Components/business/BlockedPageGuard';
+import CertCard from '../../Components/business/CertCard';
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import { useToastContext } from '../../context/ToastContext';
 import useOwnerBusinessStatus from '../../hooks/useOwnerBusinessStatus';
 import { createCertification, deleteCertification, getMyCertifications, updateCertification } from '../../services/certifications/certifications.service';
@@ -10,7 +11,6 @@ import { uploadDocument } from '../../services/upload/upload.service';
 
 const emptyForm = { name: '', issuing_entity: '', verification_url: '' };
 
-// ─── PdfDropzone ──────────────────────────────────────────────────────────────
 const PdfDropzone = forwardRef(function PdfDropzone({ onError, onFileStaged }, ref) {
   const [file,     setFile]     = useState(null);
   const [dragging, setDragging] = useState(false);
@@ -157,7 +157,7 @@ function CertFormModal({ onClose, onSave, loading, editingCert = null }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+    <ModalOverlay>
       <div className="bg-card-bg rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
           <h2 className="text-lg font-semibold text-heading">{isEdit ? 'Editar y reenviar certificación' : 'Nueva certificación'}</h2>
@@ -246,13 +246,13 @@ function CertFormModal({ onClose, onSave, loading, editingCert = null }) {
           </div>
         </form>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
 function DeleteConfirmModal({ cert, onClose, onConfirm, loading }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+    <ModalOverlay>
       <div className="bg-card-bg rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
@@ -283,7 +283,7 @@ function DeleteConfirmModal({ cert, onClose, onConfirm, loading }) {
           </button>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 

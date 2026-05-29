@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import BusinessForm from '../../Components/Auth/register/businessFormStep';
 import { useToastContext } from '../../context/ToastContext';
 import { registerBusinessModel } from '../../models/business/business.model';
-import { postBusiness } from '../../services/business/busienss.service';
+import { getMyBusinesses, postBusiness } from '../../services/business/busienss.service';
 
 export default function CreateBusiness() {
   const navigate = useNavigate();
@@ -18,6 +18,17 @@ export default function CreateBusiness() {
       success('¡Negocio registrado! Está pendiente de aprobación.');
       navigate('/dashboardBusiness/perfil');
     } catch (err) {
+      if (err._httpStatus === 500) {
+        try {
+          const existing = await getMyBusinesses();
+          const biz = Array.isArray(existing) ? existing[0] : null;
+          if (biz) {
+            success('¡Negocio registrado! Está pendiente de aprobación.');
+            navigate('/dashboardBusiness/perfil');
+            return;
+          }
+        } catch {}
+      }
       error(err?.message || 'No se pudo registrar el negocio. Inténtalo de nuevo.');
     } finally {
       setLoading(false);

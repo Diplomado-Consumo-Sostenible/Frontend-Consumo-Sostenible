@@ -1,24 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
 import {
-  Flag,
-  Search,
-  Loader2,
-  LayoutDashboard,
-  ChevronRight,
-  CheckCircle,
-  Trash2,
-  RotateCcw,
   AlertTriangle,
-  ChevronLeft,
-  ChevronRight as ChevronRightIcon,
-  MessageSquare,
   Building2,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  ChevronRight as ChevronRightIcon,
+  Flag,
+  LayoutDashboard,
+  Loader2,
+  MessageSquare,
+  RotateCcw,
+  Search,
+  ShieldAlert,
+  Trash2,
   User,
   X,
-  ShieldAlert,
 } from 'lucide-react';
-import { getReportedReviews, resolveReport } from '../../services/admin/reviews-reports.service';
+import { useCallback, useEffect, useState } from 'react';
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import { useToastContext } from '../../context/ToastContext';
+import { getReportedReviews, resolveReport } from '../../services/admin/reviews-reports.service';
 
 const REASON_OPTIONS = [
   { value: '', label: 'Todos los motivos' },
@@ -30,7 +31,6 @@ const REASON_OPTIONS = [
   { value: 'Otro motivo', label: 'Otro' },
 ];
 
-// Deduplica los motivos de los reportes de una reseña
 function uniqueReasons(reports = []) {
   return [...new Set(reports.map((r) => r.reason).filter(Boolean))];
 }
@@ -60,9 +60,8 @@ function ResolveModal({ review, onClose, onResolved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-lg max-h-[90vh] flex flex-col">
+    <ModalOverlay onClose={onClose}>
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-lg max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
 
         {/* Cabecera */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-edge shrink-0">
@@ -199,7 +198,7 @@ function ResolveModal({ review, onClose, onResolved }) {
           </form>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -237,7 +236,6 @@ export default function AdminReviewsReports() {
     fetchAll(p, reasonFilter);
   };
 
-  // Búsqueda cliente sobre la página actual (campos reales del backend)
   const filtered = items.filter((item) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -332,7 +330,6 @@ export default function AdminReviewsReports() {
                   <div className="flex items-center justify-between gap-4">
                     <div className="min-w-0 flex-1 space-y-2">
 
-                      {/* Fila superior: ID + badge oculta + motivos */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-muted font-mono font-medium">
                           Reseña #{item.id_review}
@@ -352,7 +349,6 @@ export default function AdminReviewsReports() {
                         ))}
                       </div>
 
-                      {/* Negocio + Autor + Nº reportes — anchos fijos para alineación consistente */}
                       <div className="flex items-center gap-x-5">
                         <div className="flex items-center gap-1.5 w-40 min-w-0">
                           <Building2 className="w-3.5 h-3.5 text-muted shrink-0" />

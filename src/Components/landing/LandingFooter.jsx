@@ -65,9 +65,13 @@ export default function LandingFooter() {
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold text-heading uppercase tracking-wider">Compañía</p>
             <ul className="flex flex-col gap-2">
-              {['Sobre nosotros', 'Nuestra misión', 'Impacto'].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-xs text-muted hover:text-body transition-colors">{item}</a>
+              {[
+                { label: 'Sobre nosotros', to: '/sobre-nosotros#inicio'  },
+                { label: 'Nuestra misión', to: '/sobre-nosotros#mision'  },
+                { label: 'Impacto',        to: '/sobre-nosotros#impacto' },
+              ].map(({ label, to }) => (
+                <li key={label}>
+                  <Link to={to} className="text-xs text-muted hover:text-body transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>

@@ -1,4 +1,6 @@
 import API from '../../api/api';
+import { decodeToken } from '../../utils/jwt.utils';
+import { getToken } from '../../utils/storage';
 
 const extractError = (error) => {
   const data = error?.response?.data;
@@ -68,6 +70,18 @@ export const changePassword = async ({ currentPassword, newPassword }) => {
 export const deleteUser = async (id) => {
   try {
     const response = await API.delete(`/user/${id}`);
+    return response.data;
+  } catch (error) {
+    throw extractError(error);
+  }
+};
+
+export const deleteMyAccount = async (password) => {
+  const decoded = decodeToken(getToken());
+  const id = decoded?.sub != null ? Number(decoded.sub) : null;
+  if (!id) throw { message: 'No se pudo identificar el usuario.' };
+  try {
+    const response = await API.delete(`/user/${id}`, { data: { password } });
     return response.data;
   } catch (error) {
     throw extractError(error);
