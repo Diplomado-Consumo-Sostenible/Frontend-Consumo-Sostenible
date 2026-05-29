@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import ModalOverlay from '../../ui/ModalOverlay';
 import { Minus, TrendingDown, TrendingUp, X } from 'lucide-react';
 
 const TREND_MAP = {
@@ -27,10 +28,7 @@ export default function WeeklySummaryModal({ summary, onClose }) {
     : '';
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-      onClick={onClose}
-    >
+    <ModalOverlay onClose={onClose}>
       <div
         className="bg-card-bg rounded-2xl shadow-2xl border border-edge w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
@@ -119,7 +117,7 @@ export default function WeeklySummaryModal({ summary, onClose }) {
           </button>
         </div>
       </div>
-    </div>,
+    </ModalOverlay>,
     document.body,
   );
 }

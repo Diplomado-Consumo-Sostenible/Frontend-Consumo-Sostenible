@@ -1,3 +1,4 @@
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import {
   AlertCircle,
   CalendarDays,
@@ -22,7 +23,7 @@ import useUserProfile from '../../hooks/useUserProfile';
 import { getGeneros } from '../../services/types/generos.service';
 import { uploadProfileImage } from '../../services/upload/upload.service';
 import { updateMyProfile, updateMyProfilePhoto } from '../../services/user/profile.service';
-import { changeEmail, changePassword } from '../../services/user/user.service';
+import { changeEmail, changePassword, deleteMyAccount } from '../../services/user/user.service';
 import { removeToken } from '../../utils/storage';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
@@ -73,13 +74,8 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
     }`;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-        onClick={!loading ? onClose : undefined}
-      />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <ModalOverlay onClose={!loading ? onClose : undefined}>
+      <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-bold text-heading">Editar datos personales</h3>
             <button
@@ -158,8 +154,7 @@ function EditModal({ currentNombre, currentGeneroId, generos, onSave, onClose, l
             </div>
           </form>
         </div>
-      </div>
-    </>
+    </ModalOverlay>
   );
 }
 
@@ -193,13 +188,8 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
     }`;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-        onClick={!loading ? onClose : undefined}
-      />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <ModalOverlay onClose={!loading ? onClose : undefined}>
+      <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-bold text-heading">Cambiar correo electrónico</h3>
             <button
@@ -301,8 +291,7 @@ function ChangeEmailModal({ currentEmail, onSave, onClose, loading }) {
             </div>
           </form>
         </div>
-      </div>
-    </>
+    </ModalOverlay>
   );
 }
 
@@ -362,13 +351,8 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
   );
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-        onClick={!loading ? onClose : undefined}
-      />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <ModalOverlay onClose={!loading ? onClose : undefined}>
+      <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-bold text-heading">Cambiar contraseña</h3>
             <button
@@ -458,8 +442,102 @@ function ChangePasswordModal({ onSave, onClose, loading }) {
             </div>
           </form>
         </div>
-      </div>
-    </>
+    </ModalOverlay>
+  );
+}
+
+function DeleteAccountModal({ onConfirm, onClose, loading }) {
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [error,    setError]    = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!password.trim()) { setError('Ingresa tu contraseña para confirmar.'); return; }
+    onConfirm(password);
+  };
+
+  const inputCls = `w-full px-4 py-2.5 rounded-xl border text-sm text-body focus:outline-none focus:ring-2 transition-all bg-card-bg pr-10 ${
+    error ? 'border-red-300 focus:ring-red-200' : 'border-edge focus:ring-green-400/30 focus:border-green-400'
+  }`;
+
+  return (
+    <ModalOverlay onClose={!loading ? onClose : undefined}>
+      <div className="bg-card-bg rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-start gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-edge/50 border border-edge flex items-center justify-center shrink-0">
+              <Trash2 className="w-5 h-5 text-muted" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-heading">Eliminar cuenta</h3>
+              <p className="text-sm text-muted mt-1 leading-relaxed">
+                Esta acción es <strong className="text-heading">permanente e irreversible</strong>. Se eliminarán tus datos, reseñas y favoritos.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-body block mb-1.5">
+                Confirma tu contraseña para continuar
+              </label>
+              <div className="relative">
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                  placeholder="Tu contraseña actual"
+                  className={inputCls}
+                  autoComplete="current-password"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPass ? (
+                    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+              {error && (
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />{error}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 py-2.5 rounded-xl border border-edge text-sm font-medium text-body hover:bg-app-bg transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !password.trim()}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {loading ? 'Eliminando…' : 'Eliminar cuenta'}
+              </button>
+            </div>
+          </form>
+        </div>
+    </ModalOverlay>
   );
 }
 
@@ -649,6 +727,8 @@ export default function Profile() {
   const [localPhoto,       setLocalPhoto]       = useState(null);
   const [photoRemoved,     setPhotoRemoved]     = useState(false);
   const [generos,          setGeneros]          = useState([]);
+  const [deleteOpen,       setDeleteOpen]       = useState(false);
+  const [deleteLoading,    setDeleteLoading]    = useState(false);
 
   const email        = profile?._user?.email      ?? profile?.email        ?? '';
   const nombre       = profile?._profile?.nombre  ?? profile?.nombre       ?? '';
@@ -743,6 +823,19 @@ export default function Profile() {
       toast.error(err?.message || 'Error al cambiar la contraseña');
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async (password) => {
+    setDeleteLoading(true);
+    try {
+      await deleteMyAccount(password);
+      toast.success('Cuenta eliminada. Hasta pronto.');
+      removeToken();
+      navigate('/');
+    } catch (err) {
+      toast.error(err?.message || 'No se pudo eliminar la cuenta. Verifica tu contraseña.');
+      setDeleteLoading(false);
     }
   };
 
@@ -888,6 +981,24 @@ export default function Profile() {
             />
           </div>
 
+          <div className="rounded-2xl border border-edge bg-card-bg shadow-sm px-6 py-5">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-heading">Zona de peligro</p>
+                <p className="text-xs text-muted mt-0.5">
+                  Eliminar tu cuenta es permanente. Perderás tus reseñas, favoritos y datos de perfil.
+                </p>
+              </div>
+              <button
+                onClick={() => setDeleteOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-300 bg-white text-red-600 text-sm font-medium hover:bg-red-50 hover:border-red-400 transition-colors shrink-0"
+              >
+                <Trash2 className="w-4 h-4" />
+                Eliminar cuenta
+              </button>
+            </div>
+          </div>
+
         </div>
       )}
 
@@ -923,6 +1034,14 @@ export default function Profile() {
           onSave={handleChangePassword}
           onClose={() => !passwordLoading && setPasswordOpen(false)}
           loading={passwordLoading}
+        />
+      )}
+
+      {deleteOpen && (
+        <DeleteAccountModal
+          onConfirm={handleDeleteAccount}
+          onClose={() => !deleteLoading && setDeleteOpen(false)}
+          loading={deleteLoading}
         />
       )}
     </div>

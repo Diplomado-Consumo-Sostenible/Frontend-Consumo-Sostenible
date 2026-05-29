@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Tag, Plus, Search, Edit2, Trash2, X, AlertTriangle, Loader2, LayoutDashboard, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
-import { getCategorias, createCategoria, updateCategoria, deleteCategoria } from '../../services/admin/categorias.service';
+import { AlertTriangle, ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon, Edit2, LayoutDashboard, Loader2, Plus, Search, Tag, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import { useToastContext } from '../../context/ToastContext';
+import { createCategoria, deleteCategoria, getCategorias, updateCategoria } from '../../services/admin/categorias.service';
 
 const LIMIT = 15;
 
 function Modal({ title, onClose, children }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm">
+    <ModalOverlay onClose={onClose}>
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
           <h2 className="text-base font-semibold text-heading">{title}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg text-muted hover:text-body hover:bg-app-bg transition-colors">
@@ -18,15 +18,14 @@ function Modal({ title, onClose, children }) {
         </div>
         <div className="px-6 py-5">{children}</div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
 function ConfirmDialog({ item, onConfirm, onCancel, loading }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6">
+    <ModalOverlay onClose={onCancel}>
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex flex-col items-center text-center gap-3">
           <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6 text-red-500" />
@@ -45,7 +44,7 @@ function ConfirmDialog({ item, onConfirm, onCancel, loading }) {
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -134,7 +133,6 @@ export default function AdminCategorias() {
       await deleteCategoria(deleteItem.id_category);
       toast.success('Categoría eliminada');
       setDeleteItem(null);
-      // If we deleted the last item on this page, go back one page
       const newPage = filtered.length === 1 && page > 1 ? page - 1 : page;
       setPage(newPage);
       fetchAll(newPage);

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import { Award, Download, FileText, Search, Trash2, X, AlertTriangle, Loader2, LayoutDashboard, ChevronRight, CheckCircle, XCircle, Clock, ExternalLink, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
 
 async function downloadFile(url, filename) {
@@ -38,9 +39,8 @@ function StatusBadge({ status }) {
 
 function ConfirmDialog({ title, message, onConfirm, onCancel, loading, confirmLabel = 'Confirmar', confirmClass = 'bg-primary-dark hover:bg-primary-darkest' }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6">
+    <ModalOverlay onClose={onCancel}>
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex flex-col items-center text-center gap-3">
           <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6 text-amber-500" />
@@ -57,7 +57,7 @@ function ConfirmDialog({ title, message, onConfirm, onCancel, loading, confirmLa
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 

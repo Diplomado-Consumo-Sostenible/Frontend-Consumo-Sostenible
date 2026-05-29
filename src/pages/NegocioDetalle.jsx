@@ -1,3 +1,4 @@
+import ModalOverlay from '../Components/ui/ModalOverlay';
 import {
   AlertTriangle, Award, Building2, ChevronLeft, ChevronRight,
   Clock, Compass, Globe, Images, Leaf, Loader2, MapPin, Package,
@@ -408,7 +409,7 @@ function PublicProductDetailModal({ product, onClose }) {
     : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
+    <ModalOverlay onClose={onClose}>
       <div
         className="bg-card-bg rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -438,7 +439,7 @@ function PublicProductDetailModal({ product, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 

@@ -1,4 +1,5 @@
 import { AlertTriangle, Building2, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, Edit2, Eye, Globe, LayoutDashboard, LayoutGrid, LayoutList, Loader2, Mail, MapPin, Phone, Search, Tag as TagIcon, Trash2, X, XCircle } from 'lucide-react';
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import { useCallback, useEffect, useState } from 'react';
 import { MunicipioForm } from '../../Components/business/profile/BusinessLocationCard';
 import Button from '../../Components/button';
@@ -117,9 +118,8 @@ function RejectModal({ business, onConfirm, onCancel, loading }) {
     onConfirm(reason.trim());
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-md">
+    <ModalOverlay onClose={onCancel}>
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-md" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-edge">
           <h2 className="text-base font-semibold text-heading">Rechazar negocio</h2>
           <button onClick={onCancel} className="p-1.5 rounded-lg text-muted hover:text-body hover:bg-app-bg transition-colors">
@@ -152,16 +152,15 @@ function RejectModal({ business, onConfirm, onCancel, loading }) {
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
 /* ─── Delete confirm ─────────────────────────────────────────────────────── */
 function DeleteConfirm({ business, onConfirm, onCancel, loading }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6">
+    <ModalOverlay onClose={onCancel}>
+      <div className="relative bg-card-bg rounded-2xl shadow-warm w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex flex-col items-center text-center gap-3">
           <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6 text-red-500" />
@@ -182,7 +181,7 @@ function DeleteConfirm({ business, onConfirm, onCancel, loading }) {
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 

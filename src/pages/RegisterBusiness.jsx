@@ -4,7 +4,7 @@ import BusinessFormStep from '../Components/Auth/register/businessFormStep';
 import AuthLayout from '../layouts/AuthLayout';
 import { useToastContext } from '../context/ToastContext';
 import { registerBusinessModel } from '../models/business/business.model';
-import { postBusiness } from '../services/business/busienss.service';
+import { getMyBusinesses, postBusiness } from '../services/business/busienss.service';
 
 export default function RegisterBusiness() {
   const navigate = useNavigate();
@@ -16,6 +16,17 @@ export default function RegisterBusiness() {
       toast.success('¡Negocio registrado! Está pendiente de aprobación.');
       navigate('/dashboardBusiness/perfil', { replace: true });
     } catch (err) {
+      if (err._httpStatus === 500) {
+        try {
+          const existing = await getMyBusinesses();
+          const biz = Array.isArray(existing) ? existing[0] : null;
+          if (biz) {
+            toast.success('¡Negocio registrado! Está pendiente de aprobación.');
+            navigate('/dashboardBusiness/perfil', { replace: true });
+            return;
+          }
+        } catch {}
+      }
       toast.error(err?.message || 'No se pudo registrar el negocio. Inténtalo de nuevo.');
     }
   };

@@ -23,7 +23,9 @@ export const postBusiness = async (businessData) => {
     const response = await API.post('/business', businessData);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'Error al registrar el negocio' };
+    const err = error.response?.data || { message: 'Error al registrar el negocio' };
+    err._httpStatus = error.response?.status ?? 0;
+    throw err;
   }
 };
 
@@ -33,5 +35,32 @@ export const updateMyBusiness = async (id, data) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Error al actualizar el negocio' };
+  }
+};
+
+export const deleteMyBusiness = async (id, password) => {
+  try {
+    const response = await API.delete(`/business/${id}`, { data: { password } });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al eliminar el negocio' };
+  }
+};
+
+export const requestBusinessReactivation = async (id) => {
+  try {
+    const response = await API.patch(`/business/${id}/request-reactivation`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al solicitar la reactivación' };
+  }
+};
+
+export const reactivateMyBusiness = async (id) => {
+  try {
+    const response = await API.patch(`/business/${id}/reactivate`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al reactivar el negocio' };
   }
 };

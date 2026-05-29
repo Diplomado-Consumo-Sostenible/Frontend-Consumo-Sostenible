@@ -1,3 +1,4 @@
+import ModalOverlay from '../../Components/ui/ModalOverlay';
 import {
   AlertTriangle,
   ChevronLeft,
@@ -78,7 +79,7 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+    <ModalOverlay>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
@@ -210,7 +211,7 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
           </div>
         </form>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -218,7 +219,7 @@ function ProductFormModal({ initial, onClose, onSave, loading }) {
 
 function DeleteConfirmModal({ product, onClose, onConfirm, loading }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+    <ModalOverlay>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
@@ -249,7 +250,7 @@ function DeleteConfirmModal({ product, onClose, onConfirm, loading }) {
           </button>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
@@ -261,7 +262,7 @@ function ProductDetailModal({ product, onClose, onEdit, onDelete }) {
     : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
+    <ModalOverlay onClose={onClose}>
       <div
         className="bg-card-bg rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -306,7 +307,7 @@ function ProductDetailModal({ product, onClose, onEdit, onDelete }) {
           </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 }
 
