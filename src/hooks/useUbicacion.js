@@ -12,8 +12,7 @@ export default function useUbicacion() {
     try {
       const data = await getDepartamentos();
       setDepartamentos(data);
-    } catch {
-    } finally {
+    } catch { /* no-op */ } finally {
       setLoadingDeps(false);
     }
   }, []);

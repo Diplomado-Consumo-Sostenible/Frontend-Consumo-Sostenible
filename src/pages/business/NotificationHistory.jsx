@@ -292,9 +292,7 @@ export default function NotificationHistory() {
       if (remaining.length === 0 && page > 1) {
         setPage((p) => p - 1);
       }
-    } catch {
-
-    } finally {
+    } catch { /* no-op */ } finally {
       setDeletingId(null);
     }
   };

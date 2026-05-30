@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import useSentimentSocket from '../hooks/useSentimentSocket';
 import { getMyBusinesses } from '../services/business/busienss.service';
@@ -33,6 +34,7 @@ export function NotificationsProvider({ children }) {
   const [businessId, setBusinessId] = useState(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBusinessId(null);
   }, [authTick]);
 

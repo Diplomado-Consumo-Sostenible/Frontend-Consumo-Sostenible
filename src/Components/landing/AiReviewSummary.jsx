@@ -9,13 +9,15 @@ export default function AiReviewSummary({ businessId }) {
   useEffect(() => {
     if (!businessId) return;
     let cancelled = false;
-    setLoading(true);
-    getSavedGeneralSummary(businessId)
-      .then((res) => {
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await getSavedGeneralSummary(businessId);
         if (!cancelled && res?.hasAiSummary) setData(res);
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
+      } catch { /* no-op */ } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
     return () => { cancelled = true; };
   }, [businessId]);
 

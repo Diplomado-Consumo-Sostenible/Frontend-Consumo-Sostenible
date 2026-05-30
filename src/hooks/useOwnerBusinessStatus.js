@@ -13,6 +13,7 @@ export default function useOwnerBusinessStatus() {
   const [loading, setLoading]             = useState(isOwner);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!isOwner) { setLoading(false); return; }
     getMyBusinesses()
       .then((data) => {

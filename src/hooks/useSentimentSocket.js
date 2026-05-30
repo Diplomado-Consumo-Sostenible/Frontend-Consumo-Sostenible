@@ -42,6 +42,7 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
   const [unreadCount, setUnreadCount]     = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAlerts([]);
     setLiveStream([]);
     setWeeklySummary(null);
@@ -57,7 +58,7 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
   const markRead = useCallback(async (id) => {
     try {
       await markNotificationRead(id);
-    } catch {}
+    } catch { /* no-op */ }
     setAlerts((prev) =>
       prev.map((a) => (a.id === id ? { ...a, isRead: true } : a))
     );
@@ -67,7 +68,7 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
   const clearAlerts = useCallback(async () => {
     try {
       await markAllNotificationsRead();
-    } catch {}
+    } catch { /* no-op */ }
     setAlerts([]);
     setUnreadCount(0);
   }, []);
@@ -77,7 +78,7 @@ export default function useSentimentSocket({ businessId = null, userId = null, e
   const deleteAlert = useCallback(async (id) => {
     try {
       await deleteNotification(id);
-    } catch {}
+    } catch { /* no-op */ }
     setAlerts((prev) => {
       const target = prev.find((a) => a.id === id);
       if (target && !target.isRead) {

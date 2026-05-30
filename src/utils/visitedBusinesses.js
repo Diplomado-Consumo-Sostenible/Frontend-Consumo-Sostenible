@@ -14,7 +14,7 @@ export function saveVisitedBusiness(business) {
 
     localStorage.setItem(KEY, JSON.stringify(list));
     window.dispatchEvent(new CustomEvent('visitedBusinessesUpdated'));
-  } catch {}
+  } catch { /* no-op */ }
 }
 
 export function getVisitedBusinesses() {

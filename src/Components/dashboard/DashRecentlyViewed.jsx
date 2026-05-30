@@ -15,7 +15,7 @@ const DashRecentlyViewed = forwardRef(function DashRecentlyViewed(
   const handleSelect = useCallback((business) => {
     saveVisitedBusiness(business);
     setSelectedBusiness(business);
-  }, []);
+  }, [setSelectedBusiness]);
 
   const bizMap = new Map(businesses.map((b) => [b.id_business ?? b.id, b]));
   const items  = visited.map((v) => bizMap.get(v.id)).filter(Boolean);

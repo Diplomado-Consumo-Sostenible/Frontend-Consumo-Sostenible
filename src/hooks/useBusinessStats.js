@@ -12,23 +12,21 @@ export default function useBusinessStats(period, { skip = false } = {}) {
     if (!business?.id_business || skip) return;
 
     let cancelled = false;
-    setChartLoading(true);
-    setChartError(null);
-
-    Promise.all([
-      fetchAllFollowers(),
-      fetchAllReviews(business.id_business),
-    ])
-      .then(([followers, reviews]) => {
+    (async () => {
+      setChartLoading(true);
+      setChartError(null);
+      try {
+        const [followers, reviews] = await Promise.all([
+          fetchAllFollowers(),
+          fetchAllReviews(business.id_business),
+        ]);
         if (!cancelled) setRawData({ followers, reviews });
-      })
-      .catch((err) => {
+      } catch (err) {
         if (!cancelled) setChartError(err?.message ?? 'No se pudieron cargar los datos de la gráfica.');
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setChartLoading(false);
-      });
-
+      }
+    })();
     return () => { cancelled = true; };
   }, [business?.id_business, skip]);
 

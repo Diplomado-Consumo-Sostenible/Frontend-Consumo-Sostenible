@@ -46,7 +46,7 @@ export default function LandingFilterBar({
         if (!active) return;
         setCategories((Array.isArray(rawCats) ? rawCats : []).map(normaliseCategory));
         setTags((Array.isArray(rawTags) ? rawTags : []).map(normaliseTag));
-      } catch {}
+      } catch { /* no-op */ }
     }
     loadFilters();
     return () => { active = false; };

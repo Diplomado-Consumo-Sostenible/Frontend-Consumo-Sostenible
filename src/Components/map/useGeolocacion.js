@@ -6,6 +6,7 @@ export function useGeolocacion() {
 
   useEffect(() => {
     if (!navigator.geolocation) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDenied(true);
       return;
     }

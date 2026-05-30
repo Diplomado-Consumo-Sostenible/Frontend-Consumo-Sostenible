@@ -6,7 +6,7 @@ import Button from '../../Components/button';
 import BusinessDetailModal from '../../Components/ui/BusinessDetailModal';
 import API from '../../api/api';
 import { useToastContext } from '../../context/ToastContext';
-import { changeBusinessStatus, deleteBusiness, getBusinessesForAdmin, toggleBusinessActive, updateBusiness } from '../../services/business/business.admin.service';
+import { changeBusinessStatus, deleteBusiness, getBusinessesForAdmin, updateBusiness } from '../../services/business/business.admin.service';
 
 const STATUS = { ALL: '', PENDING: 'Pending', ACTIVE: 'Active', REJECTED: 'Rejected' };
 const STATUS_LABELS = { Pending: 'Pendiente', Active: 'Aprobado', Rejected: 'Rechazado' };
@@ -647,19 +647,6 @@ export default function AdminBusinesses() {
       fetchBusinesses(activeTab, page);
     } catch (err) {
       toast.error(err?.message || 'Error al rechazar');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleToggleActive = async (business, isActive) => {
-    setActionLoading(business.id_business);
-    try {
-      const res = await toggleBusinessActive(business.id_business, isActive);
-      toast.success(res?.message || 'Estado actualizado');
-      fetchBusinesses(activeTab, page);
-    } catch (err) {
-      toast.error(err?.message || 'Error al cambiar estado');
     } finally {
       setActionLoading(null);
     }

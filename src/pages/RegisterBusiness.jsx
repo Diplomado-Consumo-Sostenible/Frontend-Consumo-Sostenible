@@ -25,7 +25,7 @@ export default function RegisterBusiness() {
             navigate('/dashboardBusiness/perfil', { replace: true });
             return;
           }
-        } catch {}
+        } catch { /* no-op */ }
       }
       toast.error(err?.message || 'No se pudo registrar el negocio. Inténtalo de nuevo.');
     }

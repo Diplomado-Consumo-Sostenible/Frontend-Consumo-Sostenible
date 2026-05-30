@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Award, Download, ExternalLink, FileText, Pencil, Trash2 } from 'lucide-react';
 
 export const STATUS_MAP = {
