@@ -23,7 +23,7 @@ function loadReported(userId) {
 function saveReported(userId, set) {
   try {
     localStorage.setItem(storageKey(userId), JSON.stringify([...set]));
-  } catch {}
+  } catch { /* no-op */ }
 }
 
 export default function useBusinessReviews(businessId, { ratingFilter = null, skipMyReview = false } = {}) {
@@ -84,7 +84,7 @@ export default function useBusinessReviews(businessId, { ratingFilter = null, sk
         counts[s] = results[i]?.meta?.totalItems ?? 0;
       });
       setRatingCounts(counts);
-    } catch {}
+    } catch { /* no-op */ }
   }, [businessId]);
 
   useEffect(() => { fetchReviews(1); }, [fetchReviews]);

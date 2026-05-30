@@ -377,6 +377,7 @@ export default function NotificationBell() {
   // Cuando las alertas se vacían (cambio de usuario) cerrar dropdown y detalle flotante
   useEffect(() => {
     if (rawAlerts.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpen(false);
       setSelectedAlert(null);
     }

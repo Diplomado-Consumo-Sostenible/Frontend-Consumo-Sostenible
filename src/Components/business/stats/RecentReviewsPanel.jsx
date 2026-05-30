@@ -9,11 +9,15 @@ export default function RecentReviewsPanel({ businessId, total }) {
 
   useEffect(() => {
     if (!businessId) return;
-    setLoading(true);
-    getBusinessReviews(businessId, { page: 1, limit: 4 })
-      .then(res => setReviews(res.data ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await getBusinessReviews(businessId, { page: 1, limit: 4 });
+        setReviews(res.data ?? []);
+      } catch { /* no-op */ } finally {
+        setLoading(false);
+      }
+    })();
   }, [businessId]);
 
   return (

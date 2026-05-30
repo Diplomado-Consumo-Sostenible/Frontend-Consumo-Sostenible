@@ -213,8 +213,7 @@ export function useAdminStats() {
         allBizList,
       });
       setLastUpdated(new Date());
-    } catch {
-    } finally {
+    } catch { /* no-op */ } finally {
       isFirstLoad.current = false;
       setLoading(false);
       setRefreshing(false);

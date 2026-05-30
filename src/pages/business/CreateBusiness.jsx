@@ -27,7 +27,7 @@ export default function CreateBusiness() {
             navigate('/dashboardBusiness/perfil');
             return;
           }
-        } catch {}
+        } catch { /* no-op */ }
       }
       error(err?.message || 'No se pudo registrar el negocio. Inténtalo de nuevo.');
     } finally {

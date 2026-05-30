@@ -20,6 +20,7 @@ const ProtectedRoute = ({ children, roles = null }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // eslint-disable-next-line react-hooks/purity
   const isExpired = decoded?.exp ? Number(decoded.exp) * 1000 < Date.now() : true;
   if (isExpired) {
     removeToken();

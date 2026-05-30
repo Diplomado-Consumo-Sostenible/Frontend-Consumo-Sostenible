@@ -7,6 +7,7 @@ function useNearbyDistance() {
   const [distKm, setDistKm] = useState(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!navigator?.geolocation) { setStatus('denied'); return; }
     setStatus('loading');
     navigator.geolocation.getCurrentPosition(

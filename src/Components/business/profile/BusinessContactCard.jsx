@@ -94,7 +94,7 @@ export function SocialCard({ instagramUrl, facebookUrl, xUrl, website, onSave })
         website:      draft.website      || null,
       });
       setEditing(false);
-    } catch {}
+    } catch { /* no-op */ }
     finally {
       setSaving(false);
     }

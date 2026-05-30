@@ -32,8 +32,7 @@ export default function AiInsightsCard({ businessId }) {
         updatedAt: res.updatedAt,
         hasAiSummary: true,
       }));
-    } catch {
-    } finally {
+    } catch { /* no-op */ } finally {
       setRegenerating(false);
     }
   };

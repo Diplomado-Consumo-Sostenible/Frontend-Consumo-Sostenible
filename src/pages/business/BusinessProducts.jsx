@@ -411,8 +411,6 @@ export default function BusinessProducts() {
   const navigate = useNavigate();
   const { success: showSuccess, error: showError } = useToastContext();
 
-  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
-
   // ── Estado ────────────────────────────────────────────────────────────────
   const [business, setBusiness]           = useState(null);
   const [products, setProducts]           = useState([]);
@@ -462,6 +460,7 @@ export default function BusinessProducts() {
   }
 
   useEffect(() => {
+    if (isRejected || isPending) return;
     async function init() {
       try {
         const businesses = await getMyBusinesses();
@@ -477,7 +476,9 @@ export default function BusinessProducts() {
       }
     }
     init();
-  }, []);
+  }, [isRejected, isPending]);
+
+  if (isRejected || isPending) return <BlockedPageGuard status={status} rejectionReason={rejectionReason} />;
 
   // ── Handlers de filtros ───────────────────────────────────────────────────
 

@@ -1,5 +1,4 @@
-name: CI
-
+﻿name: CI
 
 on:
   push:
@@ -7,7 +6,7 @@ on:
 
 jobs:
   check:
-    name: Lint y build
+    name: Lint, test y build
     runs-on: ubuntu-latest
 
     steps:
@@ -19,14 +18,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
-        
-      - name: Install dependencias 
+
+      - name: Instalar dependencias
         run: npm ci
 
       - name: Lint
         run: npm run lint
-        continue-on-error: true
-      
+
       - name: Test
         run: npm run test
 

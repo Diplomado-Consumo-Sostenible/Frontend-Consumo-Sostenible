@@ -18,7 +18,7 @@ function MetaItem({ label, value }) {
   );
 }
 
-export default function BusinessMetadata({ id, createdAt, updatedAt }) {
+export default function BusinessMetadata({ createdAt, updatedAt }) {
   return (
     <div className="bg-card-bg border border-edge rounded-2xl p-6">
       <div className="grid grid-cols-3 gap-4">

@@ -56,8 +56,16 @@ function ReviewCard({ review, onDelete }) {
         className="w-full text-left p-5 space-y-3 disabled:cursor-default group"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-14 h-14 rounded-xl bg-primary-softest flex items-center justify-center shrink-0">
-            <Building2 className="w-7 h-7 text-primary-dark" />
+          <div className="w-14 h-14 rounded-xl bg-primary-softest flex items-center justify-center shrink-0 overflow-hidden">
+            {review.negocio?.logo ? (
+              <img
+                src={review.negocio.logo}
+                alt={review.negocio?.nombre ?? 'Negocio'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Building2 className="w-7 h-7 text-primary-dark" />
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold text-heading truncate group-hover:text-primary-dark transition-colors">

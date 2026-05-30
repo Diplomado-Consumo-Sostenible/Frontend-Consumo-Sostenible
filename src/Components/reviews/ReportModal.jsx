@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Flag, Loader2, X } from 'lucide-react';
 import ModalOverlay from '../ui/ModalOverlay';
 import { useState } from 'react';
